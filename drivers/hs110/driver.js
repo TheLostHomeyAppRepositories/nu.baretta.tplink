@@ -29,7 +29,7 @@ function guid() {
 
 class TPlinkPlugDriver extends Homey.Driver {
 
-    async onPair(socket) {
+    async onPair(session) {
         // socket is a direct channel to the front-end
         var devIds = {};
 
@@ -83,7 +83,7 @@ class TPlinkPlugDriver extends Homey.Driver {
                             ip: plug.host,
                             name: plug.name
                         }
-                        socket.emit('found', data);
+                        session.emit('found', data);
                         setTimeout(function () {
                             client.stopDiscovery()
                         }, 1000);
@@ -105,7 +105,7 @@ class TPlinkPlugDriver extends Homey.Driver {
                             ip: plug.host,
                             name: plug.name
                         }
-                        socket.emit('found', data);
+                        session.emit('found', data);
                         setTimeout(function () {
                             client.stopDiscovery()
                         }, 1000);
