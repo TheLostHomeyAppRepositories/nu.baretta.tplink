@@ -1,5 +1,8 @@
 # Changelog
 
+**Version 0.1.13**
+- Attempt to move HS110 to SDK3 - all the rest is broken !
+
 **Version 0.1.12**
 - Added support for KL range of bulbs: KL50/60/110/120/130
 
