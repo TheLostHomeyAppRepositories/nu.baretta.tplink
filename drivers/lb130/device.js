@@ -39,7 +39,7 @@ var options = {};
 
 class TPlinkBulbDevice extends Homey.Device {
 
-    onInit() {
+    async onInit() {
         var interval = 10;
 
         this.log('device init');
@@ -78,50 +78,16 @@ class TPlinkBulbDevice extends Homey.Device {
 
         // register flow card actions
 
-        let circadianModeOn = new Homey.FlowCardAction('circadianModeOn');
-        circadianModeOn
-            .register().registerRunListener(async (args, state) => {
-                let settings = await args.device.getSettings();
-                let device = settings["settingIPAddress"];
-                this.log("Flow card action circadianModeOn ip: " + device);
-                this.circadianModeOn(device);
-                return Promise.resolve(true);
-            });
-
-        let circadianModeOff = new Homey.FlowCardAction('circadianModeOff');
-        circadianModeOff
-            .register().registerRunListener(async (args, state) => {
-                let settings = await args.device.getSettings();
-                let device = settings["settingIPAddress"];
-                this.log("Flow card action circadianModeOff ip: " + device);
-                this.circadianModeOff(device);
-                return Promise.resolve(true);
-            });
-
-        let transitionOn = new Homey.FlowCardAction('transitionOn');
-        transitionOn
-            .register().registerRunListener(async (args, state) => {
-                var transition = args.transition * 1000;
-                let settings = await args.device.getSettings();
-                let device = settings["settingIPAddress"];
-                this.log("Flow card action transitionOn ip: " + device);
-                this.onTransition(device, transition);
-                return Promise.resolve(true);
-            });
-
-        let transitionOff = new Homey.FlowCardAction('transitionOff');
-        transitionOff
-            .register().registerRunListener(async (args, state) => {
-                var transition = args.transition * 1000;
-                let settings = await args.device.getSettings();
-                let device = settings["settingIPAddress"];
-                this.log("Flow card action transitionOff ip: " + device);
-                this.offTransition(device, transition);
-                return Promise.resolve(true);
-            });
-
+        let circadianModeOn = this.homey.flow.getActionCard('circadianModeOn');
+       
+        let circadianModeOff = this.homey.flow.getActionCard('circadianModeOff');
+        
+        let transitionOn = this.homey.flow.getActionCard('transitionOn');
+        
+        let transitionOff = this.homey.flow.getActionCard('transitionOff');
+        
         /*
-        let meterResetAction = new Homey.FlowCardAction('meter_reset');
+        let meterResetAction = this.homey.flow.getActionCard('meter_reset');
         meterResetAction
             .register().registerRunListener(async (args, state) => {
                 let settings = await args.device.getSettings();
@@ -132,7 +98,7 @@ class TPlinkBulbDevice extends Homey.Device {
                 return Promise.resolve(true);
             });
 
-        let undoMeterResetAction = new Homey.FlowCardAction('undo_meter_reset');
+        let undoMeterResetAction = this.homey.flow.getActionCard('undo_meter_reset');
         undoMeterResetAction
             .register().registerRunListener(async (args, state) => {
                 let settings = this.getSettings();
@@ -170,7 +136,7 @@ class TPlinkBulbDevice extends Homey.Device {
             this.powerOff(device);
         }
         // Then, emit a callback ( err, result )
-        callback(null, true);
+        return(null, true);
     }
 
     onCapabilityDim(value, opts, callback) {
@@ -191,7 +157,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('dim', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        callback(null, value);
+        return(null, value);
     }
 
     onCapabilityHue(value, opts, callback) {
@@ -213,7 +179,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('light_hue', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        callback(null, value);
+        return(null, value);
     }
 
     onCapabilitySaturation(value, opts, callback) {
@@ -234,7 +200,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('light_saturation', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        callback(null, value);
+        return(null, value);
     }
 
     onCapabilityTemperature(value, opts, callback) {
@@ -258,7 +224,7 @@ class TPlinkBulbDevice extends Homey.Device {
             this.setCapabilityValue('light_temperature', value)
                 .catch(this.error);
             // Then, emit a callback ( err, result )
-            callback(null, value);
+            return(null, value);
         }
     }
 
@@ -273,7 +239,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('light_mode', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        callback(null, value);
+        return(null, value);
     }
 
     // start functions
@@ -291,9 +257,9 @@ class TPlinkBulbDevice extends Homey.Device {
                         break;
                 }
             }
-            callback(null, true)
+            return(null, true)
         } catch (error) {
-            callback(error, null)
+            return "error";
         }
     }
 
@@ -372,10 +338,10 @@ class TPlinkBulbDevice extends Homey.Device {
         this.bulb.getSysInfo().then((sysInfo) => {
             if (sysInfo.relay_state === 1) {
                 Homey.log('TP Link smartbulb app - light is on ');
-                callback(null, true);
+                return(null, true);
             } else {
                 Homey.log('TP Link smartbulb app - light is off ');
-                callback(null, false);
+                return(null, false);
             }
         });
     }
@@ -443,10 +409,10 @@ class TPlinkBulbDevice extends Homey.Device {
         this.bulb.getSysInfo().then((sysInfo) => {
                 if (sysInfo.relay_state === 1) {
                     this.log('Relay state on ');
-                    callback(null, true);
+                    return(null, true);
                 } else {
                     this.log('Relay state off ');
-                    callback(null, false);
+                    return(null, false);
                 }
             })
             .catch((err) => {
