@@ -29,7 +29,7 @@ function guid() {
 
 class TPlinkBulbDriver extends Homey.Driver {
 
-   async onPair(socket) {
+   async onPair(session) {
         // socket is a direct channel to the front-end
         var devIds = {};
 
@@ -57,7 +57,7 @@ class TPlinkBulbDriver extends Homey.Driver {
         }];
 
         // discover function
-        socket.on('discover', (data, callback) => {
+        session.setHandler("discover", async (data) => { 
             this.log('Starting Bulb Discovery');
 
             // discover new bulbs
@@ -83,12 +83,12 @@ class TPlinkBulbDriver extends Homey.Driver {
                             ip: bulb.host,
                             name: bulb.name
                         }
-                        socket.emit('found', data);
+                        session.emit('found', data);
                         setTimeout(function () {
                             client.stopDiscovery()
                         }, 1000);
                         this.log("Discovered new bulb: " + data.id + " name " + data.name);
-                        callback(null, data);
+                        return "data";
                     }
                 }
             })
@@ -105,19 +105,19 @@ class TPlinkBulbDriver extends Homey.Driver {
                             ip: bulb.host,
                             name: bulb.name
                         }
-                        socket.emit('found', data);
+                        session.emit('found', data);
                         setTimeout(function () {
                             client.stopDiscovery()
                         }, 1000);
                         this.log("Discovered online bulb: " + data.name);
-                        callback(null, data);
+                        return "data";
                     }
                 }
             })
         });
 
         // this is called when the user presses save settings button in start.html
-        socket.on('get_devices', (data, callback) => {
+        session.setHandler("get_devices", async (data) => {
             this.log("Get_devices data: " + JSON.stringify(data));
             devices = [{
                 data: {
@@ -133,20 +133,20 @@ class TPlinkBulbDriver extends Homey.Driver {
 
             // Set passed pair settings in variables
             this.log("Got get_devices from front-end, IP =", data.ipaddress, " Name = ", data.deviceName);
-            socket.emit('continue', null);
+            session.emit('continue', null);
 
             // this method is run when Homey.emit('list_devices') is run on the front-end
             // which happens when you use the template `list_devices`
 
-            socket.on('list_devices', (data, callback) => {
+            session.setHandler('list_devices', (data, callback) => {
 
                 this.log("List_devices data: " + JSON.stringify(data));
 
-                callback(null, devices);
+                return devices;
             });
         });
 
-        socket.on('disconnect', () => {
+        session.setHandler("disconnect", () => {
             this.log("Pairing is finished (done or aborted)");
         })
     }

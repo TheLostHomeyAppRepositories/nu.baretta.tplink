@@ -16,7 +16,7 @@ var util = require('util')
 
 class TPlinkPlugDevice extends Homey.Device {
 
-    onInit() {
+    async onInit() {
         this.log('device init');
         let device = this;
         var interval = 10;
@@ -25,7 +25,7 @@ class TPlinkPlugDevice extends Homey.Device {
         // console.dir(this.getData()); // for debugging
         let settings = this.getSettings();
         let id = this.getData().id;
-        let TPlinkModel = this.getDriver().id.toUpperCase();
+        let TPlinkModel = getDriverName().toUpperCase();
         this.log('id: ', id);
         this.log('name: ', this.getName());
         this.log('class: ', this.getClass());
@@ -54,47 +54,14 @@ class TPlinkPlugDevice extends Homey.Device {
 
         // register flow card actions
 
-        let ledOnAction = new Homey.FlowCardAction('ledOn');
-        ledOnAction
-            .register().registerRunListener(async (args) => {
-                let settings = await args.device.getSettings();
-                let ip_device = settings["settingIPAddress"];
-                this.log("Flow card action ledOff ip " + ip_device );
-                this.ledOn(ip_device);
-                return Promise.resolve(true);
-            });
+        let ledOnAction = this.homey.flow.getActionCard('ledOn');
 
-        let ledOffAction = new Homey.FlowCardAction('ledOff');
-        ledOffAction
-            .register().registerRunListener(async (args) => {
-                let settings = await args.device.getSettings();
-                let ip_device = settings["settingIPAddress"];
-                this.log("Flow card action ledOff ip " + ip_device );
-                this.ledOff(ip_device);
-                return Promise.resolve(true);
-            });
-
-        let meterResetAction = new Homey.FlowCardAction('meter_reset');
-        meterResetAction
-            .register().registerRunListener(async (args, state) => {
-                let settings = await args.device.getSettings();
-                let ip_device = settings["settingIPAddress"];
-                let totalOffset = settings["totalOffset"];
-                this.log("Flow card reset meter" + ip_device);
-                this.meter_reset(ip_device);
-                return Promise.resolve(true);
-            });
-
-        let undoMeterResetAction = new Homey.FlowCardAction('undo_meter_reset');
-        undoMeterResetAction
-            .register().registerRunListener(async (args) => {
-                let settings = await args.device.getSettings();
-                let ip_device = settings["settingIPAddress"];
-                this.log("Flow card undo reset meter" + ip_device);
-                this.undo_meter_reset(ip_device);
-                return Promise.resolve(true);
-            });
-
+        let ledOffAction = this.homey.flow.getActionCard('ledOff');
+       
+        let meterResetAction = this.homey.flow.getActionCard('meter_reset');
+        
+        let undoMeterResetAction = this.homey.flow.getActionCard('undo_meter_reset');
+       
     } // end onInit
 
     onAdded() {
@@ -125,7 +92,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.powerOff(device);
         }
         // Then, emit a callback ( err, result )
-        callback(null);
+        return(null);
     }
 
     async onCapabilityLedOnoff(value, opts, callback) {
@@ -139,7 +106,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.ledOff(device);
         }
         // Then, emit a callback ( err, result )
-        callback(null);
+        return(null);
     }
 
     // start functions
@@ -163,9 +130,9 @@ class TPlinkPlugDevice extends Homey.Device {
                         break;
                 }
             }
-            callback(null, true)
+            return(null, true)
         } catch (error) {
-            callback(error, null)
+            return "error";
         }
     }
 
@@ -192,10 +159,10 @@ class TPlinkPlugDevice extends Homey.Device {
         this.plug.getSysInfo().then((sysInfo) => {
                 if (sysInfo.relay_state === 1) {
                     this.log('Relay state on ');
-                    callback(null, true);
+                    return(null, true);
                 } else {
                     this.log('Relay state off ');
-                    callback(null, false);
+                    return(null, false);
                 }
             })
             .catch((err) => {
@@ -210,7 +177,7 @@ class TPlinkPlugDevice extends Homey.Device {
         this.plug.getSysInfo().then((sysInfo) => {
                 if (sysInfo.led_off === 0) {
                     this.log('LED on ');
-                    return true;
+                    return "true";
                 } else {
                     this.log('LED off ');
                     return false;
@@ -270,7 +237,7 @@ class TPlinkPlugDevice extends Homey.Device {
     async getStatus() {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
-        let TPlinkModel = this.getDriver().id.toUpperCase();
+        let TPlinkModel = getDriverName().toUpperCase();
         this.log("getStatus device: " + device);
 
         try {

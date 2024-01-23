@@ -1,6 +1,6 @@
 {
         "id": "nu.baretta.tplink",
-        "sdk": 2,
+        "sdk": 3,
         "brandColor": "#4ACBD6",
         "name": {
                 "en": "TP-Link Smart Devices",
@@ -11,13 +11,13 @@
                 "nl": ["lamp", "licht", "schakelaar", "energie monitoring", "HS100", "HS105", "HS110", "HS200", "LB100", "LB110", "LB120", "LB130", "LB200", "LB230", "tplink", "KL50", "KL60", "KL110", "KL120", "KL130"]
         },
         "version": "0.1.12",
-        "compatibility": ">=4.2.0",
+        "compatibility": ">=5.0.0",
         "author": {
-                "name": "Anne Baretta",
-                "email": "dev@baretta.nu"
+                "name": "Bretislav Kubesa",
+                "website": "https://github.com/shaarkys"            
         },
         "homeyCommunityTopicId": 1045,
-        "source": "https://github.com/abaretta/nu.baretta.tplink",
+        "source": "https://github.com/shaarkys/nu.baretta.tplink",
         "contributors": {
                 "developers": [{
                         "name": "Anne Baretta",
@@ -27,7 +27,7 @@
         "contributing": {
                 "donate": {
                         "paypal": {
-                                "username": "baretta"
+                                "username": "bkubesa"
                         }
                 }
         },
@@ -970,147 +970,168 @@
 
         ],
         "flow": {
-                "actions": [{
-                                "id": "ledOn",
-                                "title": {
-                                        "en": "Turn LED on",
-                                        "nl": "Zet LED aan"
-                                },
-                                "hint": {
-                                        "en": "Turn the LED on (turn off 'nightmode').",
-                                        "nl": "Zet de LED aan (zet 'nachtmode' uit). "
-                                },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=hs100|hs110|hs200"
-                                }]
+                "actions": [
+                        {
+                            "id": "ledOn",
+                            "title": {
+                                "en": "Turn LED on",
+                                "nl": "Zet LED aan"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn LED on for [[device]]",
+                                "nl": "Zet LED aan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs100|hs110|hs200"
+                                }
+                            ]
                         },
                         {
-                                "id": "ledOff",
-                                "title": {
-                                        "en": "Turn LED off",
-                                        "nl": "Zet LED uit"
-                                },
-                                "hint": {
-                                        "en": "Turn the LED off ('nightmode'). Use with care, the power remains on!",
-                                        "nl": "Zet de LED uit ('nachtmode'). Let op, de stroom blijft ingeschakeld!"
-                                },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=hs100|hs110|hs200"
-                                }]
+                            "id": "ledOff",
+                            "title": {
+                                "en": "Turn LED off",
+                                "nl": "Zet LED uit"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn LED off for [[device]]",
+                                "nl": "Zet LED uit voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs100|hs110|hs200"
+                                }
+                            ]
                         },
                         {
-                                "id": "meter_reset",
-                                "title": {
-                                        "en": "Reset meter values",
-                                        "nl": "Meter waarden resetten"
-                                },
-                                "hint": {
-                                        "en": "Reset the accumulated power usage (kWh). Can be reversed with the next action card.",
-                                        "nl": "Reset de stroomverbruik (kWh) waarden. Kan ongedaan gemaakt worden met de volgende kaart."
-                                },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=hs110|hs200"
-                                }]
+                            "id": "meter_reset",
+                            "title": {
+                                "en": "Reset meter values",
+                                "nl": "Meter waarden resetten"
+                            },
+                            "titleFormatted": {
+                                "en": "Reset meter values for [[device]]",
+                                "nl": "Reset meter waarden voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs110|hs200"
+                                }
+                            ]
                         },
                         {
-                                "id": "undo_meter_reset",
-                                "title": {
-                                        "en": "Undo reset meter values",
-                                        "nl": "Ongedaan maken meter resetten"
-                                },
-                                "hint": {
-                                        "en": "Undo resetting the accumulated power usage (kWh).",
-                                        "nl": "Maak reset van stroomverbruik ongedaan."
-                                },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=hs110|hs200"
-                                }]
+                            "id": "undo_meter_reset",
+                            "title": {
+                                "en": "Undo reset meter values",
+                                "nl": "Ongedaan maken meter resetten"
+                            },
+                            "titleFormatted": {
+                                "en": "Undo reset of meter values for [[device]]",
+                                "nl": "Maak reset van meter waarden ongedaan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs110|hs200"
+                                }
+                            ]
                         },
                         {
-                                "id": "transitionOn",
-                                "title": {
-                                        "en": "Turn bulb on with a transition in brightness.",
-                                        "nl": "Aan, geleidelijke toename van helderheid."
+                            "id": "transitionOn",
+                            "title": {
+                                "en": "Turn bulb on with transition",
+                                "nl": "Lamp aan met overgang"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn device on with a [[transition]] sec transition",
+                                "nl": "Zet device aan met een overgang van [[transition]] sec"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb100|lb110|lb120|lb130"
                                 },
-                                "hint": {
-                                        "en": "Turn the bulb on with a transistion in brightness over the entered number of seconds.",
-                                        "nl": "Schakel de lamp aan met een geleidelijke toename van de helderheid over het opgegeven aantal seconden."
+                                {
+                                    "name": "transition",
+                                    "type": "number",
+                                    "min": 1,
+                                    "max": 3600,
+                                    "placeholder": {
+                                        "en": "Transition time in seconds",
+                                        "nl": "Overgangstijd in seconden"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "transitionOff",
+                            "title": {
+                                "en": "Turn bulb off with transition",
+                                "nl": "Lamp uit met overgang"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn device off with a [[transition]] sec transition",
+                                "nl": "Zet device uit met een overgang van [[transition]] sec"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb100|lb110|lb120|lb130"
                                 },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=lb100|lb110|lb120|lb130"
-                                }, {
-                                        "name": "transition",
-                                        "type": "number",
-                                        "min": 1,
-                                        "max": 3600,
-                                        "placeholder": {
-                                                "en": "Transition time in seconds",
-                                                "nl": "Overgangstijd in seconden"
-                                        }
-                                }]
-                        }, {
-                                "id": "transitionOff",
-                                "title": {
-                                        "en": "Turn bulb off with a transition in brightness.",
-                                        "nl": "Uit, geleidelijke afname van helderheid."
-                                },
-                                "hint": {
-                                        "en": "Turn the bulb off with a transistion in brightness over the entered number of seconds.",
-                                        "nl": "Schakel de lamp uit met een geleidelijke afname van de helderheid over het opgegeven aantal seconden."
-                                },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=lb100|lb110|lb120|lb130"
-                                }, {
-                                        "name": "transition",
-                                        "type": "number",
-                                        "min": 1,
-                                        "max": 3600,
-                                        "placeholder": {
-                                                "en": "Transition time in seconds",
-                                                "nl": "Overgangstijd in seconden"
-                                        }
-                                }]
-                        }, {
-                                "id": "circadianModeOn",
-                                "title": {
-                                        "en": "Enable circadian mode",
-                                        "nl": "Zet circadian mode aan"
-                                },
-                                "hint": {
-                                        "en": "Enable circadian mode. In this mode the color of the bulb automatically changes during the day.",
-                                        "nl": "Zet de circadian mode aan. In deze mode veranderd de lamp van kleur in de loop van de dag."
-                                },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=lb120|lb130"
-                                }]
-                        }, {
-                                "id": "circadianModeOff",
-                                "title": {
-                                        "en": "Enable normal mode",
-                                        "nl": "Zet normale mode aan"
-                                },
-                                "hint": {
-                                        "en": "Disable circadian mode and set the bulb to normal mode, it will keep the current colorsetting.",
-                                        "nl": "Zet de circadian mode uit en zet de lamp in de normale modus, de lamp behoudt dezelfde kleureninstelling."
-                                },
-                                "args": [{
-                                        "name": "device",
-                                        "type": "device",
-                                        "filter": "driver_id=lb120|lb130"
+                                {
+                                    "name": "transition",
+                                    "type": "number",
+                                    "min": 1,
+                                    "max": 3600,
+                                    "placeholder": {
+                                        "en": "Transition time in seconds",
+                                        "nl": "Overgangstijd in seconden"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "circadianModeOn",
+                            "title": {
+                                "en": "Enable circadian mode",
+                                "nl": "Zet circadian mode aan"
+                            },
+                            "titleFormatted": {
+                                "en": "Enable circadian mode for [[device]]",
+                                "nl": "Zet circadian mode aan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb120|lb130"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "circadianModeOff",
+                            "title": {
+                                "en": "Enable normal mode",
+                                "nl": "Zet normale mode aan"
+                            },
+                            "titleFormatted": {
+                                "en": "Enable normal mode for [[device]]",
+                                "nl": "Zet normale mode aan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb120|lb130"
                                 }]
                         }
                 ]
