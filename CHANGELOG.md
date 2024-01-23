@@ -1,5 +1,8 @@
 # Changelog
 
+**Version 0.1.13**
+- SDK3 rewrite
+
 **Version 0.1.12**
 - Added support for KL range of bulbs: KL50/60/110/120/130
 
