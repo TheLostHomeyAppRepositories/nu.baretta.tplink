@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "id": "nu.baretta.tplink",
   "sdk": 3,
   "brandColor": "#4ACBD6",
@@ -139,6 +140,14 @@
       "pair": [
         {
           "id": "start"
+=======
+        "id": "nu.baretta.tplink",
+        "sdk": 3,
+        "brandColor": "#4ACBD6",
+        "name": {
+                "en": "TP-Link Smart Devices",
+                "nl": "TP-Link Smart Home"
+>>>>>>> 5dec91658d0a01fcd6198333c1aaad2ac2efa8b1
         },
         {
           "id": "list_devices",
@@ -147,9 +156,1137 @@
             "next": "add_plugs"
           }
         },
+<<<<<<< HEAD
         {
           "id": "add_plugs",
           "template": "add_devices"
+=======
+        "version": "0.1.12",
+        "compatibility": ">=5.0.0",
+        "author": {
+                "name": "Bretislav Kubesa",
+                "website": "https://github.com/shaarkys"            
+        },
+        "homeyCommunityTopicId": 1045,
+        "source": "https://github.com/shaarkys/nu.baretta.tplink",
+        "contributors": {
+                "developers": [{
+                        "name": "Anne Baretta",
+                        "email": "dev@baretta.nu"
+                }]
+        },
+        "contributing": {
+                "donate": {
+                        "paypal": {
+                                "username": "bkubesa"
+                        }
+                }
+        },
+        "images": {
+                "large": "./assets/images/large.jpg",
+                "small": "./assets/images/small.jpg"
+        },
+        "category": ["appliances", "lights"],
+        "description": {
+                "en": "TP-Link Smart Plugs and Bulbs (WIFI)",
+                "nl": "TP-Link Smart Plugs en Lampen (WIFI)"
+        },
+        "dependencies": {
+                "net": "*"
+        },
+        "capabilities": {
+                "ledonoff": {
+                        "type": "boolean",
+                        "title": {
+                                "en": "Switch LED on/off",
+                                "nl": "Zet LED aan/uit"
+                        },
+                        "getable": true,
+                        "setable": true,
+                        "uiComponent": null
+                }
+        },
+        "drivers": [{
+                        "id": "hs100",
+                        "name": {
+                                "en": "HS100",
+                                "nl": "HS100"
+                        },
+                        "images": {
+                                "large": "drivers/hs100/assets/images/large.jpg",
+                                "small": "drivers/hs100/assets/images/small.jpg"
+                        },
+                        "class": "socket",
+                        "capabilities": ["onoff", "ledonoff"],
+                        "mobile": {
+                                "components": [{
+                                                "id": "icon",
+                                                "capabilities": ["onoff"]
+                                        },
+                                        {
+                                                "id": "toggle",
+                                                "capabilities": ["onoff"]
+                                        }
+                                ]
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "hs110",
+                        "name": {
+                                "en": "HS110",
+                                "nl": "HS110"
+                        },
+                        "images": {
+                                "large": "drivers/hs110/assets/images/large.jpg",
+                                "small": "drivers/hs110/assets/images/small.jpg"
+                        },
+                        "class": "socket",
+                        "capabilities": ["onoff", "measure_power", "meter_power", "measure_current", "measure_voltage", "ledonoff"],
+                        "mobile": {
+                                "components": [{
+                                        "id": "icon",
+                                        "capabilities": ["onoff"]
+                                }, {
+                                        "id": "sensor",
+                                        "capabilities": [
+                                                "meter_power",
+                                                "measure_power",
+                                                "measure_current",
+                                                "measure_voltage"
+                                        ]
+                                }, {
+                                        "id": "toggle",
+                                        "capabilities": ["onoff"]
+                                }]
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0",
+                                                "hint": {
+                                                        "en": "Only change the IP address here if the device's IP address has changed! This does not change the IP adres on the device.",
+                                                        "nl": "Pas het IP adres hier alleen aan als het IP adres van de TP-Link veranderd is! De instelling veranderd het IP van de TP-Link niet."
+                                                }
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+
+                        ]
+                },
+                {
+                        "id": "hs200",
+                        "name": {
+                                "en": "HS200",
+                                "nl": "HS200"
+                        },
+                        "images": {
+                                "large": "drivers/hs200/assets/images/large.jpg",
+                                "small": "drivers/hs200/assets/images/small.jpg"
+                        },
+                        "class": "socket",
+                        "capabilities": ["onoff", "measure_power", "meter_power", "measure_current", "measure_voltage", "ledonoff"],
+                        "mobile": {
+                                "components": [{
+                                        "id": "icon",
+                                        "capabilities": ["onoff"]
+                                }, {
+                                        "id": "sensor",
+                                        "capabilities": [
+                                                "meter_power",
+                                                "measure_power",
+                                                "measure_current",
+                                                "measure_voltage"
+                                        ]
+                                }, {
+                                        "id": "toggle",
+                                        "capabilities": ["onoff"]
+                                }]
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "lb100",
+                        "name": {
+                                "en": "LB100",
+                                "nl": "LB100"
+                        },
+                        "images": {
+                                "large": "drivers/lb100/assets/images/large.jpg",
+                                "small": "drivers/lb100/assets/images/small.jpg"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 8, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "lb110",
+                        "name": {
+                                "en": "LB110",
+                                "nl": "LB110"
+                        },
+                        "images": {
+                                "large": "drivers/lb110/assets/images/large.jpg",
+                                "small": "drivers/lb110/assets/images/small.jpg"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 11, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "lb120",
+                        "name": {
+                                "en": "LB120",
+                                "nl": "LB120"
+                        },
+                        "images": {
+                                "large": "drivers/lb120/assets/images/large.jpg",
+                                "small": "drivers/lb120/assets/images/small.jpg"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim", "light_saturation", "light_mode", "light_temperature"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 11, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                }
+
+                                ,
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "lb130",
+                        "name": {
+                                "en": "LB130",
+                                "nl": "LB130"
+                        },
+                        "images": {
+                                "large": "drivers/lb130/assets/images/large.jpg",
+                                "small": "drivers/lb130/assets/images/small.jpg"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim", "light_hue", "light_saturation", "light_mode", "light_temperature"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 11, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "kl50",
+                        "name": {
+                                "en": "KL50",
+                                "nl": "KL50"
+                        },
+                        "images": {
+                                "large": "drivers/kl50/assets/images/large.png",
+                                "small": "drivers/kl50/assets/images/small.png"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 7, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "kl60",
+                        "name": {
+                                "en": "KL60",
+                                "nl": "KL60"
+                        },
+                        "images": {
+                                "large": "drivers/kl60/assets/images/large.png",
+                                "small": "drivers/kl60/assets/images/small.png"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 5, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "kl110",
+                        "name": {
+                                "en": "KL110",
+                                "nl": "KL110"
+                        },
+                        "images": {
+                                "large": "drivers/kl110/assets/images/large.jpg",
+                                "small": "drivers/kl110/assets/images/small.jpg"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 10, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "kl120",
+                        "name": {
+                                "en": "KL120",
+                                "nl": "KL120"
+                        },
+                        "images": {
+                                "large": "drivers/kl120/assets/images/large.jpg",
+                                "small": "drivers/kl120/assets/images/small.jpg"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim", "light_saturation", "light_mode", "light_temperature"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 10, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                }
+
+                                ,
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                },
+                {
+                        "id": "kl130",
+                        "name": {
+                                "en": "KL130",
+                                "nl": "KL130"
+                        },
+                        "images": {
+                                "large": "drivers/kl130/assets/images/large.jpg",
+                                "small": "drivers/kl130/assets/images/small.jpg"
+                        },
+                        "class": "light",
+                        "capabilities": ["onoff", "dim", "light_hue", "light_saturation", "light_mode", "light_temperature"],
+                        "energy": {
+                          "approximation": {
+                            "usageOn": 10, 
+                            "usageOff": 1 
+                                   }
+                        },
+                        "pair": [{
+                                        "id": "start"
+                                },
+                                {
+                                        "id": "list_devices",
+                                        "template": "list_devices",
+                                        "navigation": {
+                                                "next": "add_plugs"
+                                        }
+                                },
+                                {
+                                        "id": "add_plugs",
+                                        "template": "add_devices"
+                                }
+                        ],
+                        "settings": [{
+                                        "type": "group",
+                                        "label": {
+                                                "en": "General settings",
+                                                "nl": "Algemene instellingen"
+                                        },
+                                        "children": [{
+                                                "id": "settingIPAddress",
+                                                "type": "text",
+                                                "label": {
+                                                        "en": "IP address",
+                                                        "nl": "IP adres"
+                                                },
+                                                "value": "0.0.0.0"
+                                        }]
+                                },
+                                {
+                                        "type": "group",
+                                        "collapsed": "true",
+                                        "label": {
+                                                "en": "Optional connection setting",
+                                                "nl": "Optionele verbindingsinstelling"
+                                        },
+                                        "children": [{
+                                                "id": "dynamicIp",
+                                                "type": "checkbox",
+                                                "value": false,
+                                                "label": {
+                                                        "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                                                        "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+                                                },
+                                                "hint": {
+                                                        "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                                                        "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+                                                }
+                                        }]
+                                }
+
+                        ]
+                }
+
+        ],
+        "flow": {
+                "actions": [
+                        {
+                            "id": "ledOn",
+                            "title": {
+                                "en": "Turn LED on",
+                                "nl": "Zet LED aan"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn LED on for [[device]]",
+                                "nl": "Zet LED aan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs100|hs110|hs200"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "ledOff",
+                            "title": {
+                                "en": "Turn LED off",
+                                "nl": "Zet LED uit"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn LED off for [[device]]",
+                                "nl": "Zet LED uit voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs100|hs110|hs200"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "meter_reset",
+                            "title": {
+                                "en": "Reset meter values",
+                                "nl": "Meter waarden resetten"
+                            },
+                            "titleFormatted": {
+                                "en": "Reset meter values for [[device]]",
+                                "nl": "Reset meter waarden voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs110|hs200"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "undo_meter_reset",
+                            "title": {
+                                "en": "Undo reset meter values",
+                                "nl": "Ongedaan maken meter resetten"
+                            },
+                            "titleFormatted": {
+                                "en": "Undo reset of meter values for [[device]]",
+                                "nl": "Maak reset van meter waarden ongedaan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=hs110|hs200"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "transitionOn",
+                            "title": {
+                                "en": "Turn bulb on with transition",
+                                "nl": "Lamp aan met overgang"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn device on with a [[transition]] sec transition",
+                                "nl": "Zet device aan met een overgang van [[transition]] sec"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb100|lb110|lb120|lb130"
+                                },
+                                {
+                                    "name": "transition",
+                                    "type": "number",
+                                    "min": 1,
+                                    "max": 3600,
+                                    "placeholder": {
+                                        "en": "Transition time in seconds",
+                                        "nl": "Overgangstijd in seconden"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "transitionOff",
+                            "title": {
+                                "en": "Turn bulb off with transition",
+                                "nl": "Lamp uit met overgang"
+                            },
+                            "titleFormatted": {
+                                "en": "Turn device off with a [[transition]] sec transition",
+                                "nl": "Zet device uit met een overgang van [[transition]] sec"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb100|lb110|lb120|lb130"
+                                },
+                                {
+                                    "name": "transition",
+                                    "type": "number",
+                                    "min": 1,
+                                    "max": 3600,
+                                    "placeholder": {
+                                        "en": "Transition time in seconds",
+                                        "nl": "Overgangstijd in seconden"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "circadianModeOn",
+                            "title": {
+                                "en": "Enable circadian mode",
+                                "nl": "Zet circadian mode aan"
+                            },
+                            "titleFormatted": {
+                                "en": "Enable circadian mode for [[device]]",
+                                "nl": "Zet circadian mode aan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb120|lb130"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "circadianModeOff",
+                            "title": {
+                                "en": "Enable normal mode",
+                                "nl": "Zet normale mode aan"
+                            },
+                            "titleFormatted": {
+                                "en": "Enable normal mode for [[device]]",
+                                "nl": "Zet normale mode aan voor [[device]]"
+                            },
+                            "args": [
+                                {
+                                    "name": "device",
+                                    "type": "device",
+                                    "filter": "driver_id=lb120|lb130"
+                                }]
+                        }
+                ]
+>>>>>>> 5dec91658d0a01fcd6198333c1aaad2ac2efa8b1
         }
       ],
       "settings": [
