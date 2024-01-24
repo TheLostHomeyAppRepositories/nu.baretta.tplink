@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 // need Homey module, see SDK Guidelines
 const Homey = require('homey');
 
