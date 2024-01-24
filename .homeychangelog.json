@@ -19,5 +19,8 @@
   },
   "0.1.19": {
     "en": "HS100, HS110 attempt to prevent stack traces, removal of unnused node modules"
+  },
+  "0.1.20": {
+    "en": "Another icon fix attempt, Node.JS modules cleanup"
   }
 }
