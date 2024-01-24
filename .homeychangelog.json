@@ -16,5 +16,8 @@
   },
   "0.1.18": {
     "en": "Cosmetic fixes"
+  },
+  "0.1.19": {
+    "en": "HS100, HS110 attempt to prevent stack traces, removal of unnused node modules"
   }
 }
