@@ -6,12 +6,6 @@
   "repository": "https://github.com/shaarkys/nu.baretta.tplink",
   "license": "ISC",
   "dependencies": {
-    "lodash.castarray": "^4.0.0",
-    "lodash.defaultto": "^4.0.0",
-    "lodash.groupby": "^4.0.0",
-    "lodash.isequal": "^4.0.0",
-    "loglevel": "^1.0.0",
-    "promise-queue": "*",
     "tplink-smarthome-api": "^2.0.0"
   }
 }

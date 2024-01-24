@@ -111,7 +111,7 @@
         "en": "HS100",
         "nl": "HS100"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icon/icon.svg",
       "images": {
         "large": "drivers/hs100/assets/images/large.jpg",
         "small": "drivers/hs100/assets/images/small.jpg"
@@ -203,7 +203,7 @@
         "en": "HS110",
         "nl": "HS110"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "drivers/hs110/assets/icons/icon.svg",
       "images": {
         "large": "drivers/hs110/assets/images/large.jpg",
         "small": "drivers/hs110/assets/images/small.jpg"
@@ -312,7 +312,7 @@
         "en": "HS200",
         "nl": "HS200"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/hs200/assets/images/large.jpg",
         "small": "drivers/hs200/assets/images/small.jpg"
@@ -417,7 +417,7 @@
         "en": "LB100",
         "nl": "LB100"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/lb100/assets/images/large.jpg",
         "small": "drivers/lb100/assets/images/small.jpg"
@@ -499,7 +499,7 @@
         "en": "LB110",
         "nl": "LB110"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/lb110/assets/images/large.jpg",
         "small": "drivers/lb110/assets/images/small.jpg"
@@ -581,7 +581,7 @@
         "en": "LB120",
         "nl": "LB120"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/lb120/assets/images/large.jpg",
         "small": "drivers/lb120/assets/images/small.jpg"
@@ -666,7 +666,7 @@
         "en": "LB130",
         "nl": "LB130"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/lb130/assets/images/large.jpg",
         "small": "drivers/lb130/assets/images/small.jpg"
@@ -752,7 +752,7 @@
         "en": "KL50",
         "nl": "KL50"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/kl50/assets/images/large.png",
         "small": "drivers/kl50/assets/images/small.png"
@@ -834,7 +834,7 @@
         "en": "KL60",
         "nl": "KL60"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/kl60/assets/images/large.png",
         "small": "drivers/kl60/assets/images/small.png"
@@ -916,7 +916,7 @@
         "en": "KL110",
         "nl": "KL110"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/kl110/assets/images/large.jpg",
         "small": "drivers/kl110/assets/images/small.jpg"
@@ -998,7 +998,7 @@
         "en": "KL120",
         "nl": "KL120"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/kl120/assets/images/large.jpg",
         "small": "drivers/kl120/assets/images/small.jpg"
@@ -1083,7 +1083,7 @@
         "en": "KL130",
         "nl": "KL130"
       },
-      "icon": "{{driverAssetsPath}}/icon.svg",
+      "icon": "{{driverAssetsPath}}/icons/icon.svg",
       "images": {
         "large": "drivers/kl130/assets/images/large.jpg",
         "small": "drivers/kl130/assets/images/small.jpg"

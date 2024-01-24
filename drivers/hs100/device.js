@@ -252,11 +252,13 @@ async ledOff(device) {
         this.log("getStatus device: " + device);
 
         try {
-            this.plug = await client.getPlug({
+            this.plug = client.getPlug({
                 host: device
             });
 
-            await this.plug.getInfo().then((data) => {
+            this.plug.getInfo().catch((err) => {
+                this.log("Error getting plug info: " + err.message);
+            }).then((data) => {
                     //this.log("DeviceID: " + settings["deviceId"]);
                     //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
 
