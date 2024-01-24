@@ -4,5 +4,8 @@
   },
   "0.1.14": {
     "en": "Catching possible stacktraces / refactored methods"
+  },
+  "0.1.15": {
+    "en": "Icons per device as requested by Athom (created by Athom)"
   }
 }
