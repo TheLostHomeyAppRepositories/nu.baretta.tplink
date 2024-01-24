@@ -136,21 +136,28 @@ class TPlinkPlugDevice extends Homey.Device {
         }
     }
 
-    powerOn(device) {
+async powerOn(device) {
+    try {
         this.log('Turning device on ' + device);
-        this.plug = client.getPlug({
-            host: device
-        });
-        this.plug.setPowerState(true);
+        this.plug = client.getPlug({ host: device });
+        await this.plug.setPowerState(true);
+    } catch (err) {
+        this.log('Error turning device on: ', err.message);
+        // Handle the error appropriately
     }
+}
 
-    powerOff(device) {
-        this.log('Turning device off ');
-        this.plug = client.getPlug({
-            host: device
-        });
-        this.plug.setPowerState(false);
+
+async powerOff(device) {
+    try {
+        this.log('Turning device off ' + device);
+        this.plug = client.getPlug({ host: device });
+        await this.plug.setPowerState(false);
+    } catch (err) {
+        this.log('Error turning device off: ', err.message);
+        // Handle the error appropriately
     }
+}
 
     getPower(device) {
         this.plug = client.getPlug({
@@ -189,27 +196,31 @@ class TPlinkPlugDevice extends Homey.Device {
 
     }
 
-    ledOn(device) {
-        this.log('Turning LED on ');
-        this.plug = client.getPlug({
-            host: device
-        });
-        this.plug.setLedState(true)
-            .catch(this.error);
-        this.setCapabilityValue('ledonoff', true)
-            .catch(this.error);
+async ledOn(device) {
+    try {
+        this.log('Turning LED on for device ' + device);
+        this.plug = client.getPlug({ host: device });
+        await this.plug.setLedState(true);
+        await this.setCapabilityValue('ledonoff', true);
+    } catch (err) {
+        this.log('Error turning LED on: ', err.message);
+        // Handle the error appropriately
     }
+}
 
-    ledOff(device) {
-        this.log('Turning LED off ');
-        this.plug = client.getPlug({
-            host: device
-        });
-        this.plug.setLedState(false)
-            .catch(this.error);
-        this.setCapabilityValue('ledonoff', false)
-            .catch(this.error);
+
+async ledOff(device) {
+    try {
+        this.log('Turning LED off for device ' + device);
+        this.plug = client.getPlug({ host: device });
+        await this.plug.setLedState(false);
+        await this.setCapabilityValue('ledonoff', false);
+    } catch (err) {
+        this.log('Error turning LED off: ', err.message);
+        // Handle the error appropriately
     }
+}
+
 
     meter_reset(device) {
         this.log('Reset meter ');

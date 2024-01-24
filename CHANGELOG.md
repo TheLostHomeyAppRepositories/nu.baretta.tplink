@@ -1,5 +1,8 @@
 # Changelog
 
+**Version 0.1.14**
+- Catching possible stacktraces / refactored methods
+
 **Version 0.1.13**
 - SDK3 rewrite
 

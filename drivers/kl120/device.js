@@ -264,72 +264,69 @@ class TPlinkBulbDevice extends Homey.Device {
     }
 
 
-    powerOn(device) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 300,
-            "on_off": 1
-        }
-        this.bulb.lighting.setLightState(options);
+async powerOn(device) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 300, "on_off": 1 };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in powerOn method: ', err.message);
+        // Handle the error appropriately
     }
+}
 
-    powerOff(device) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 1000,
-            "on_off": 0
-        }
-        this.bulb.lighting.setLightState(options);
+async powerOff(device) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 1000, "on_off": 0 };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in powerOff method: ', err.message);
     }
+}
 
-    dim(device, dimLevel) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 30,
-            "brightness": dimLevel
-        }
-        this.bulb.lighting.setLightState(options);
+async dim(device, dimLevel) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 30, "brightness": dimLevel };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in dim method: ', err.message);
     }
+}
 
-    color_temp(device, tempLevel) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 30,
-            "color_temp": tempLevel
-        }
-        this.bulb.lighting.setLightState(options);
+async color_temp(device, tempLevel) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 30, "color_temp": tempLevel };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in color_temp method: ', err.message);
     }
+}
 
-    set_hue(device, hueLevel) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 30,
-            "hue": hueLevel,
-            "color_temp": 0
-        }
-        this.bulb.lighting.setLightState(options);
-    }
 
-    set_saturation(device, saturationLevel) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 30,
-            "saturation": saturationLevel,
-        }
-        this.bulb.lighting.setLightState(options);
+async set_hue(device, hueLevel) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 30, "hue": hueLevel, "color_temp": 0 };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in set_hue method: ', err.message);
     }
+}
+
+
+async set_saturation(device, saturationLevel) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 30, "saturation": saturationLevel };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in set_saturation method: ', err.message);
+    }
+}
+
 
     getPower(device) {
         this.bulb = client.getBulb({
@@ -347,59 +344,49 @@ class TPlinkBulbDevice extends Homey.Device {
     }
 
     // mode 'normal', 'circadian'
-    circadianModeOn(device) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 100,
-            "mode": "circadian"
-        }
-        this.bulb.lighting.setLightState(options);
+async circadianModeOn(device) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 100, "mode": "circadian" };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in circadianModeOn method: ', err.message);
     }
+}
 
-    circadianModeOff(device) {
-        this.log('CircadionModeOn device: ' + device.id);
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": 100,
-            "mode": "normal",
-            "brightness": 100
-        }
-        this.bulb.lighting.setLightState(options);
-    }
 
-    onTransition(device, transition) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": transition,
-            "on_off": 1,
-            "brightness": 100
-        }
-        this.bulb.lighting.setLightState(options);
+async circadianModeOff(device) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": 100, "mode": "normal", "brightness": 100 };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in circadianModeOff method: ', err.message);
     }
+}
 
-    offTransition(device, transition) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        options = {
-            "transition_period": transition,
-            "on_off": 0
-        }
-        this.bulb.lighting.setLightState(options);
-    }
 
-    getInfo(device) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        this.bulb.getInfo().then(this.log);
+async onTransition(device, transition) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": transition, "on_off": 1, "brightness": 100 };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in onTransition method: ', err.message);
     }
+}
+
+
+async offTransition(device, transition) {
+    try {
+        this.bulb = client.getBulb({ host: device });
+        options = { "transition_period": transition, "on_off": 0 };
+        await this.bulb.lighting.setLightState(options);
+    } catch (err) {
+        this.log('Error in offTransition method: ', err.message);
+    }
+}
+
 
     /*
     getPower(device) {
