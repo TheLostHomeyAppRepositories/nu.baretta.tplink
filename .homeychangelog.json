@@ -1,5 +1,8 @@
 {
   "0.1.13": {
     "en": "SDK3 update"
+  },
+  "0.1.14": {
+    "en": "Catching possible stacktraces / refactored methods"
   }
 }
