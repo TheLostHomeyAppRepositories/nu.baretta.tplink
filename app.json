@@ -1173,8 +1173,8 @@
           "nl": "Zet LED aan"
         },
         "titleFormatted": {
-          "en": "Turn LED on for [[device]]",
-          "nl": "Zet LED aan voor [[device]]"
+          "en": "Turn LED on ",
+          "nl": "Zet LED aan "
         },
         "args": [
           {
@@ -1191,8 +1191,8 @@
           "nl": "Zet LED uit"
         },
         "titleFormatted": {
-          "en": "Turn LED off for [[device]]",
-          "nl": "Zet LED uit voor [[device]]"
+          "en": "Turn LED off",
+          "nl": "Zet LED uit"
         },
         "args": [
           {
@@ -1209,8 +1209,8 @@
           "nl": "Meter waarden resetten"
         },
         "titleFormatted": {
-          "en": "Reset meter values for [[device]]",
-          "nl": "Reset meter waarden voor [[device]]"
+          "en": "Reset meter values ",
+          "nl": "Reset meter waarden "
         },
         "args": [
           {
@@ -1227,8 +1227,8 @@
           "nl": "Ongedaan maken meter resetten"
         },
         "titleFormatted": {
-          "en": "Undo reset of meter values for [[device]]",
-          "nl": "Maak reset van meter waarden ongedaan voor [[device]]"
+          "en": "Undo reset of meter values ",
+          "nl": "Maak reset van meter waarden ongedaan "
         },
         "args": [
           {
@@ -1269,11 +1269,11 @@
       {
         "id": "transitionOff",
         "title": {
-          "en": "Turn bulb off with transition",
+          "en": "Turn bulb offwith transition",
           "nl": "Lamp uit met overgang"
         },
         "titleFormatted": {
-          "en": "Turn device off with a [[transition]] sec transition",
+          "en": "Turn device offwith a [[transition]] sec transition",
           "nl": "Zet device uit met een overgang van [[transition]] sec"
         },
         "args": [
@@ -1301,8 +1301,8 @@
           "nl": "Zet circadian mode aan"
         },
         "titleFormatted": {
-          "en": "Enable circadian mode for [[device]]",
-          "nl": "Zet circadian mode aan voor [[device]]"
+          "en": "Enable circadian mode ",
+          "nl": "Zet circadian mode aan "
         },
         "args": [
           {
@@ -1319,8 +1319,8 @@
           "nl": "Zet normale mode aan"
         },
         "titleFormatted": {
-          "en": "Enable normal mode for [[device]]",
-          "nl": "Zet normale mode aan voor [[device]]"
+          "en": "Enable normal mode ",
+          "nl": "Zet normale mode aan "
         },
         "args": [
           {
