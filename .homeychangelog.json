@@ -31,5 +31,8 @@
   },
   "0.1.23": {
     "en": "Fix for HS100 and HS200 - getdrivername is not defined"
+  },
+  "0.1.24": {
+    "en": "Attemp to add KP115"
   }
 }
