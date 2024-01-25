@@ -28,5 +28,8 @@
   },
   "0.1.22": {
     "en": "Flow title fix"
+  },
+  "0.1.23": {
+    "en": "Fix for HS100 and HS200 - getdrivername is not defined"
   }
 }
