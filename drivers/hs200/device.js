@@ -5,6 +5,12 @@ const {
 } = require('tplink-smarthome-api');
 const client = new Client();
 
+// get driver name based on dirname (hs100, hs110, etc.)
+function getDriverName() {
+    var parts = __dirname.replace(/\\/g, '/').split('/');
+    return parts[parts.length - 1].split('.')[0];
+}
+
 var oldpowerState = "";
 var oldtotalState = 0;
 var totalOffset = 0;
