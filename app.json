@@ -8,6 +8,7 @@
   },
   "tags": {
     "en": [
+      "KASA",
       "light",
       "socket",
       "switch",
@@ -29,9 +30,11 @@
       "KL60",
       "KL110",
       "KL120",
-      "KL130"
+      "KL130",
+      "KP115"
     ],
     "nl": [
+      "KASA",
       "lamp",
       "licht",
       "schakelaar",
@@ -51,7 +54,8 @@
       "KL60",
       "KL110",
       "KL120",
-      "KL130"
+      "KL130",
+      "KP115"
     ]
   },
   "version": "0.1.23",
@@ -207,6 +211,115 @@
       "images": {
         "large": "drivers/hs110/assets/images/large.jpg",
         "small": "drivers/hs110/assets/images/small.jpg"
+      },
+      "class": "socket",
+      "capabilities": [
+        "onoff",
+        "measure_power",
+        "meter_power",
+        "measure_current",
+        "measure_voltage",
+        "ledonoff"
+      ],
+      "mobile": {
+        "components": [
+          {
+            "id": "icon",
+            "capabilities": [
+              "onoff"
+            ]
+          },
+          {
+            "id": "sensor",
+            "capabilities": [
+              "meter_power",
+              "measure_power",
+              "measure_current",
+              "measure_voltage"
+            ]
+          },
+          {
+            "id": "toggle",
+            "capabilities": [
+              "onoff"
+            ]
+          }
+        ]
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_plugs"
+          }
+        },
+        {
+          "id": "add_plugs",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "General settings",
+            "nl": "Algemene instellingen"
+          },
+          "children": [
+            {
+              "id": "settingIPAddress",
+              "type": "text",
+              "label": {
+                "en": "IP address",
+                "nl": "IP adres"
+              },
+              "value": "0.0.0.0",
+              "hint": {
+                "en": "Only change the IP address here if the device's IP address has changed! This does not change the IP adres on the device.",
+                "nl": "Pas het IP adres hier alleen aan als het IP adres van de TP-Link veranderd is! De instelling veranderd het IP van de TP-Link niet."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "collapsed": "true",
+          "label": {
+            "en": "Optional connection setting",
+            "nl": "Optionele verbindingsinstelling"
+          },
+          "children": [
+            {
+              "id": "dynamicIp",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+              },
+              "hint": {
+                "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kp115",
+      "name": {
+        "en": "KP115",
+        "nl": "KP115"
+      },
+      "icon": "drivers/kp115/assets/icons/icon.svg",
+      "images": {
+        "large": "drivers/kp115/assets/images/large.jpg",
+        "small": "drivers/kp115/assets/images/small.jpg"
       },
       "class": "socket",
       "capabilities": [
@@ -1180,7 +1293,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200"
+            "filter": "driver_id=hs100|hs110|hs200|kp115"
           }
         ]
       },
@@ -1198,7 +1311,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200"
+            "filter": "driver_id=hs100|hs110|hs200|kp115"
           }
         ]
       },
@@ -1216,7 +1329,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs110|hs200"
+            "filter": "driver_id=hs110|hs200|kp115"
           }
         ]
       },
@@ -1234,7 +1347,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs110|hs200"
+            "filter": "driver_id=hs110|hs200|kp115"
           }
         ]
       },
