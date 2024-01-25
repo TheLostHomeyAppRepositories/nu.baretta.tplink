@@ -1245,8 +1245,8 @@
           "nl": "Lamp aan met overgang"
         },
         "titleFormatted": {
-          "en": "Turn device on with a [[transition]] sec transition",
-          "nl": "Zet device aan met een overgang van [[transition]] sec"
+          "en": "Turn bulb on with a [[transition]] sec transition",
+          "nl": "Zet lamp aan met een overgang van [[transition]] sec"
         },
         "args": [
           {
@@ -1269,12 +1269,12 @@
       {
         "id": "transitionOff",
         "title": {
-          "en": "Turn bulb offwith transition",
+          "en": "Turn bulb off with transition",
           "nl": "Lamp uit met overgang"
         },
         "titleFormatted": {
-          "en": "Turn device offwith a [[transition]] sec transition",
-          "nl": "Zet device uit met een overgang van [[transition]] sec"
+          "en": "Turn bulb off with a [[transition]] sec transition",
+          "nl": "Zet lamp uit met een overgang van [[transition]] sec"
         },
         "args": [
           {
