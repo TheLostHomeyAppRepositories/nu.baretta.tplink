@@ -6,6 +6,6 @@
   "repository": "https://github.com/shaarkys/nu.baretta.tplink",
   "license": "ISC",
   "dependencies": {
-    "tplink-smarthome-api": "^2.0.0"
+    "tplink-smarthome-api": "^5.0.0"
   }
 }
