@@ -145,7 +145,8 @@ class TPlinkPlugDevice extends Homey.Device {
 async powerOn(device) {
     try {
         this.log('Turning device on ' + device);
-        this.plug = client.getPlug({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         await this.plug.setPowerState(true);
     } catch (err) {
         this.log('Error turning device on: ', err.message);
@@ -157,7 +158,8 @@ async powerOn(device) {
 async powerOff(device) {
     try {
         this.log('Turning device off ' + device);
-        this.plug = client.getPlug({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         await this.plug.setPowerState(false);
     } catch (err) {
         this.log('Error turning device off: ', err.message);
@@ -205,7 +207,8 @@ async powerOff(device) {
 async ledOn(device) {
     try {
         this.log('Turning LED on for device ' + device);
-        this.plug = client.getPlug({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         await this.plug.setLedState(true);
         await this.setCapabilityValue('ledonoff', true);
     } catch (err) {
@@ -218,7 +221,8 @@ async ledOn(device) {
 async ledOff(device) {
     try {
         this.log('Turning LED off for device ' + device);
-        this.plug = client.getPlug({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         await this.plug.setLedState(false);
         await this.setCapabilityValue('ledonoff', false);
     } catch (err) {
@@ -258,8 +262,9 @@ async ledOff(device) {
         this.log("getStatus device: " + device);
 
         try {
+            const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({
-                host: device
+                host: device,  sysInfo: sysInfo
             });
 
             this.plug.getInfo().catch((err) => {
