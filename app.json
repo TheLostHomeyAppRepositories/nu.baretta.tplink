@@ -3,8 +3,8 @@
   "sdk": 3,
   "brandColor": "#4ACBD6",
   "name": {
-    "en": "TP-Link Smart Devices",
-    "nl": "TP-Link Smart Home"
+    "en": "TP-Link KASA Smart Home - LAN",
+    "nl": "TP-Link KASA Smart Home - LAN"
   },
   "tags": {
     "en": [
@@ -31,7 +31,8 @@
       "KL110",
       "KL120",
       "KL130",
-      "KP115"
+      "KP115",
+      "KP105"
     ],
     "nl": [
       "KASA",
@@ -55,7 +56,8 @@
       "KL110",
       "KL120",
       "KL130",
-      "KP115"
+      "KP115",
+      "KP105"
     ]
   },
   "version": "0.1.24",
@@ -82,8 +84,8 @@
     }
   },
   "images": {
-    "large": "./assets/images/large.jpg",
-    "small": "./assets/images/small.jpg"
+    "large": "./assets/images/large.png",
+    "small": "./assets/images/small.png"
   },
   "category": [
     "appliances",
@@ -391,6 +393,98 @@
                 "en": "Only change the IP address here if the device's IP address has changed! This does not change the IP adres on the device.",
                 "nl": "Pas het IP adres hier alleen aan als het IP adres van de TP-Link veranderd is! De instelling veranderd het IP van de TP-Link niet."
               }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "collapsed": "true",
+          "label": {
+            "en": "Optional connection setting",
+            "nl": "Optionele verbindingsinstelling"
+          },
+          "children": [
+            {
+              "id": "dynamicIp",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+              },
+              "hint": {
+                "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kp105",
+      "name": {
+        "en": "KP105",
+        "nl": "KP105"
+      },
+      "icon": "{{driverAssetsPath}}/icon.svg",
+      "images": {
+        "large": "drivers/kp105/assets/images/large.jpg",
+        "small": "drivers/kp105/assets/images/small.jpg"
+      },
+      "class": "socket",
+      "capabilities": [
+        "onoff",
+        "ledonoff"
+      ],
+      "mobile": {
+        "components": [
+          {
+            "id": "icon",
+            "capabilities": [
+              "onoff"
+            ]
+          },
+          {
+            "id": "toggle",
+            "capabilities": [
+              "onoff"
+            ]
+          }
+        ]
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_plugs"
+          }
+        },
+        {
+          "id": "add_plugs",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "General settings",
+            "nl": "Algemene instellingen"
+          },
+          "children": [
+            {
+              "id": "settingIPAddress",
+              "type": "text",
+              "label": {
+                "en": "IP address",
+                "nl": "IP adres"
+              },
+              "value": "0.0.0.0"
             }
           ]
         },
@@ -1293,7 +1387,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|kp115"
+            "filter": "driver_id=hs100|hs110|hs200|kp115|kp105"
           }
         ]
       },
@@ -1311,7 +1405,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|kp115"
+            "filter": "driver_id=hs100|hs110|hs200|kp115|kp105"
           }
         ]
       },
