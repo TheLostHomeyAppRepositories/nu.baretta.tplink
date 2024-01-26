@@ -266,7 +266,8 @@ class TPlinkBulbDevice extends Homey.Device {
 
 async powerOn(device) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 300, "on_off": 1 };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -277,7 +278,8 @@ async powerOn(device) {
 
 async powerOff(device) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 1000, "on_off": 0 };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -287,7 +289,8 @@ async powerOff(device) {
 
 async dim(device, dimLevel) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 30, "brightness": dimLevel };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -297,7 +300,8 @@ async dim(device, dimLevel) {
 
 async color_temp(device, tempLevel) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 30, "color_temp": tempLevel };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -308,7 +312,8 @@ async color_temp(device, tempLevel) {
 
 async set_hue(device, hueLevel) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 30, "hue": hueLevel, "color_temp": 0 };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -319,7 +324,8 @@ async set_hue(device, hueLevel) {
 
 async set_saturation(device, saturationLevel) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 30, "saturation": saturationLevel };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -346,7 +352,8 @@ async set_saturation(device, saturationLevel) {
     // mode 'normal', 'circadian'
 async circadianModeOn(device) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 100, "mode": "circadian" };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -357,7 +364,8 @@ async circadianModeOn(device) {
 
 async circadianModeOff(device) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": 100, "mode": "normal", "brightness": 100 };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -368,7 +376,8 @@ async circadianModeOff(device) {
 
 async onTransition(device, transition) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": transition, "on_off": 1, "brightness": 100 };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -379,7 +388,8 @@ async onTransition(device, transition) {
 
 async offTransition(device, transition) {
     try {
-        this.bulb = client.getBulb({ host: device });
+        const sysInfo = await client.getSysInfo(device);
+				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
         options = { "transition_period": transition, "on_off": 0 };
         await this.bulb.lighting.setLightState(options);
     } catch (err) {
@@ -439,8 +449,9 @@ async offTransition(device, transition) {
         //this.log("DeviceId device: " + deviceId);
 
         try {
-            this.bulb = await client.getBulb({
-                host: device
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({
+                host: device,  sysInfo: sysInfo
             });
 
             if (settings["deviceId"] === undefined) {
