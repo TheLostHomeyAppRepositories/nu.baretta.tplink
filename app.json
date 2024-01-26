@@ -3,8 +3,8 @@
   "sdk": 3,
   "brandColor": "#4ACBD6",
   "name": {
-    "en": "TP-Link Smart Devices",
-    "nl": "TP-Link Smart Home"
+    "en": "TP-Link KASA Smart Home - LAN",
+    "nl": "TP-Link KASA Smart Home - LAN"
   },
   "tags": {
     "en": [
@@ -31,7 +31,8 @@
       "KL110",
       "KL120",
       "KL130",
-      "KP115"
+      "KP115",
+      "KP105"
     ],
     "nl": [
       "KASA",
@@ -55,7 +56,8 @@
       "KL110",
       "KL120",
       "KL130",
-      "KP115"
+      "KP115",
+      "KP105"
     ]
   },
   "version": "0.1.24",
@@ -82,8 +84,8 @@
     }
   },
   "images": {
-    "large": "./assets/images/large.jpg",
-    "small": "./assets/images/small.jpg"
+    "large": "./assets/images/large.png",
+    "small": "./assets/images/small.png"
   },
   "category": [
     "appliances",
@@ -1293,7 +1295,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|kp115"
+            "filter": "driver_id=hs100|hs110|hs200|kp115|kp105"
           }
         ]
       },
@@ -1311,7 +1313,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|kp115"
+            "filter": "driver_id=hs100|hs110|hs200|kp115|kp105"
           }
         ]
       },
