@@ -40,5 +40,8 @@
   },
   "0.1.26": {
     "en": "Name correction to be inline with Athom rules"
+  },
+  "0.1.261": {
+    "en": "Experimental - compatibility updates due to the plink-smarthome-api v5"
   }
 }
