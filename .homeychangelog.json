@@ -46,5 +46,8 @@
   },
   "0.2.1": {
     "en": "Experimental - compatibility updates due to the plink-smarthome-api v5"
+  },
+  "0.2.2": {
+    "en": "Added support for HS210 - 3way"
   }
 }
