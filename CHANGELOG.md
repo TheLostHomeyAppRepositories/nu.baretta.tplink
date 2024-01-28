@@ -1,5 +1,10 @@
 # Changelog
 
+**Version 0.2.1**
+- experimental - compatibility updates due to the plink-smarthome-api v5
+
+**Version 0.2.00**
+- Adding KP105, KP115,Fix getdrivername is not defined, Flow title fix, new name for app store
 **Version 0.1.14**
 - Catching possible stacktraces / refactored methods
 
