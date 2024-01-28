@@ -43,5 +43,8 @@
   },
   "0.1.261": {
     "en": "Experimental - compatibility updates due to the plink-smarthome-api v5"
+  },
+  "0.2.1": {
+    "en": "Experimental - compatibility updates due to the plink-smarthome-api v5"
   }
 }
