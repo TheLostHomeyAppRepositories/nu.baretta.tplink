@@ -1,5 +1,8 @@
 # Changelog
 
+**Version 0.2.2**
+- Added support for HS210 - 3way
+
 **Version 0.2.1**
 - experimental - compatibility updates due to the plink-smarthome-api v5
 
