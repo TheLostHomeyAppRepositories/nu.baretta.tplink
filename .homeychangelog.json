@@ -49,5 +49,8 @@
   },
   "0.1.4": {
     "en": "Adding KP105, KP115,Fix getdrivername is not defined, Flow title fix, New name"
+  },
+  "0.2.0": {
+    "en": "Adding KP105, KP115,Fix getdrivername is not defined, Flow title fix, New name"
   }
 }
