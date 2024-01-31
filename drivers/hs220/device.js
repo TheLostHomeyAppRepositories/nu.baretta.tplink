@@ -1,8 +1,6 @@
 'use strict';
 const Homey = require('homey');
-const {
-    Client
-} = require('tplink-smarthome-api');
+const { Client } = require('tplink-smarthome-api');
 const client = new Client();
 
 // get driver name based on dirname (hs100, hs110, etc.)
@@ -53,20 +51,29 @@ class TPlinkPlugDevice extends Homey.Device {
         this.pollDevice(interval);
 
         this.registerCapabilityListener('onoff', this.onCapabilityOnoff.bind(this));
-        // actually quite useless to have the 'ledonoff' function in the mobile interface...
+        
         this.registerCapabilityListener('ledonoff', this.onCapabilityLedOnoff.bind(this));
 
-        // flow conditions - default for "socket"
+        this.registerCapabilityListener('dim', this.onCapabilityDim.bind(this));
 
         // register flow card actions
 
         let ledOnAction = this.homey.flow.getActionCard('ledOn');
         
         let ledOffAction = this.homey.flow.getActionCard('ledOff');
-        
-        let meterResetAction = this.homey.flow.getActionCard('meter_reset');
-        
-        let undoMeterResetAction = this.homey.flow.getActionCard('undo_meter_reset');
+
+        let setBrightnessAction = this.homey.flow.getActionCard('set_brightness');
+        setBrightnessAction.registerRunListener(async (args, state) => {
+          const { device, brightness } = args;
+          try {
+            await device.setBrightness(device.getSettings().settingIPAddress, brightness);
+            return true; // Action was successful
+          } catch (err) {
+            this.log(err);
+            return false; // Action failed
+          }
+        });
+      
         
     } // end onInit
 
@@ -167,6 +174,17 @@ async powerOff(device) {
     }
 }
 
+async setBrightness(device, brightness) {
+    try {
+        this.log('Setting brightness for device ' + device + ' to ' + brightness);
+        const sysInfo = await client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+        await this.plug.dimmer.setBrightness(brightness);
+    } catch (err) {
+        this.log('Error setting brightness: ', err.message);
+    }
+}
+
     getPower(device) {
         this.plug = client.getPlug({
             host: device
@@ -217,7 +235,6 @@ async ledOn(device) {
     }
 }
 
-
 async ledOff(device) {
     try {
         this.log('Turning LED off for device ' + device);
@@ -231,29 +248,19 @@ async ledOff(device) {
     }
 }
 
+async onCapabilityDim(value, opts) {
+    this.log("Capability called: dim value: ", value);
+    let settings = this.getSettings();
+    let device = settings["settingIPAddress"];
 
-    meter_reset(device) {
-        this.log('Reset meter ');
-        this.plug = client.getPlug({
-            host: device
-        });
-        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-        // this.plug.emeter.eraseStats(null);
-        this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
-        totalOffset = oldtotalState;
-        this.setSettings({
-            totalOffset: totalOffset
-        }).catch(this.error);
+    try {
+        // Assuming the value is between 0.0 and 1.0, and converting it to a percentage
+        await this.setBrightness(device, value * 100);
+    } catch (err) {
+        this.log('Error setting brightness:', err.message);
+        // You can also perform additional error handling here if necessary
     }
-
-    undo_meter_reset(device) {
-        this.log('Undo reset meter, setting totalOffset to 0 ');
-        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-        totalOffset = 0;
-        this.setSettings({
-            totalOffset: totalOffset
-        }).catch(this.error);
-    }
+}
 
     async getStatus() {
         let settings = this.getSettings();
@@ -319,6 +326,16 @@ async ledOff(device) {
                             this.log('Current changed: ' + data.emeter.realtime.current);
                             this.setCapabilityValue('measure_current', data.emeter.realtime.current)
                                 .catch(this.error);
+                        }
+                    }
+
+                    if (TPlinkModel === "HS220") { // Check if the model supports dimming
+                        try {
+                            const brightness = this.plug.dimmer.brightness;
+                            this.log('Brightness level: ' + brightness);
+                            // Update Homey device state for brightness
+                        } catch (err) {
+                            this.log('Error getting brightness: ', err.message);
                         }
                     }
                 })

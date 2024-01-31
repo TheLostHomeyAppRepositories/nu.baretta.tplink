@@ -20,6 +20,7 @@
       "HS110",
       "HS200",
       "HS210",
+      "HS220",
       "LB100",
       "LB110",
       "LB120",
@@ -46,6 +47,7 @@
       "HS110",
       "HS200",
       "HS210",
+      "HS220",
       "LB100",
       "LB110",
       "LB120",
@@ -635,6 +637,99 @@
       "capabilities": [
         "onoff",
         "ledonoff"
+      ],
+      "mobile": {
+        "components": [
+          {
+            "id": "icon",
+            "capabilities": [
+              "onoff"
+            ]
+          },
+          {
+            "id": "toggle",
+            "capabilities": [
+              "onoff"
+            ]
+          }
+        ]
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_plugs"
+          }
+        },
+        {
+          "id": "add_plugs",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "General settings",
+            "nl": "Algemene instellingen"
+          },
+          "children": [
+            {
+              "id": "settingIPAddress",
+              "type": "text",
+              "label": {
+                "en": "IP address",
+                "nl": "IP adres"
+              },
+              "value": "0.0.0.0"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "collapsed": "true",
+          "label": {
+            "en": "Optional connection setting",
+            "nl": "Optionele verbindingsinstelling"
+          },
+          "children": [
+            {
+              "id": "dynamicIp",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Enable if your TP-Link device uses a dynamically assigned IP address (optional):",
+                "nl": "Selecteer als het TP-Link apparaat een dynamisch toegewezen IP adres gebruikt (optioneel):"
+              },
+              "hint": {
+                "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hs220",
+      "name": {
+        "en": "HS220 dimmer",
+        "nl": "HS220 dimmer"
+      },
+      "icon": "{{driverAssetsPath}}/icon.svg",
+      "images": {
+        "large": "drivers/hs220/assets/images/large.jpg",
+        "small": "drivers/hs220/assets/images/small.jpg"
+      },
+      "class": "socket",
+      "capabilities": [
+        "onoff",
+        "ledonoff",
+        "dim"
       ],
       "mobile": {
         "components": [
@@ -1481,7 +1576,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|hs210|kp115|kp105"
+            "filter": "driver_id=hs100|hs110|hs200|hs210|hs220|kp115|kp105"
           }
         ]
       },
@@ -1499,7 +1594,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|hs210|kp115|kp105"
+            "filter": "driver_id=hs100|hs110|hs200|hs210|hs220|kp115|kp105"
           }
         ]
       },
@@ -1517,7 +1612,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs110|hs200|hs210|kp115"
+            "filter": "driver_id=hs110|hs200|hs210|hs220|kp115"
           }
         ]
       },
@@ -1535,7 +1630,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs110|hs200|hs210|kp115"
+            "filter": "driver_id=hs110|hs200|hs210|hs220|kp115"
           }
         ]
       },
@@ -1628,6 +1723,26 @@
             "name": "device",
             "type": "device",
             "filter": "driver_id=lb120|lb130"
+          }
+        ]
+      },
+      {
+        "id": "set_brightness",
+        "title": {
+          "en": "Set Brightness"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=hs220"
+          },
+          {
+            "name": "brightness",
+            "type": "number",
+            "placeholder": {
+              "en": "Enter brightness (0-100)"
+            }
           }
         ]
       }
