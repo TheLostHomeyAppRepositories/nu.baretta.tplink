@@ -2,22 +2,33 @@
 
 	Homey.setTitle( __('pair.start.title') );
 
-Homey.on('error', function( errortype, callback ){
+	Homey.on('error', function(errortype, callback) {
+    let errorMessage;
 
-	if (errortype == 'error') {
-		Homey.alert(__('pair.start.error'), 'error');
-		Homey.done();
-	}
+    switch(errortype) {
+        case 'error':
+            errorMessage = __('pair.start.error');
+            break;
+        case 'nosettings':
+            errorMessage = __('pair.start.nosettings');
+            break;
+        case 'session_not_found': // Add a case for 'session_not_found' or similar if relevant
+            errorMessage = __('pair.start.session_not_found');
+            break;
+        default:
+            errorMessage = __('pair.start.unknown_error'); // Handle unknown errors
+            break;
+    }
 
-	if (errortype == 'nosettings') {
-		Homey.alert(__('pair.start.nosettings'), 'error');
-		Homey.done();
-	}
-})
+    if (errorMessage) {
+        Homey.alert(errorMessage, 'error');
+        Homey.done();
+    }
+});
 
 Homey.on('continue', function( success, callback ){
 		Homey.showView('list_devices');
-})
+});
 
 $('#startdiscovery').on('click', function() {
         
