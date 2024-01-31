@@ -52,5 +52,8 @@
   },
   "0.2.3": {
     "en": "Attempt to add HS220 Dimmer"
+  },
+  "0.2.4": {
+    "en": "Attempt do add KS230 3-way dimmer"
   }
 }
