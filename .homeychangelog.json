@@ -49,5 +49,8 @@
   },
   "0.2.2": {
     "en": "Added support for HS210 - 3way"
+  },
+  "0.2.3": {
+    "en": "Attempt to add HS220 Dimmer"
   }
 }
