@@ -277,7 +277,7 @@ async ledOff(device) {
                         this.log("DeviceId added: " + settings["deviceId"])
                     }
 
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220") {
+                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230") {
                         oldpowerState = this.getCapabilityValue('measure_power');
                         oldtotalState = this.getCapabilityValue('meter_power');
                         oldvoltageState = this.getCapabilityValue('measure_voltage');
@@ -298,7 +298,7 @@ async ledOff(device) {
                     }
 
                     // update realtime data only in case it changed
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220") {
+                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230") {
                         if (oldtotalState != corrected_total) {
                             this.log("Total - Offset: " + corrected_total);
                             this.setCapabilityValue('meter_power', corrected_total)
