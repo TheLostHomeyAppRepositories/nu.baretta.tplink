@@ -55,5 +55,8 @@
   },
   "0.2.4": {
     "en": "Attempt do add KS230 3-way dimmer"
+  },
+  "0.2.5": {
+    "en": "Re-Added registerRunListener (error since SDK3 migration), fixes for Reset meter/Undo reset meter functionality, cleanups"
   }
 }
