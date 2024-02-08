@@ -1824,7 +1824,12 @@
       {
         "id": "set_brightness",
         "title": {
-          "en": "Set Brightness"
+          "en": "Set Brightness",
+          "nl": "Stel Helderheid in"
+        },
+        "titleFormatted": {
+          "en": "Set Brightness to [[brightness]]%",
+          "nl": "Stel Helderheid in op [[brightness]]%"
         },
         "args": [
           {
@@ -1836,11 +1841,12 @@
             "name": "brightness",
             "type": "number",
             "placeholder": {
-              "en": "Enter brightness (0-100)"
+              "en": "Enter brightness (0-100)",
+              "nl": "Voer helderheid in (0-100)"
             }
           }
         ]
-      }
+      }      
     ]
   }
 }

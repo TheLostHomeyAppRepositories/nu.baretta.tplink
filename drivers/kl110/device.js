@@ -78,35 +78,25 @@ class TPlinkBulbDevice extends Homey.Device {
 
         // register flow card actions
 
-        let circadianModeOn = this.homey.flow.getActionCard('circadianModeOn');
-        
-        let circadianModeOff = this.homey.flow.getActionCard('circadianModeOff');
-        
-        let transitionOn = this.homey.flow.getActionCard('transitionOn');
-        
-        let transitionOff = this.homey.flow.getActionCard('transitionOff');
-        
-        /*
-        let meterResetAction = this.homey.flow.getActionCard('meter_reset');
-        meterResetAction
-            .register().registerRunListener(async (args, state) => {
-                let settings = await args.device.getSettings();
-                let device = settings["settingIPAddress"];
-                let totalOffset = settings["totalOffset"];
-                this.log("Flow card reset meter");
-                this.meter_reset(device);
-                return Promise.resolve(true);
-            });
+  		this.homey.flow.getActionCard('circadianModeOn').registerRunListener(async (args, state) => {
+			return args.device.circadianModeOn(args.device.getSettings().settingIPAddress);
+		});
 
-        let undoMeterResetAction = this.homey.flow.getActionCard('undo_meter_reset');
-        undoMeterResetAction
-            .register().registerRunListener(async (args, state) => {
-                let settings = this.getSettings();
-                let device = settings["settingIPAddress"];
-                this.log("Flow card undo reset meter");
-                this.undo_meter_reset(device);
-                return Promise.resolve(true);
-            }); */
+		this.homey.flow.getActionCard('circadianModeOff').registerRunListener(async (args, state) => {
+			return args.device.circadianModeOff(args.device.getSettings().settingIPAddress);
+		});
+
+		this.homey.flow.getActionCard('transitionOn').registerRunListener(async (args, state) => {
+			var transition = args.transition * 1000;
+			return args.device.onTransition(args.device.getSettings().settingIPAddress, transition);
+		});
+
+		this.homey.flow.getActionCard('transitionOff').registerRunListener(async (args, state) => {
+			var transition = args.transition * 1000;
+			return args.device.offTransition(args.device.getSettings().settingIPAddress, transition);
+		});
+        
+
 
     } // end onInit
 
@@ -398,48 +388,7 @@ async offTransition(device, transition) {
 }
 
 
-    /*
-    getPower(device) {
-        this.bulb = client.getBulb({
-            host: device
-        });
-        this.bulb.getSysInfo().then((sysInfo) => {
-                if (sysInfo.relay_state === 1) {
-                    this.log('Relay state on ');
-                    return(null, true);
-                } else {
-                    this.log('Relay state off ');
-                    return(null, false);
-                }
-            })
-            .catch((err) => {
-                this.log("Caught error in getPower function: " + err.message);
-            });
-    }
 
-    meter_reset(device) {
-        this.log('Reset meter ');
-        this.bulb = client.getBulb({
-            host: device
-        });
-        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-        // this.bulb.emeter.eraseStats(null);
-        this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
-        totalOffset = oldtotalState;
-        this.setSettings({
-            totalOffset: totalOffset
-        }).catch(this.error);
-    }
-
-    undo_meter_reset(device) {
-        this.log('Undo reset meter, setting totalOffset to 0 ');
-        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-        totalOffset = 0;
-        this.setSettings({
-            totalOffset: totalOffset
-        }).catch(this.error);
-    }
-*/
 
     async getStatus() {
         let settings = this.getSettings();

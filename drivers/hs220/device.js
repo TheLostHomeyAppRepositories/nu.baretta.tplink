@@ -58,9 +58,13 @@ class TPlinkPlugDevice extends Homey.Device {
 
         // register flow card actions
 
-        let ledOnAction = this.homey.flow.getActionCard('ledOn');
+        this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
+            return args.device.ledOn(args.device.getSettings().settingIPAddress);
+        });
         
-        let ledOffAction = this.homey.flow.getActionCard('ledOff');
+        this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
+            return args.device.ledOff(args.device.getSettings().settingIPAddress);
+        });
 
         let setBrightnessAction = this.homey.flow.getActionCard('set_brightness');
         setBrightnessAction.registerRunListener(async (args, state) => {
@@ -186,15 +190,14 @@ async setBrightness(device, brightness) {
 }
 
     getPower(device) {
-        this.plug = client.getPlug({
-            host: device
-        });
+		const sysInfo = client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         this.plug.getSysInfo().then((sysInfo) => {
                 if (sysInfo.relay_state === 1) {
-                    this.log('Relay state on ');
+                    this.log('Relay state is on ');
                     return(null, true);
                 } else {
-                    this.log('Relay state off ');
+                    this.log('Relay state is off ');
                     return(null, false);
                 }
             })
@@ -204,9 +207,8 @@ async setBrightness(device, brightness) {
     }
 
     getLed(device) {
-        this.plug = client.getPlug({
-            host: device
-        });
+		const sysInfo = client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         this.plug.getSysInfo().then((sysInfo) => {
                 if (sysInfo.led_off === 0) {
                     this.log('LED on ');
@@ -295,11 +297,11 @@ async onCapabilityDim(value, opts) {
                     }
 
                     if (data.sysInfo.relay_state === 1) {
-                        this.log('Relay state on ');
+                        this.log('Relay state is on ');
                         this.setCapabilityValue('onoff', true)
                             .catch(this.error);
                     } else {
-                        this.log('Relay state off ');
+                        this.log('Relay state is off ');
                         this.setCapabilityValue('onoff', false)
                             .catch(this.error);
                     }

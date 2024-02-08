@@ -56,19 +56,25 @@ class TPlinkPlugDevice extends Homey.Device {
         this.registerCapabilityListener('onoff', this.onCapabilityOnoff.bind(this));
         // actually quite useless to have the 'ledonoff' function in the mobile interface...
         this.registerCapabilityListener('ledonoff', this.onCapabilityLedOnoff.bind(this));
+        
+        // Register flow card action listeners
+        this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
+            return args.device.ledOn(args.device.getSettings().settingIPAddress);
+        });
+        
+        this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
+            return args.device.ledOff(args.device.getSettings().settingIPAddress);
+        });
+    
+        this.homey.flow.getActionCard('meter_reset').registerRunListener(async (args, state) => {
+            return args.device.meter_reset(args.device.getSettings().settingIPAddress);
+        });
 
-        // flow conditions - default for "socket"
+        this.homey.flow.getActionCard('undo_meter_reset').registerRunListener(async (args, state) => {
+            return args.device.undo_meter_reset(args.device.getSettings().settingIPAddress);
+        });
 
-        // register flow card actions
-        let ledOnAction = this.homey.flow.getActionCard('ledOn');
-
-        let ledOffAction = this.homey.flow.getActionCard('ledOff');
-
-        let meterResetAction = this.homey.flow.getActionCard('meter_reset');
-
-        let undoMeterResetAction = this.homey.flow.getActionCard('undo_meter_reset');
-
-    } // end onInit
+    } // end onInit    
 
     onAdded() {
         let id = this.getData().id;
@@ -168,15 +174,14 @@ async powerOff(device) {
 }
 
     getPower(device) {
-        this.plug = client.getPlug({
-            host: device
-        });
+		const sysInfo = client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         this.plug.getSysInfo().then((sysInfo) => {
                 if (sysInfo.relay_state === 1) {
-                    this.log('Relay state on ');
+                    this.log('Relay state is on ');
 			return "true";	
                 } else {
-                    this.log('Relay state off ');
+                    this.log('Relay state is off ');
 			return "false";
                 }
             })
@@ -186,9 +191,8 @@ async powerOff(device) {
     }
 
     getLed(device) {
-        this.plug = client.getPlug({
-            host: device
-        });
+		const sysInfo = client.getSysInfo(device);
+				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         this.plug.getSysInfo().then((sysInfo) => {
                 if (sysInfo.led_off === 0) {
                     this.log('LED on ');
@@ -234,9 +238,8 @@ async ledOff(device) {
 
     meter_reset(device) {
         this.log('Reset meter ');
-        this.plug = client.getPlug({
-            host: device
-        });
+        const sysInfo = client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         // reset meter for counters in Kasa app. Does not actually clear the total counter though...
         // this.plug.emeter.eraseStats(null);
         this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
@@ -258,7 +261,7 @@ async ledOff(device) {
     async getStatus() {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
-	let TPlinkModel = getDriverName().toUpperCase();
+	    let TPlinkModel = getDriverName().toUpperCase();
         this.log("getStatus device: " + device);
 
         try {
@@ -291,11 +294,11 @@ async ledOff(device) {
                     }
 
                     if (data.sysInfo.relay_state === 1) {
-                        this.log('Relay state on ');
+                        this.log('Relay state is on ');
                         this.setCapabilityValue('onoff', true)
                             .catch(this.error);
                     } else {
-                        this.log('Relay state off ');
+                        this.log('Relay state is off ');
                         this.setCapabilityValue('onoff', false)
                             .catch(this.error);
                     }
