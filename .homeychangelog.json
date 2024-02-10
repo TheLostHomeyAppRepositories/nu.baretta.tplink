@@ -58,5 +58,8 @@
   },
   "0.2.5": {
     "en": "Re-Added registerRunListener (error since SDK3 migration), fixes for Reset meter/Undo reset meter functionality, cleanups"
+  },
+  "0.2.6": {
+    "en": "drivers sync, attempt to fix some crashes"
   }
 }
