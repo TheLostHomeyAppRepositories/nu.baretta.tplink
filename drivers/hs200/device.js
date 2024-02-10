@@ -9,7 +9,7 @@ const client = new Client();
 function getDriverName() {
     var parts = __dirname.replace(/\\/g, '/').split('/');
     return parts[parts.length - 1].split('.')[0];
-}
+};
 
 var oldpowerState = "";
 var oldtotalState = 0;
@@ -18,11 +18,13 @@ var oldvoltageState = 0;
 var oldcurrentState = 0;
 var unreachableCount = 0;
 var discoverCount = 0;
-var util = require('util')
+var util = require('util');
+var TPlinkModel = getDriverName().toUpperCase();
+
 
 class TPlinkPlugDevice extends Homey.Device {
 
-    async onInit() {
+  async onInit() {
         this.log('device init');
         let device = this;
         var interval = 10;
@@ -31,7 +33,6 @@ class TPlinkPlugDevice extends Homey.Device {
         // console.dir(this.getData()); // for debugging
         let settings = this.getSettings();
         let id = this.getData().id;
-        let TPlinkModel = getDriverName().toUpperCase();
         this.log('id: ', id);
         this.log('name: ', this.getName());
         this.log('class: ', this.getClass());
@@ -55,11 +56,8 @@ class TPlinkPlugDevice extends Homey.Device {
         this.registerCapabilityListener('onoff', this.onCapabilityOnoff.bind(this));
         // actually quite useless to have the 'ledonoff' function in the mobile interface...
         this.registerCapabilityListener('ledonoff', this.onCapabilityLedOnoff.bind(this));
-
-        // flow conditions - default for "socket"
-
-        // register flow card actions
-
+        
+        // Register flow card action listeners
         this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
             return args.device.ledOn(args.device.getSettings().settingIPAddress);
         });
@@ -75,8 +73,8 @@ class TPlinkPlugDevice extends Homey.Device {
         this.homey.flow.getActionCard('undo_meter_reset').registerRunListener(async (args, state) => {
             return args.device.undo_meter_reset(args.device.getSettings().settingIPAddress);
         });
-        
-    } // end onInit
+
+    } // end onInit    
 
     onAdded() {
         let id = this.getData().id;
@@ -106,7 +104,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.powerOff(device);
         }
         // Then, emit a callback ( err, result )
-        return(null);
+     		return(null);
     }
 
     async onCapabilityLedOnoff(value, opts, callback) {
@@ -120,7 +118,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.ledOff(device);
         }
         // Then, emit a callback ( err, result )
-        return(null);
+  		return "null";
     }
 
     // start functions
@@ -144,9 +142,9 @@ class TPlinkPlugDevice extends Homey.Device {
                         break;
                 }
             }
-            return(null, true)
+			return "true";
         } catch (error) {
-            return "error";
+ 			return "error";
         }
     }
 
@@ -181,10 +179,10 @@ async powerOff(device) {
         this.plug.getSysInfo().then((sysInfo) => {
                 if (sysInfo.relay_state === 1) {
                     this.log('Relay state is on ');
-                    return(null, true);
+			return "true";	
                 } else {
                     this.log('Relay state is off ');
-                    return(null, false);
+			return "false";
                 }
             })
             .catch((err) => {
@@ -201,7 +199,7 @@ async powerOff(device) {
                     return "true";
                 } else {
                     this.log('LED off ');
-                    return false;
+                    return "false";
                 }
             })
             .catch((err) => {
@@ -240,8 +238,8 @@ async ledOff(device) {
 
     meter_reset(device) {
         this.log('Reset meter ');
-		const sysInfo = client.getSysInfo(device);
-				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
+        const sysInfo = client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
         // reset meter for counters in Kasa app. Does not actually clear the total counter though...
         // this.plug.emeter.eraseStats(null);
         this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
@@ -263,15 +261,18 @@ async ledOff(device) {
     async getStatus() {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
-        let TPlinkModel = getDriverName().toUpperCase();
+	    let TPlinkModel = getDriverName().toUpperCase();
         this.log("getStatus device: " + device);
 
         try {
-            this.plug = await client.getPlug({
-                host: device
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({
+                host: device,  sysInfo: sysInfo
             });
 
-            await this.plug.getInfo().then((data) => {
+            this.plug.getInfo().catch((err) => {
+                this.log("Error getting plug info: " + err.message);
+            }).then((data) => {
                     //this.log("DeviceID: " + settings["deviceId"]);
                     //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
 

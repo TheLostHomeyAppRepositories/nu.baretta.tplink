@@ -147,7 +147,7 @@ class TPlinkPlugDevice extends Homey.Device {
                         break;
                 }
             }
-            return(null, true)
+            return "true";
         } catch (error) {
             return "error";
         }
@@ -271,11 +271,14 @@ async onCapabilityDim(value, opts) {
         this.log("getStatus device: " + device);
 
         try {
-            this.plug = await client.getPlug({
-                host: device
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({
+                host: device,  sysInfo: sysInfo
             });
 
-            await this.plug.getInfo().then((data) => {
+            this.plug.getInfo().catch((err) => {
+                this.log("Error getting plug info: " + err.message);
+            }).then((data) => {
                     //this.log("DeviceID: " + settings["deviceId"]);
                     //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
 

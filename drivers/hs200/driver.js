@@ -57,8 +57,8 @@ class TPlinkPlugDriver extends Homey.Driver {
         }];
 
         // discover function
-        session.setHandler("discover", async (data) => { 
-            this.log('Starting Plug Discovery');
+	session.setHandler("discover", async (data) => {       
+     this.log('Starting Plug Discovery');
 
             // discover new plugs
             // TODO: use API's discovery options (exclude MAC addresses, timeout, interval)
@@ -88,7 +88,7 @@ class TPlinkPlugDriver extends Homey.Driver {
                             client.stopDiscovery()
                         }, 1000);
                         this.log("Discovered new plug: " + data.id + " name " + data.name);
-                        return "data";
+			return "data";
                     }
                 }
             })
@@ -117,7 +117,7 @@ class TPlinkPlugDriver extends Homey.Driver {
         });
 
         // this is called when the user presses save settings button in start.html
-        session.setHandler("get_devices", async (data) => {
+ 		session.setHandler("get_devices", async (data) => {
             this.log("Get_devices data: " + JSON.stringify(data));
             devices = [{
                 data: {
@@ -138,15 +138,14 @@ class TPlinkPlugDriver extends Homey.Driver {
             // this method is run when Homey.emit('list_devices') is run on the front-end
             // which happens when you use the template `list_devices`
 
-            session.setHandler('list_devices', (data, callback) => {
-
+     session.setHandler("list_devices", async (data) => {
                 this.log("List_devices data: " + JSON.stringify(data));
 
-                return devices;
+		return devices;
             });
         });
 
-        session.setHandler("disconnect", () => {
+	session.setHandler("disconnect", () => {
             this.log("Pairing is finished (done or aborted)");
         })
     }

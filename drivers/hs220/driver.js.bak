@@ -135,7 +135,7 @@ class TPlinkPlugDriver extends Homey.Driver {
             // this method is run when Homey.emit('list_devices') is run on the front-end
             // which happens when you use the template `list_devices`
 
-           session.setHandler("list_devices", async (data) => {
+            session.setHandler('list_devices', (data, callback) => {
 
                 this.log("List_devices data: " + JSON.stringify(data));
 
