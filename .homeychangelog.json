@@ -61,5 +61,8 @@
   },
   "0.2.6": {
     "en": "drivers sync, attempt to fix some crashes"
+  },
+  "0.2.7": {
+    "en": "Fixes for bulbs"
   }
 }
