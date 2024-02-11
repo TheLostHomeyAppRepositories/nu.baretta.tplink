@@ -78,24 +78,24 @@ class TPlinkBulbDevice extends Homey.Device {
 
         // register flow card actions
 
-        this.homey.flow.getActionCard('circadianModeOn').registerRunListener(async (args, state) => {
+  		this.homey.flow.getActionCard('circadianModeOn').registerRunListener(async (args, state) => {
 			return args.device.circadianModeOn(args.device.getSettings().settingIPAddress);
 		});
 
-       
-        this.homey.flow.getActionCard('circadianModeOff').registerRunListener(async (args, state) => {
+		this.homey.flow.getActionCard('circadianModeOff').registerRunListener(async (args, state) => {
 			return args.device.circadianModeOff(args.device.getSettings().settingIPAddress);
-       
-        this.homey.flow.getActionCard('transitionOn').registerRunListener(async (args, state) => {
+		});
+
+		this.homey.flow.getActionCard('transitionOn').registerRunListener(async (args, state) => {
 			var transition = args.transition * 1000;
 			return args.device.onTransition(args.device.getSettings().settingIPAddress, transition);
 		});
-       
-        this.homey.flow.getActionCard('transitionOn').registerRunListener(async (args, state) => {
+
+		this.homey.flow.getActionCard('transitionOff').registerRunListener(async (args, state) => {
 			var transition = args.transition * 1000;
-			return args.device.onTransition(args.device.getSettings().settingIPAddress, transition);
+			return args.device.offTransition(args.device.getSettings().settingIPAddress, transition);
 		});
-       
+        
 
 
     } // end onInit

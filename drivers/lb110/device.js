@@ -95,7 +95,7 @@ class TPlinkBulbDevice extends Homey.Device {
 			var transition = args.transition * 1000;
 			return args.device.offTransition(args.device.getSettings().settingIPAddress, transition);
 		});
-       
+        
 
 
     } // end onInit
