@@ -64,5 +64,8 @@
   },
   "0.2.7": {
     "en": "Fixes for bulbs"
+  },
+  "0.2.8": {
+    "en": "Rework of discovery mechanism, pairing view, allow addition of multiple devices and added HS300(US) multisocket"
   }
 }
