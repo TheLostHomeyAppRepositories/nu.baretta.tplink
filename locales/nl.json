@@ -5,6 +5,7 @@
                   "name": "Naam",
                   "title": "Apparaat zoeken...",
                   "error": "Er is een fout opgetreden.",
+				  "nodevice": "Ontdekking mislukt.",
                   "nosettings": "Instellingen ontbreken",
                   "required": "IP adres moet ingevuld zijn.",
                   "ipAddress": "IP adres",
@@ -13,7 +14,7 @@
                   "optional": "De volgende setting is optioneel:",
                   "totalOffset": "Correctie van totaal stroomverbruik",
                   "saveSettings": "Gegevens opslaan",
-                  "discovery": "Zoeken naar nieuwe smart plugs... een moment geduld a.u.b. Zorg dat de smart plug in het stopcontact zit en online is (de LED op de plug is groen). Mocht de gevonden plug al bekend zijn in Homey, click dan nog een keer op de 'Automatisch zoeken' knop.",
+                  "discovery": "Zoeken naar nieuwe apparaten, een moment geduld alstublieft... Zorg ervoor dat de slimme stekker is aangesloten en online is (het LED-lampje is continu groen). Ontdekte apparaten worden hieronder vermeld:",
                   "startdiscovery": "Automatisch zoeken"
             }
       }

@@ -5,6 +5,7 @@
                         "name": "Name",
                         "title": "Finding device...",
                         "error": "An error has occurred.",
+						"nodevice": "Discovery unsuccessful.",
                         "nosettings": "Settings are missing.",
                         "required": "IP address is a required value.",
                         "ipAddress": "IP address",
@@ -13,7 +14,7 @@
                         "optional": "The following setting is optional:",
                         "totalOffset": "Correction of total power usage",
                         "saveSettings": "Save settings",
-                        "discovery": "Searching for new devices, one moment please... Make sure the smart plug is plugged in and online (the LED is solid green). If the device found is already known by Homey, just click the button again.",
+                        "discovery": "Searching for new devices, one moment please... Make sure the smart plug is plugged in and online (the LED is solid green). Discovered devices will be listed below :",
                         "startdiscovery": "Start discovery"
                 }
         }
