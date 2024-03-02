@@ -7,7 +7,7 @@ const {
 } = require('tplink-smarthome-api');
 const client = new Client();
 
-// get driver name based on dirname (hs100, hs110, etc.)
+// get driver name based on dirname
 function getDriverName() {
     var parts = __dirname.replace(/\\/g, '/').split('/');
     return parts[parts.length - 1].split('.')[0];

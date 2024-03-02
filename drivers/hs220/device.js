@@ -3,7 +3,7 @@ const Homey = require('homey');
 const { Client } = require('tplink-smarthome-api');
 const client = new Client();
 
-// get driver name based on dirname (hs100, hs110, etc.)
+// get driver name based on dirname
 function getDriverName() {
     var parts = __dirname.replace(/\\/g, '/').split('/');
     return parts[parts.length - 1].split('.')[0];
@@ -289,7 +289,7 @@ async onCapabilityDim(value, opts) {
                         this.log("DeviceId added: " + settings["deviceId"])
                     }
 
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "HS300") {
+                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "KP405") {
                         oldpowerState = this.getCapabilityValue('measure_power');
                         oldtotalState = this.getCapabilityValue('meter_power');
                         oldvoltageState = this.getCapabilityValue('measure_voltage');
@@ -310,7 +310,7 @@ async onCapabilityDim(value, opts) {
                     }
 
                     // update realtime data only in case it changed
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "HS300") {
+                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "KP405") {
                         if (oldtotalState != corrected_total) {
                             this.log("Total - Offset: " + corrected_total);
                             this.setCapabilityValue('meter_power', corrected_total)
