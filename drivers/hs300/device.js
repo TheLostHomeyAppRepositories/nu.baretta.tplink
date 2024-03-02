@@ -91,7 +91,7 @@ class TPlinkPlugDevice extends Homey.Device {
     onAdded() {
         let id = this.getData().id;
         let childId = this.getData().childId; // Retrieve the childId for the socket
-        this.log("Device added: " + id + ", Socket ID: " + childId);
+        this.log("Device added: " + id + ", Child ID: " + childId);
 
         let settings = this.getSettings();
         var interval = 10;
@@ -106,17 +106,17 @@ class TPlinkPlugDevice extends Homey.Device {
         let id = this.getData().id;
         let childId = this.getData().childId; // Retrieve the childId for the socket
 
-        this.log("Device deleted: " + id + ", Socket ID: " + childId);
+        this.log("Device deleted: " + id + ", Child ID: " + childId);
 
         clearInterval(this.pollingInterval);
     }
 
 
     async onCapabilityOnoff(value, opts) {
-        this.log("Capability called: onoff value: ", value);
         let settings = this.getSettings();
         let device = settings["settingIPAddress"];
         let childId = this.getData().childId; // Retrieve the childId for the socket
+        this.log("Capability called: onoff value: ", value, "for ChildID ", childId);
     
         try {
             if (value) {
@@ -131,22 +131,14 @@ class TPlinkPlugDevice extends Homey.Device {
     }
     
 
-    async onCapabilityLedOnoff(value, opts) {
-        this.log("Capability called: LED onoff value: ", value);
-        
+    async onCapabilityLedOnoff(value, opts) {       
         let childId = this.getData().childId; // Get the childId
         let device = this.getSettings().settingIPAddress;
+        this.log("Capability called: LED onoff value: ", value,"for ChildID ", childId);
         
         if (childId) {
             // If childId is present, control the LED of the specific socket on the HS300
             await this.ledOnOffSocket(device, childId, value);
-        } else {
-            // Fallback for single outlet devices (if used for other models)
-            if (value) {
-                await this.ledOn(device);
-            } else {
-                await this.ledOff(device);
-            }
         }
     }
     
@@ -180,15 +172,15 @@ class TPlinkPlugDevice extends Homey.Device {
 
     async powerOn(device, childId) {
         try {
-            this.log('Turning on device: ' + device + ', Socket ID: ' + childId);
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            if (childId) {
-                // Code to turn on the specific outlet using childId
-            } else {
-                // Code to turn on a single-outlet device or the entire multi-outlet device
-                await this.plug.setPowerState(true);
-            }
+            this.log('Turning on device: ' + device + ', Child ID: ' + childId);
+            // await this.plug.setPowerState(true, { childId: childId });
+                 // Send command directly with childId context
+        await this.plug.sendCommand(
+            `{"system":{"set_relay_state":{"state":1}}}`, // Command to turn on the device
+            childId // Context with childId
+        );
         } catch (err) {
             this.log('Error turning device on: ', err.message);
             throw err;
@@ -197,15 +189,15 @@ class TPlinkPlugDevice extends Homey.Device {
     
     async powerOff(device, childId) {
         try {
-            this.log('Turning on device: ' + device + ', Socket ID: ' + childId);
+            this.log('Turning on device: ' + device + ', Child ID: ' + childId);
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            if (childId) {
-                // Code to turn on the specific outlet using childId
-            } else {
-                // Code to turn on a single-outlet device or the entire multi-outlet device
-                await this.plug.setPowerState(false);
-            }
+            //await this.plug.setPowerState(false, { childId: childId });
+                 // Send command directly with childId context
+        await this.plug.sendCommand(
+            `{"system":{"set_relay_state":{"state":0}}}`, // Command to turn on the device
+            childId // Context with childId
+        );
         } catch (err) {
             this.log('Error turning device off: ', err.message);
             throw err;
@@ -229,17 +221,13 @@ class TPlinkPlugDevice extends Homey.Device {
                     this.log('Child socket not found for childId: ', childId);
                     return "false";
                 }
-            } else {
-                // For single-socket devices or if no childId is present
-                this.log('Relay state is ' + (sysInfo.relay_state === 1 ? 'on' : 'off'));
-                return sysInfo.relay_state === 1 ? "true" : "false";
             }
         } catch (err) {
             this.log("Caught error in getPower function: " + err.message);
             return "error";
         }
     }
-    
+   //REWORK !!! -  
     getLed(device) {
         const sysInfo = client.getSysInfo(device);
         this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
@@ -271,7 +259,6 @@ class TPlinkPlugDevice extends Homey.Device {
         }
     }
 
-
     async ledOff(device) {
         try {
             this.log('Turning LED off for device ' + device);
@@ -284,8 +271,7 @@ class TPlinkPlugDevice extends Homey.Device {
             // Handle the error appropriately
         }
     }
-
-        //REWORK !!! - https://plasticrake.github.io/tplink-smarthome-api/classes/Emeter.html
+       
         meter_reset(device) {
             this.log('Reset meter ');
             const sysInfo = client.getSysInfo(device);
@@ -299,7 +285,6 @@ class TPlinkPlugDevice extends Homey.Device {
             }).catch(this.error);
         }
 
-        //REWORK !!! - https://plasticrake.github.io/tplink-smarthome-api/classes/Emeter.html
         undo_meter_reset(device) {
             this.log('Undo reset meter, setting totalOffset to 0 ');
             // reset meter for counters in Kasa app. Does not actually clear the total counter though...
@@ -325,7 +310,7 @@ class TPlinkPlugDevice extends Homey.Device {
                     const childSocket = sysInfo.children.find(child => child.id === childId);
                     const relayState = childSocket ? childSocket.state === 1 : false;
                     this.setCapabilityValue('onoff', relayState).catch(this.error);
-                    this.log('Relay state for socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
+                    this.log('Relay state for child socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
         
                     // Fetch and update real-time data for the specific socket
                     const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
@@ -334,7 +319,7 @@ class TPlinkPlugDevice extends Homey.Device {
                         this.setCapabilityValue('measure_power', realtimeStats.power || 0).catch(this.error);
                         this.setCapabilityValue('measure_voltage', realtimeStats.voltage || 0).catch(this.error);
                         this.setCapabilityValue('measure_current', realtimeStats.current || 0).catch(this.error);
-                        this.log('Updated real-time stats for socket ' + childId);
+                        this.log('Updated real-time stats for child socket ' + childId);
                     }
                 } else {
                     this.log('Child ID not found for socket');
@@ -373,13 +358,14 @@ class TPlinkPlugDevice extends Homey.Device {
                     this.getStatus(childId);
                 } else {
                     // For single-socket devices or parent device of multi-socket models
-                    this.getStatus();
+                    // this.getStatus();
                 }
             } catch (err) {
                 this.log("Error in polling: " + err.message);
             }
         }, 1000 * interval);
     }
+
 
     discover() {
         let settings = this.getSettings();

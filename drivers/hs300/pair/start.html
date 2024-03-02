@@ -72,7 +72,8 @@
 		} else {
 			// variables
 			var inputIPAddress = document.getElementById('ipAddress').value;
-			var inputDeviceName = document.getElementById('deviceName').value;
+			//var inputDeviceName = document.getElementById('deviceName').value;
+			var inputDeviceName = "HS300dummy";
 
 			// If required values are filled in
 			// create Regular Expression that validates for IPv4 addresses, then do the actual test on the input.
@@ -132,8 +133,8 @@
 			<td><input id="ipAddress" type="text" value="" placeholder="192.168.1.10" /></td>
 		</tr>
 		<tr>
-			<td style="width:100px;"><span data-i18n="pair.start.deviceName"></span></td>
-			<td><input id="deviceName" type="text" value="" placeholder="TP-Link Device" /></td>
+	<!--		<td style="width:100px;"><span data-i18n="pair.start.deviceName"></span></td>
+			<td><input id="deviceName" type="text" value="" placeholder="TP-Link Device" /></td>-->
 		</tr>
 	</table>
 </div>

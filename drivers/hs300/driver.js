@@ -57,34 +57,48 @@ class TPlinkPlugDriver extends Homey.Driver {
             } // initial settings
         }];
 
-// discover function
-session.setHandler("discover", async (data) => {
-    
-    client.stopDiscovery();
-    client.removeAllListeners();
-    
-    let discoveredDevicesArray = []; // Initialize an array to store discovered devices
+        // discover function
+        session.setHandler("discover", async (data) => {
 
-    var discoveryOptions = {
-        deviceTypes: 'plug',
-        discoveryInterval: 1500,
-        discoveryTimeout: 2000
-    }
-    client.startDiscovery(discoveryOptions);
-    this.log('Starting Plug Discovery');
-    client.on('plug-new', async (plug) => {
-        logEvent('Found plug-new', plug);
-    
-        if (plug.model.match(myRegEx)) {
-            const sysInfo = await plug.getSysInfo();
-    
-            if (sysInfo.children) {
-                const childrenMap = plug.children; // Get the map of children
-                childrenMap.forEach((child, childId) => {
-                    const childName = child.alias || `Socket ${childId}`;
-    
+            let discoveredDevicesArray = []; // Initialize an array to store discovered devices
+
+            var discoveryOptions = {
+                deviceTypes: 'plug',
+                discoveryInterval: 1500,
+                discoveryTimeout: 2000
+            }
+            client.startDiscovery(discoveryOptions);
+            this.log('Starting Plug Discovery');
+            client.on('plug-new', async (plug) => {
+
+                if (plug.model.match(myRegEx)) {
+                    const sysInfo = await plug.getSysInfo();
+
+                    if (sysInfo.children) {
+                        const childrenMap = plug.children; // Get the map of children
+                        childrenMap.forEach((child, childId) => {
+                            const childName = child.alias || `Socket ${childId}`;
+
+                            if (!discoveredDevicesArray.some(device => device.childId === childId)) {
+                                this.log("New Socket found: " + childName + " in " + plug.host + " id " + childId);
+                                discoveredDevicesArray.push({
+                                    ip: plug.host,
+                                    name: childName,
+                                    deviceId: plug.deviceId,
+                                    childId: childId
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+
+            client.on('plug-online', (plug) => {
+                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
+
                     if (!discoveredDevicesArray.some(device => device.childId === childId)) {
-                        this.log("New Socket found: " + childName + " in " + plug.host + " id " + childId);
+                        this.log("New Socket found online: " + childName + " in " + plug.host + " id " + childId);
                         discoveredDevicesArray.push({
                             ip: plug.host,
                             name: childName,
@@ -92,47 +106,68 @@ session.setHandler("discover", async (data) => {
                             childId: childId
                         });
                     }
-                });
-            }
-        }
-    });
-    
+                }
+            });
 
-    client.on('plug-online', (plug) => {
-        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-            
-            if (!discoveredDevicesArray.some(device => device.childId === childId)) {
-                this.log("New Socket found online: " + childName + " in " + plug.host + " id " + childId);
-                discoveredDevicesArray.push({
-                    ip: plug.host,
-                    name: childName,
-                    deviceId: plug.deviceId,
-                    childId: childId
-                });
-            }
-        }
-    });
-
-    setTimeout(() => {
-        if (discoveredDevicesArray.length > 0) {
-            session.emit('discovered_devices', discoveredDevicesArray); // Emit the array of discovered devices
-            this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
-            return discoveredDevicesArray; // Return the array
-        } else {
-            this.log("No devices discovered");
-            session.emit('discovery_failed', { devicesFound: false });
-            return []; // Return an empty array if no devices were discovered
-        }
-    }, discoveryOptions.discoveryTimeout);
+            setTimeout(() => {
+                if (discoveredDevicesArray.length > 0) {
+                    session.emit('discovered_devices', discoveredDevicesArray); // Emit the array of discovered devices
+                    this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
+                    return discoveredDevicesArray; // Return the array
+                } else {
+                    this.log("No devices discovered");
+                    session.emit('discovery_failed', { devicesFound: false });
+                    return []; // Return an empty array if no devices were discovered
+                }
+            }, discoveryOptions.discoveryTimeout);
             client.stopDiscovery();
-});
+        });
 
         // this is called when the user presses save settings button in start.html
         session.setHandler("get_devices", async (data) => {
-            this.log("Received get_devices data: " + JSON.stringify(data));            
+            this.log("Received get_devices data: " + JSON.stringify(data));
+
+            if (data[0].name === "HS300dummy") {
+                this.log("Processed devices for manual IP");
+                // Manually entered IP, initiate specific discovery
+                let specificDeviceOptions = {
+                    deviceTypes: ['plug'],
+                    devices: [{ host: data[0].ip }]
+                };
+                client.startDiscovery(specificDeviceOptions);
+                
+                client.on('plug-new', async (plug) => {
+                    if (plug.host === data[0].ip && plug.model.match(myRegEx)) {
+                        const sysInfo = await plug.getSysInfo();
+                        if (sysInfo.children) {
+                            let devices = sysInfo.children.map(child => {
+                                let deviceId = guid();
+                                return {
+                                    data: { id: deviceId, childId: child.id },
+                                    name: child.alias || data[0].name,
+                                    settings: {
+                                        "settingIPAddress": plug.host,
+                                        "dynamicIp": false,
+                                        "totalOffset": 0
+                                    }
+                                };
+                            });
         
-            let inputData = Array.isArray(data) ? data : [data];
+                            this.log("Processed devices for manual IP: " + JSON.stringify(devices));
+                            session.emit('continue', null);
         
+                            session.setHandler("list_devices", async () => {
+                                return devices;
+                            });
+                        }
+                    }
+                });
+
+            } else {
+                this.log("Processed devices for autodiscovered devices");
+                // Handle normally for autodiscovered devices
+                let inputData = Array.isArray(data) ? data : [data];
+
             let devices = inputData
                 .filter(device => device.childId) // Filter to include only devices with a childId
                 .map(device => {
@@ -147,10 +182,7 @@ session.setHandler("discover", async (data) => {
                         }
                     };
                 });
-
-        
-
-            // Log and return the processed devices
+                // Log and return the processed devices
             this.log("Processed devices: " + JSON.stringify(devices));
             //            return devices;
 
@@ -167,9 +199,14 @@ session.setHandler("discover", async (data) => {
 
                 return devices;
             });
+            
+            }
+
+            
         });
 
         session.setHandler("disconnect", () => {
+            let discoveredDevicesArray = []; // Initialize an array to store discovered devices
             this.log("Pairing is finished (done or aborted)");
         })
     }
