@@ -68,7 +68,7 @@
       "KP405"
     ]
   },
-  "version": "0.2.8",
+  "version": "0.2.9",
   "compatibility": ">=5.0.0",
   "author": {
     "name": "Bretislav Kubesa",
@@ -538,7 +538,7 @@
         }
       ]
     },
-     {
+    {
       "id": "kp405",
       "name": {
         "en": "KP405",

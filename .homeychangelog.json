@@ -67,5 +67,8 @@
   },
   "0.2.8": {
     "en": "Rework of discovery mechanism, pairing view, allow addition of multiple devices and added HS300(US) multisocket"
+  },
+  "0.2.9": {
+    "en": "Added KP405"
   }
 }
