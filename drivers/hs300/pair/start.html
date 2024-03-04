@@ -66,7 +66,7 @@
 
 
 	function saveSettings() {
-		// Check if manual entry fields are hidden (i.e., devices have been discovered)
+		// Check if devices have been discovered
 		if (discoveredDevices.length > 0) {
 			Homey.emit('get_devices', discoveredDevices);
 		} else {
@@ -100,7 +100,6 @@
 
 				// Give error, required values
 				Homey.alert(__('pair.start.required'), 'error');
-				// Homey.done() closes the pairing window
 				Homey.done();
 
 			}

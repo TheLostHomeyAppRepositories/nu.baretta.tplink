@@ -27,7 +27,7 @@ class TPlinkPlugDevice extends Homey.Device {
     async onInit() {
         this.log('Device initialization');
         let device = this;
-        var interval = 10;
+        var interval = 15;
         let settings = this.getSettings();
         let id = this.getData().id;
         let childId = this.getData().childId; // Retrieve the childId
@@ -61,8 +61,6 @@ class TPlinkPlugDevice extends Homey.Device {
 
         this.registerCapabilityListener('onoff', value => this.onCapabilityOnoff(value, childId));
         this.registerCapabilityListener('ledonoff', value => this.onCapabilityLedOnoff(value, childId));
-
-        this.pollDevice(interval);
 
         // Register flow card action listeners
         this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
@@ -117,7 +115,7 @@ class TPlinkPlugDevice extends Homey.Device {
         let device = settings["settingIPAddress"];
         let childId = this.getData().childId; // Retrieve the childId for the socket
         this.log("Capability called: onoff value: ", value, "for ChildID ", childId);
-    
+
         try {
             if (value) {
                 await this.powerOn(device, childId);
@@ -129,20 +127,20 @@ class TPlinkPlugDevice extends Homey.Device {
             throw err; // Rethrow the error to ensure Homey knows the action failed
         }
     }
-    
 
-    async onCapabilityLedOnoff(value, opts) {       
+
+    async onCapabilityLedOnoff(value, opts) {
         let childId = this.getData().childId; // Get the childId
         let device = this.getSettings().settingIPAddress;
-        this.log("Capability called: LED onoff value: ", value,"for ChildID ", childId);
-        
+        this.log("Capability called: LED onoff value: ", value, "for ChildID ", childId);
+
         if (childId) {
             // If childId is present, control the LED of the specific socket on the HS300
             await this.ledOnOffSocket(device, childId, value);
         }
     }
-    
-// rework needed !!!
+
+    // rework needed !!!
     // start functions
     onSettings(settings, newSettingsObj, changedKeysArr, callback) {
         try {
@@ -176,40 +174,40 @@ class TPlinkPlugDevice extends Homey.Device {
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
             this.log('Turning on device: ' + device + ', Child ID: ' + childId);
             // await this.plug.setPowerState(true, { childId: childId });
-                 // Send command directly with childId context
-        await this.plug.sendCommand(
-            `{"system":{"set_relay_state":{"state":1}}}`, // Command to turn on the device
-            childId // Context with childId
-        );
+            // Send command directly with childId context
+            await this.plug.sendCommand(
+                `{"system":{"set_relay_state":{"state":1}}}`, // Command to turn on the device
+                childId // Context with childId
+            );
         } catch (err) {
             this.log('Error turning device on: ', err.message);
             throw err;
         }
     }
-    
+
     async powerOff(device, childId) {
         try {
             this.log('Turning on device: ' + device + ', Child ID: ' + childId);
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
             //await this.plug.setPowerState(false, { childId: childId });
-                 // Send command directly with childId context
-        await this.plug.sendCommand(
-            `{"system":{"set_relay_state":{"state":0}}}`, // Command to turn on the device
-            childId // Context with childId
-        );
+            // Send command directly with childId context
+            await this.plug.sendCommand(
+                `{"system":{"set_relay_state":{"state":0}}}`, // Command to turn on the device
+                childId // Context with childId
+            );
         } catch (err) {
             this.log('Error turning device off: ', err.message);
             throw err;
         }
     }
-    
+
 
     async getPower(device) {
         try {
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-    
+
             let childId = this.getData().childId; // Get the childId for the socket
             if (childId && sysInfo.children) {
                 // If childId is present and the device has multiple sockets
@@ -227,7 +225,7 @@ class TPlinkPlugDevice extends Homey.Device {
             return "error";
         }
     }
-   //REWORK !!! -  
+    //REWORK !!! -  
     getLed(device) {
         const sysInfo = client.getSysInfo(device);
         this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
@@ -271,85 +269,90 @@ class TPlinkPlugDevice extends Homey.Device {
             // Handle the error appropriately
         }
     }
-       
-        meter_reset(device) {
-            this.log('Reset meter ');
-            const sysInfo = client.getSysInfo(device);
+
+    meter_reset(device) {
+        this.log('Reset meter ');
+        const sysInfo = client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
+        // this.plug.emeter.eraseStats(null);
+        this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
+        totalOffset = oldtotalState;
+        this.setSettings({
+            totalOffset: totalOffset
+        }).catch(this.error);
+    }
+
+    undo_meter_reset(device) {
+        this.log('Undo reset meter, setting totalOffset to 0 ');
+        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
+        totalOffset = 0;
+        this.setSettings({
+            totalOffset: totalOffset
+        }).catch(this.error);
+    }
+
+    async getStatus() {
+        let settings = this.getSettings();
+        let device = settings.settingIPAddress;
+        let childId = this.getData().childId; // Retrieve the childId for the socket
+
+        this.log("getStatus for device: " + device + ", Child ID: " + childId);
+
+        try {
+            const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-            // this.plug.emeter.eraseStats(null);
-            this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
-            totalOffset = oldtotalState;
-            this.setSettings({
-                totalOffset: totalOffset
-            }).catch(this.error);
-        }
 
-        undo_meter_reset(device) {
-            this.log('Undo reset meter, setting totalOffset to 0 ');
-            // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-            totalOffset = 0;
-            this.setSettings({
-                totalOffset: totalOffset
-            }).catch(this.error);
-        }
+            if (childId) {
+                // Fetch the relay state for the specific socket
+                const childSocket = sysInfo.children.find(child => child.id === childId);
+                const relayState = childSocket ? childSocket.state === 1 : false;
+                this.setCapabilityValue('onoff', relayState).catch(this.error);
+                this.log('Relay state for child socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
 
-        async getStatus() {
-            let settings = this.getSettings();
-            let device = settings.settingIPAddress;
-            let childId = this.getData().childId; // Retrieve the childId for the socket
-        
-            this.log("getStatus for device: " + device + ", Child ID: " + childId);
-        
-            try {
-                const sysInfo = await client.getSysInfo(device);
-                this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-        
-                if (childId) {
-                    // Fetch the relay state for the specific socket
-                    const childSocket = sysInfo.children.find(child => child.id === childId);
-                    const relayState = childSocket ? childSocket.state === 1 : false;
-                    this.setCapabilityValue('onoff', relayState).catch(this.error);
-                    this.log('Relay state for child socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
-        
-                    // Fetch and update real-time data for the specific socket
-                    const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
-                    if (realtimeStats) {
-                        // Update capability values based on realtimeStats
-                        this.setCapabilityValue('measure_power', realtimeStats.power || 0).catch(this.error);
-                        this.setCapabilityValue('measure_voltage', realtimeStats.voltage || 0).catch(this.error);
-                        this.setCapabilityValue('measure_current', realtimeStats.current || 0).catch(this.error);
-                        this.log('Updated real-time stats for child socket ' + childId);
-                    }
-                } else {
-                    this.log('Child ID not found for socket');
-                    // Handle scenario where childId is not found or not applicable
+                const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
+                if (realtimeStats) {
+                    const power = realtimeStats.power || 0;
+                    const voltage = realtimeStats.voltage || 0;
+                    const current = realtimeStats.current || 0;
+                    const total = realtimeStats.total || 0;
+
+                    this.setCapabilityValue('measure_power', power).catch(this.error);
+                    this.setCapabilityValue('measure_voltage', voltage).catch(this.error);
+                    this.setCapabilityValue('measure_current', current).catch(this.error);
+                    this.setCapabilityValue('meter_power', total).catch(this.error);
+
+                    this.log('Updated real-time stats for child socket ' + childId);
                 }
-            } catch (err) {
-                var errRegEx = new RegExp("EHOSTUNREACH", 'g');
-                if (err.message.match(errRegEx)) {
-                    unreachableCount += 1;
-                    this.log("Device unreachable. Unreachable count: " + unreachableCount + " Discover count: " + discoverCount + " DynamicIP option: " + settings["dynamicIp"]);
-        
-                    if ((unreachableCount % 360 === 3) && settings["dynamicIp"]) {
-                        this.setUnavailable("Device offline");
-                        discoverCount += 1;
-                        this.log("Unreachable, starting autodiscovery");
-                        this.discover();
-                    }
-                } else {
-                    // Log other errors
-                    this.log("Caught error in getStatus function: " + err.message);
+            } else {
+                this.log('Child ID not found for socket');
+                // Handle scenario where childId is not found or not applicable
+            }
+        } catch (err) {
+            var errRegEx = new RegExp("EHOSTUNREACH", 'g');
+            if (err.message.match(errRegEx)) {
+                unreachableCount += 1;
+                this.log("Device unreachable. Unreachable count: " + unreachableCount + " Discover count: " + discoverCount + " DynamicIP option: " + settings["dynamicIp"]);
+
+                if ((unreachableCount % 360 === 3) && settings["dynamicIp"]) {
+                    this.setUnavailable("Device offline");
+                    discoverCount += 1;
+                    this.log("Unreachable, starting autodiscovery");
+                    this.discover();
                 }
+            } else {
+                // Log other errors
+                this.log("Caught error in getStatus function: " + err.message);
             }
         }
-        
+    }
+
 
     pollDevice(interval) {
         clearInterval(this.pollingInterval);
-    
+
         let childId = this.getData().childId; // Retrieve the childId for the socket
-    
+
         this.pollingInterval = setInterval(() => {
             // Poll status
             try {
@@ -375,18 +378,18 @@ class TPlinkPlugDevice extends Homey.Device {
             discoveryTimeout: 5000,
             offlineTolerance: 3
         };
-    
+
         // Start discovering new plugs
         client.startDiscovery(discoveryOptions);
-        
+
         client.on('plug-new', (plug) => {
             this.log("Discovered new plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
-            
+
             if (plug.deviceId === settings["deviceId"]) {
                 this.setSettings({
                     settingIPAddress: plug.host
                 }).catch(this.error);
-                
+
                 setTimeout(() => client.stopDiscovery(), 1000);
                 this.log("Updated settings for discovered plug: " + plug.deviceId);
                 unreachableCount = 0;
@@ -394,15 +397,15 @@ class TPlinkPlugDevice extends Homey.Device {
                 this.setAvailable();
             }
         });
-    
+
         client.on('plug-online', (plug) => {
             this.log("Discovered online plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
-            
+
             if (plug.deviceId === settings["deviceId"]) {
                 this.setSettings({
                     settingIPAddress: plug.host
                 }).catch(this.error);
-                
+
                 setTimeout(() => client.stopDiscovery(), 1000);
                 this.log("Updated settings for online plug: " + plug.deviceId);
                 unreachableCount = 0;
@@ -411,7 +414,7 @@ class TPlinkPlugDevice extends Homey.Device {
             }
         });
     }
-    
+
 }
 
 module.exports = TPlinkPlugDevice;
