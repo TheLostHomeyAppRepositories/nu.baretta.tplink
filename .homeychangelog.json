@@ -79,5 +79,8 @@
   },
   "0.2.12": {
     "en": "Attempt to randomize HS300 sub-sockets"
+  },
+  "0.2.13": {
+    "en": "Attempt to randomize HS300 sub-socket"
   }
 }
