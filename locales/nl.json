@@ -5,7 +5,7 @@
                   "name": "Naam",
                   "title": "Apparaat zoeken...",
                   "error": "Er is een fout opgetreden.",
-				  "nodevice": "Ontdekking mislukt.",
+				  "nodevice": "Geen nieuwe apparaten ontdekt.",
                   "nosettings": "Instellingen ontbreken",
                   "required": "IP adres moet ingevuld zijn.",
                   "ipAddress": "IP adres",
