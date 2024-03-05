@@ -24,10 +24,26 @@ var TPlinkModel = getDriverName().toUpperCase();
 
 class TPlinkPlugDevice extends Homey.Device {
 
+        generateRandomInterval() {
+            let interval;
+            do {
+                interval = 15 - 8 + Math.random() * 9; // Random interval between 7 and 15 seconds
+            } while(this.isIntervalTooClose(interval, this.lastInterval));
+            this.lastInterval = interval; // Update the last interval
+            return interval;
+        }
+    
+        isIntervalTooClose(newInterval, lastInterval) {
+            if (lastInterval === null) return false; // No last interval to compare
+            const diff = Math.abs(newInterval - lastInterval);
+            return diff < 2; // Define a threshold for 'too close', e.g., less than 2 seconds difference
+        }
+
     async onInit() {
         this.log('Device initialization');
         let device = this;
-        var interval = 15;
+        var interval = 10;
+        var randomInterval = interval + Math.random() * 6; // Random interval between 10 and 15
         let settings = this.getSettings();
         let id = this.getData().id;
         let childId = this.getData().childId; // Retrieve the childId
@@ -57,7 +73,8 @@ class TPlinkPlugDevice extends Homey.Device {
         // Adjust settings, capabilities, and any other specifics for the socket
 
         totalOffset = settings["totalOffset"];
-        this.pollDevice(interval, childId);
+
+        this.pollDevice(randomInterval, childId);
 
         this.registerCapabilityListener('onoff', value => this.onCapabilityOnoff(value, childId));
         this.registerCapabilityListener('ledonoff', value => this.onCapabilityLedOnoff(value, childId));
@@ -95,9 +112,8 @@ class TPlinkPlugDevice extends Homey.Device {
         var interval = 10;
 
         // Call pollDevice with childId to start polling this specific socket
-        this.pollDevice(interval, childId);
+        this.pollDevice(randomInterval, childId);
     }
-
 
     // This method is called when the Device is deleted
     onDeleted() {
@@ -295,79 +311,74 @@ class TPlinkPlugDevice extends Homey.Device {
     async getStatus() {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
-        let childId = this.getData().childId; // Retrieve the childId for the socket
-
+        let childId = this.getData().childId; // Retrieve the childId
+        const sysInfo = client.getSysInfo(device);
         this.log("getStatus for device: " + device + ", Child ID: " + childId);
-
+    
         try {
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
 
-            if (childId) {
-                // Fetch the relay state for the specific socket
-                const childSocket = sysInfo.children.find(child => child.id === childId);
-                const relayState = childSocket ? childSocket.state === 1 : false;
-                this.setCapabilityValue('onoff', relayState).catch(this.error);
-                this.log('Relay state for child socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
+            // Check the relay state of the specific socket
+            const childSocket = sysInfo.children.find(child => child.id === childId);
+            const relayState = childSocket ? childSocket.state === 1 : false;
+                          
+            this.setCapabilityValue('onoff', relayState).catch(this.error);
+            this.log('Relay state for child socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
 
-                const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
-                if (realtimeStats) {
-                    const power = realtimeStats.power || 0;
-                    const voltage = realtimeStats.voltage || 0;
-                    const current = realtimeStats.current || 0;
-                    const total = realtimeStats.total || 0;
-
-                    this.setCapabilityValue('measure_power', power).catch(this.error);
-                    this.setCapabilityValue('measure_voltage', voltage).catch(this.error);
-                    this.setCapabilityValue('measure_current', current).catch(this.error);
-                    this.setCapabilityValue('meter_power', total).catch(this.error);
-
-                    this.log('Updated real-time stats for child socket ' + childId);
-                }
-            } else {
-                this.log('Child ID not found for socket');
-                // Handle scenario where childId is not found or not applicable
+            // Get real-time electricity metrics
+            const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
+            if (realtimeStats) {
+                const power = realtimeStats.power || 0;
+                const voltage = realtimeStats.voltage || 0;
+                const current = realtimeStats.current || 0;
+                const total = realtimeStats.total || 0;
+    
+                this.setCapabilityValue('measure_power', power).catch(this.error);
+                this.setCapabilityValue('measure_voltage', voltage).catch(this.error);
+                this.setCapabilityValue('measure_current', current).catch(this.error);
+                this.setCapabilityValue('meter_power', total).catch(this.error);
+    
+                this.log(`Updated stats for child socket ${childId}: Power - ${power}W, Voltage - ${voltage}V, Current - ${current}mA, Total - ${total}kWh`);
             }
-        } catch (err) {
-            var errRegEx = new RegExp("EHOSTUNREACH", 'g');
-            if (err.message.match(errRegEx)) {
-                unreachableCount += 1;
-                this.log("Device unreachable. Unreachable count: " + unreachableCount + " Discover count: " + discoverCount + " DynamicIP option: " + settings["dynamicIp"]);
-
-                if ((unreachableCount % 360 === 3) && settings["dynamicIp"]) {
+         } catch (err) {
+               this.handleErrors(err, settings);
+            }
+        }
+    
+    
+        handleErrors(err, settings) {
+            if (err.code === 'ECONNRESET') {
+                this.log("Connection reset error: " + err.message);
+                // Cooldown delay of 10 seconds
+                return new Promise(resolve => setTimeout(resolve, 10000));
+            } else if (err.message.includes("EHOSTUNREACH")) {
+                this.log(`Device unreachable. DynamicIP option: ${settings["dynamicIp"]}`);
+                if (settings["dynamicIp"]) {
                     this.setUnavailable("Device offline");
-                    discoverCount += 1;
-                    this.log("Unreachable, starting autodiscovery");
                     this.discover();
                 }
             } else {
-                // Log other errors
-                this.log("Caught error in getStatus function: " + err.message);
+             // other logs silent
+                //   this.log("Caught error in getStatus function: " + err.message);
             }
         }
-    }
 
 
-    pollDevice(interval) {
-        clearInterval(this.pollingInterval);
-
-        let childId = this.getData().childId; // Retrieve the childId for the socket
-
-        this.pollingInterval = setInterval(() => {
-            // Poll status
-            try {
-                if (childId) {
-                    // If childId is present, poll the status of the specific socket
-                    this.getStatus(childId);
-                } else {
-                    // For single-socket devices or parent device of multi-socket models
-                    // this.getStatus();
+        pollDevice(randomInterval, childIds) {
+            clearInterval(this.pollingInterval); // Clear any existing interval
+    
+            this.log("Starting polling with interval : ",randomInterval.toFixed(0)," with childIds:", childIds);
+    
+            this.pollingInterval = this.homey.setInterval(async () => {
+                this.log("Polling for childId:", childIds);
+                try {
+                    await this.getStatus(childIds);
+                } catch (err) {
+                    this.log("Error in polling for childId", childIds, ":", err.message);
                 }
-            } catch (err) {
-                this.log("Error in polling: " + err.message);
-            }
-        }, 1000 * interval);
-    }
+            }, randomInterval * 1000); // Multiply by 1000 to convert to milliseconds
+        }
 
 
     discover() {

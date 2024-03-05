@@ -73,5 +73,8 @@
   },
   "0.2.10": {
     "en": "Another HS300 fixes"
+  },
+  "0.2.11": {
+    "en": "Attempt to randomize polling for HS300 sub-sockets"
   }
 }
