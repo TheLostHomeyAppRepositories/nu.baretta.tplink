@@ -24,11 +24,26 @@ var TPlinkModel = getDriverName().toUpperCase();
 
 class TPlinkPlugDevice extends Homey.Device {
 
+        generateRandomInterval() {
+            let interval;
+            do {
+                interval = 15 - 8 + Math.random() * 9; // Random interval between 7 and 15 seconds
+            } while(this.isIntervalTooClose(interval, this.lastInterval));
+            this.lastInterval = interval; // Update the last interval
+            return interval;
+        }
+    
+        isIntervalTooClose(newInterval, lastInterval) {
+            if (lastInterval === null) return false; // No last interval to compare
+            const diff = Math.abs(newInterval - lastInterval);
+            return diff < 2; // Define a threshold for 'too close', e.g., less than 2 seconds difference
+        }
+
     async onInit() {
         this.log('Device initialization');
         let device = this;
-        var interval = 15;
-        var randomInterval = interval - 5 + Math.random() * 5; // Random interval between 10 and 15
+        var interval = 10;
+        var randomInterval = interval + Math.random() * 6; // Random interval between 10 and 15
         let settings = this.getSettings();
         let id = this.getData().id;
         let childId = this.getData().childId; // Retrieve the childId
@@ -301,16 +316,18 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log("getStatus for device: " + device + ", Child ID: " + childId);
     
         try {
-            this.plug = client.getPlug({ host: device, childId: childId });
-            const sysInfo = await this.plug.getSysInfo();
-            
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+
             // Check the relay state of the specific socket
-            const relayState = sysInfo.relay_state === 1;
+            const childSocket = sysInfo.children.find(child => child.id === childId);
+            const relayState = childSocket ? childSocket.state === 1 : false;
+                          
             this.setCapabilityValue('onoff', relayState).catch(this.error);
             this.log('Relay state for child socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
-    
+
             // Get real-time electricity metrics
-            const realtimeStats = await this.plug.emeter.getRealtime();
+            const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
             if (realtimeStats) {
                 const power = realtimeStats.power || 0;
                 const voltage = realtimeStats.voltage || 0;
@@ -322,7 +339,7 @@ class TPlinkPlugDevice extends Homey.Device {
                 this.setCapabilityValue('measure_current', current).catch(this.error);
                 this.setCapabilityValue('meter_power', total).catch(this.error);
     
-                this.log('Updated real-time stats for child socket ' + childId);
+                this.log(`Updated stats for child socket ${childId}: Power - ${power}W, Voltage - ${voltage}V, Current - ${current}mA, Total - ${total}kWh`);
             }
          } catch (err) {
                this.handleErrors(err, settings);
@@ -348,23 +365,20 @@ class TPlinkPlugDevice extends Homey.Device {
         }
 
 
-    pollDevice(interval, childIds) {
-        clearInterval(this.pollingInterval);
-
-        this.log("Starting polling :", childIds);
-
-        this.pollingInterval = setInterval(async () => {
-
-            this.log("Polling for childId:", childIds);
-            try {
-                await this.getStatus(childIds);
-                await new Promise(resolve => setTimeout(resolve, 1000 * interval));
-            } catch (err) {
-                this.log("Error in polling for childId", childIds, ":", err.message);
-            }
-
-        }, 1000 * interval);
-    }
+        pollDevice(randomInterval, childIds) {
+            clearInterval(this.pollingInterval); // Clear any existing interval
+    
+            this.log("Starting polling with interval : ",randomInterval.toFixed(0)," with childIds:", childIds);
+    
+            this.pollingInterval = this.homey.setInterval(async () => {
+                this.log("Polling for childId:", childIds);
+                try {
+                    await this.getStatus(childIds);
+                } catch (err) {
+                    this.log("Error in polling for childId", childIds, ":", err.message);
+                }
+            }, randomInterval * 1000); // Multiply by 1000 to convert to milliseconds
+        }
 
 
     discover() {
