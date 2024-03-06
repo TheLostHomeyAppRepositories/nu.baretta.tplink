@@ -5,7 +5,7 @@
                         "name": "Name",
                         "title": "Finding device...",
                         "error": "An error has occurred.",
-						"nodevice": "Discovery unsuccessful.",
+						"nodevice": "No new devices found.",
                         "nosettings": "Settings are missing.",
                         "required": "IP address is a required value.",
                         "ipAddress": "IP address",

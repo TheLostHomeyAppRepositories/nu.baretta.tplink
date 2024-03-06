@@ -41,6 +41,8 @@ class TPlinkPlugDevice extends Homey.Device {
 
     async onInit() {
         this.log('Device initialization');
+        //DEBUG - chrome://inspect
+        //require('inspector').open(9229, '0.0.0.0');
         // Generate a random interval and assign it to 'interval'
         let interval = this.generateRandomInterval();
         let device = this;
@@ -74,8 +76,6 @@ class TPlinkPlugDevice extends Homey.Device {
 
         totalOffset = settings["totalOffset"];
 
-        this.pollDevice(interval, childId);
-
         this.registerCapabilityListener('onoff', value => this.onCapabilityOnoff(value, childId));
         this.registerCapabilityListener('ledonoff', value => this.onCapabilityLedOnoff(value, childId));
 
@@ -100,7 +100,8 @@ class TPlinkPlugDevice extends Homey.Device {
             return args.device.undo_meter_reset(args.device.getSettings().settingIPAddress, childId);
         });
 
-
+        // Call pollDevice with childId to start polling this specific socket
+        this.pollDevice(interval, childId);
     } // end onInit
 
     onAdded() {
@@ -110,12 +111,8 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log("Device added: " + id + ", Child ID: " + childId);
 
         let settings = this.getSettings();
-
-        // Generate a random interval and assign it to 'interval'
         let interval = this.generateRandomInterval();
 
-        // Call pollDevice with childId to start polling this specific socket
-        this.pollDevice(interval, childId);
     }
 
     // This method is called when the Device is deleted
@@ -245,22 +242,23 @@ class TPlinkPlugDevice extends Homey.Device {
         }
     }
     //REWORK !!! -  
-    getLed(device) {
-        const sysInfo = client.getSysInfo(device);
-        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-        this.plug.getSysInfo().then((sysInfo) => {
-            if (sysInfo.led_off === 0) {
+    async getLed(device) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+    
+            const updatedSysInfo = await this.plug.getSysInfo();
+            if (updatedSysInfo.led_off === 0) {
                 this.log('LED on ');
                 return "true";
             } else {
                 this.log('LED off ');
                 return "false";
             }
-        })
-            .catch((err) => {
-                this.log("Caught error in getLed function: " + err.message);
-            });
-
+        } catch (err) {
+            this.log("Caught error in getLed function: " + err.message);
+            return "error";
+        }
     }
 
     async ledOn(device) {
@@ -289,33 +287,43 @@ class TPlinkPlugDevice extends Homey.Device {
         }
     }
 
-    meter_reset(device) {
-        this.log('Reset meter ');
-        const sysInfo = client.getSysInfo(device);
-        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-        // this.plug.emeter.eraseStats(null);
-        this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
-        totalOffset = oldtotalState;
-        this.setSettings({
-            totalOffset: totalOffset
-        }).catch(this.error);
+    async meter_reset(device) {
+        try {
+            this.log('Reset meter');
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            // reset meter for counters in Kasa app. Does not actually clear the total counter though...
+            // this.plug.emeter.eraseStats(null);
+            this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
+            totalOffset = oldtotalState;
+            await this.setSettings({
+                totalOffset: totalOffset
+            });
+        } catch (err) {
+            this.log("Caught error in meter_reset: " + err.message);
+            // Handle the error accordingly
+        }
     }
-
-    undo_meter_reset(device) {
-        this.log('Undo reset meter, setting totalOffset to 0 ');
-        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-        totalOffset = 0;
-        this.setSettings({
-            totalOffset: totalOffset
-        }).catch(this.error);
+    
+    async undo_meter_reset(device) {
+        try {
+            this.log('Undo reset meter, setting totalOffset to 0');
+            // reset meter for counters in Kasa app. Does not actually clear the total counter though...
+            totalOffset = 0;
+            await this.setSettings({
+                totalOffset: totalOffset
+            });
+        } catch (err) {
+            this.log("Caught error in undo_meter_reset: " + err.message);
+            // Handle the error accordingly
+        }
     }
 
     async getStatus() {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let childId = this.getData().childId; // Retrieve the childId
-        const sysInfo = client.getSysInfo(device);
+        //const sysInfo = client.getSysInfo(device);
         this.log("getStatus for device: " + device + ", Child ID: " + childId);
 
         try {
@@ -331,6 +339,7 @@ class TPlinkPlugDevice extends Homey.Device {
 
             // Get real-time electricity metrics
             const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
+
             if (realtimeStats) {
                 const power = realtimeStats.power || 0;
                 const voltage = realtimeStats.voltage || 0;
@@ -393,6 +402,7 @@ class TPlinkPlugDevice extends Homey.Device {
             offlineTolerance: 3
         };
 
+        try {
         // Start discovering new plugs
         client.startDiscovery(discoveryOptions);
 
@@ -427,6 +437,10 @@ class TPlinkPlugDevice extends Homey.Device {
                 this.setAvailable();
             }
         });
+    } catch (err) {
+        this.log("Caught error in discover function: " + err.message);
+        // Handle the error accordingly
+    }
     }
 
 }

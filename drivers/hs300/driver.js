@@ -68,11 +68,12 @@ class TPlinkPlugDriver extends Homey.Driver {
             }
             this.log('Starting Plug Discovery');
             client.startDiscovery(discoveryOptions);
-        
+            
             client.on('plug-new', async (plug) => {
+                logEvent('Found plug-new type', plug);
+                const sysInfo = await plug.getSysInfo();
 
-                if (plug.model.match(myRegEx)) {
-                    const sysInfo = await plug.getSysInfo();
+                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {  
                                         
                     if (sysInfo.children) {
                         const childrenMap = plug.children; // Get the map of children
@@ -80,7 +81,7 @@ class TPlinkPlugDriver extends Homey.Driver {
                             const childName = child.alias || `Socket${childId}`;
 
                             if (!discoveredDevicesArray.some(device => device.childId === childId)) {
-                                this.log("New Socket found: " + childName + " in " + plug.host + " id " + childId);
+                                this.log("New Sub-socket found: " + childName + " in " + plug.host + " id " + childId);
                                 discoveredDevicesArray.push({
                                     ip: plug.host,
                                     name: childName,
