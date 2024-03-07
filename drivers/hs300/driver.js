@@ -1,11 +1,19 @@
 'use strict';
+
+//debug
+//process.env.DEBUG = 'tplink-smarthome-api*';
+
 // need Homey module, see SDK Guidelines
 const Homey = require('homey');
 
 const {
     Client
 } = require('tplink-smarthome-api');
-const client = new Client();
+
+const client = new Client({
+    //    logLevel: 'debug' // Set the log level to 'debug' for detailed logs
+});
+
 
 // get driver name based on dirname
 function getDriverName() {
@@ -31,7 +39,6 @@ class TPlinkPlugDriver extends Homey.Driver {
     async onPair(session) {
         // socket is a direct channel to the front-end
         var devIds = {};
-        let discoveredDevicesArray = []; // Initialize at the start of the pairing session
 
         try {
             let apidevices = this.getDevices();
@@ -66,15 +73,15 @@ class TPlinkPlugDriver extends Homey.Driver {
                 discoveryTimeout: 3000,
                 breakoutChildren: true,
             }
-            this.log('Starting Plug Discovery');
+            this.log('Starting Plug Discovery...');
             client.startDiscovery(discoveryOptions);
-            
+
             client.on('plug-new', async (plug) => {
                 logEvent('Found plug-new type', plug);
                 const sysInfo = await plug.getSysInfo();
 
-                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {  
-                                        
+                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {
+
                     if (sysInfo.children) {
                         const childrenMap = plug.children; // Get the map of children
                         childrenMap.forEach((child, childId) => {
@@ -96,13 +103,17 @@ class TPlinkPlugDriver extends Homey.Driver {
 
 
             client.on('plug-online', (plug) => {
-                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
+                logEvent('Found plug-online type', plug);
 
-                    if (!discoveredDevicesArray.some(device => device.childId === childId)) {
-                        this.log("New Socket found online: " + childName + " in " + plug.host + " id " + childId);
+                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
+                    let deviceName = plug.alias || `Device ${plug.deviceId}`;
+                    let childId = plug.childId || null; // null for non-child devices
+
+                    if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId && device.childId === childId)) {
+                        this.log(`New Socket found online: ${deviceName} in ${plug.host} with Device ID: ${plug.deviceId} and Child ID: ${childId}`);
                         discoveredDevicesArray.push({
                             ip: plug.host,
-                            name: childName,
+                            name: deviceName,
                             deviceId: plug.deviceId,
                             childId: childId
                         });
@@ -111,7 +122,6 @@ class TPlinkPlugDriver extends Homey.Driver {
             });
 
             setTimeout(() => {
-                this.log("Debug before providing resolution: " + JSON.stringify(discoveredDevicesArray));
                 if (discoveredDevicesArray.length > 0) {
                     session.emit('discovered_devices', discoveredDevicesArray); // Emit the array of discovered devices
                     this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
@@ -125,7 +135,7 @@ class TPlinkPlugDriver extends Homey.Driver {
             client.stopDiscovery();
         });
 
-        // this is called when the user presses save settings button in start.html
+        // this is called when the user presses "Next to select" button in start.html
         session.setHandler("get_devices", async (data) => {
             this.log("Received get_devices data: " + JSON.stringify(data));
 

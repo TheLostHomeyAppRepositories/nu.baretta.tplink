@@ -1,9 +1,16 @@
 'use strict';
+//debug for API
+// process.env.DEBUG = 'tplink-smarthome-api*';
+
 const Homey = require('homey');
 const {
     Client
 } = require('tplink-smarthome-api');
-const client = new Client();
+
+const client = new Client({
+    //debug for API
+    //logLevel: 'debug' // Set the log level to 'debug' for detailed logs
+});
 
 // get driver name based on dirname
 function getDriverName() {
@@ -27,7 +34,7 @@ class TPlinkPlugDevice extends Homey.Device {
     generateRandomInterval() {
         let interval;
         do {
-            interval = Math.random() * 20; // Random interval between 20 and 35 seconds
+            interval = 5 + Math.random() * 10; // Random interval
         } while (this.isIntervalTooClose(interval, this.lastInterval));
         this.lastInterval = interval; // Update the last interval
         return interval;
@@ -36,7 +43,7 @@ class TPlinkPlugDevice extends Homey.Device {
     isIntervalTooClose(newInterval, lastInterval) {
         if (lastInterval === null) return false; // No last interval to compare
         const diff = Math.abs(newInterval - lastInterval);
-        return diff < 5; // Define a threshold for 'too close', e.g., less than 2 seconds difference
+        return diff < 2; // Define a threshold for 'too close', e.g., less than 2 seconds difference
     }
 
     async onInit() {
@@ -68,8 +75,6 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log('settings totalOffset: ', settings["totalOffset"])
         totalOffset = settings["totalOffset"];
 
-        // Initialization logic for each socket (childId) of the HS300
-        // Since HS300 is a multi-socket device, childId will always be present
         this.log('Initializing socket with Child ID: ', childId);
         // Initialize specific socket based on childId
         // Adjust settings, capabilities, and any other specifics for the socket
@@ -111,7 +116,6 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log("Device added: " + id + ", Child ID: " + childId);
 
         let settings = this.getSettings();
-        let interval = this.generateRandomInterval();
 
     }
 
@@ -246,7 +250,7 @@ class TPlinkPlugDevice extends Homey.Device {
         try {
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-    
+
             const updatedSysInfo = await this.plug.getSysInfo();
             if (updatedSysInfo.led_off === 0) {
                 this.log('LED on ');
@@ -304,7 +308,7 @@ class TPlinkPlugDevice extends Homey.Device {
             // Handle the error accordingly
         }
     }
-    
+
     async undo_meter_reset(device) {
         try {
             this.log('Undo reset meter, setting totalOffset to 0');
@@ -339,7 +343,7 @@ class TPlinkPlugDevice extends Homey.Device {
 
             // Get real-time electricity metrics
             const realtimeStats = await this.plug.emeter.getRealtime(this.plug, childId);
-            
+
             if (realtimeStats) {
                 const power = realtimeStats.power || 0;
                 const voltage = realtimeStats.voltage || 0;
@@ -403,44 +407,44 @@ class TPlinkPlugDevice extends Homey.Device {
         };
 
         try {
-        // Start discovering new plugs
-        client.startDiscovery(discoveryOptions);
+            // Start discovering new plugs
+            client.startDiscovery(discoveryOptions);
 
-        client.on('plug-new', (plug) => {
-            this.log("Discovered new plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
+            client.on('plug-new', (plug) => {
+                this.log("Discovered new plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
 
-            if (plug.deviceId === settings["deviceId"]) {
-                this.setSettings({
-                    settingIPAddress: plug.host
-                }).catch(this.error);
+                if (plug.deviceId === settings["deviceId"]) {
+                    this.setSettings({
+                        settingIPAddress: plug.host
+                    }).catch(this.error);
 
-                setTimeout(() => client.stopDiscovery(), 1000);
-                this.log("Updated settings for discovered plug: " + plug.deviceId);
-                unreachableCount = 0;
-                discoverCount = 0;
-                this.setAvailable();
-            }
-        });
+                    setTimeout(() => client.stopDiscovery(), 1000);
+                    this.log("Updated settings for discovered plug: " + plug.deviceId);
+                    unreachableCount = 0;
+                    discoverCount = 0;
+                    this.setAvailable();
+                }
+            });
 
-        client.on('plug-online', (plug) => {
-            this.log("Discovered online plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
+            client.on('plug-online', (plug) => {
+                this.log("Discovered online plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
 
-            if (plug.deviceId === settings["deviceId"]) {
-                this.setSettings({
-                    settingIPAddress: plug.host
-                }).catch(this.error);
+                if (plug.deviceId === settings["deviceId"]) {
+                    this.setSettings({
+                        settingIPAddress: plug.host
+                    }).catch(this.error);
 
-                setTimeout(() => client.stopDiscovery(), 1000);
-                this.log("Updated settings for online plug: " + plug.deviceId);
-                unreachableCount = 0;
-                discoverCount = 0;
-                this.setAvailable();
-            }
-        });
-    } catch (err) {
-        this.log("Caught error in discover function: " + err.message);
-        // Handle the error accordingly
-    }
+                    setTimeout(() => client.stopDiscovery(), 1000);
+                    this.log("Updated settings for online plug: " + plug.deviceId);
+                    unreachableCount = 0;
+                    discoverCount = 0;
+                    this.setAvailable();
+                }
+            });
+        } catch (err) {
+            this.log("Caught error in discover function: " + err.message);
+            // Handle the error accordingly
+        }
     }
 
 }

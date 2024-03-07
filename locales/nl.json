@@ -13,7 +13,7 @@
                   "deviceName": "Naam",
                   "optional": "De volgende setting is optioneel:",
                   "totalOffset": "Correctie van totaal stroomverbruik",
-                  "saveSettings": "Gegevens opslaan",
+                  "saveSettings": "Volgende om te selecteren",
                   "discovery": "Zoeken naar nieuwe apparaten, een moment geduld alstublieft... Zorg ervoor dat de slimme stekker is aangesloten en online is (het LED-lampje is continu groen). Ontdekte apparaten worden hieronder vermeld:",
                   "startdiscovery": "Automatisch zoeken"
             }
