@@ -27,7 +27,7 @@ class TPlinkPlugDevice extends Homey.Device {
     generateRandomInterval() {
         let interval;
         do {
-            interval = 10 + Math.random() * 20; // Random interval between 20 and 35 seconds
+            interval = Math.random() * 20; // Random interval between 20 and 35 seconds
         } while (this.isIntervalTooClose(interval, this.lastInterval));
         this.lastInterval = interval; // Update the last interval
         return interval;
@@ -135,8 +135,10 @@ class TPlinkPlugDevice extends Homey.Device {
         try {
             if (value) {
                 await this.powerOn(device, childId);
+                await getStatus();
             } else {
                 await this.powerOff(device, childId);
+                await getStatus();
             }
         } catch (err) {
             this.log("Error in onCapabilityOnoff:", err.message);
@@ -222,7 +224,7 @@ class TPlinkPlugDevice extends Homey.Device {
     async getPower(device) {
         try {
             const sysInfo = await client.getSysInfo(device);
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo, childId: childId });
 
             let childId = this.getData().childId; // Get the childId for the socket
             if (childId && sysInfo.children) {
@@ -291,7 +293,7 @@ class TPlinkPlugDevice extends Homey.Device {
         try {
             this.log('Reset meter');
             const sysInfo = await client.getSysInfo(device);
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo, childId: childId });
             // reset meter for counters in Kasa app. Does not actually clear the total counter though...
             // this.plug.emeter.eraseStats(null);
             this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
