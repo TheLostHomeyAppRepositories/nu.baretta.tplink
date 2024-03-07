@@ -135,10 +135,8 @@ class TPlinkPlugDevice extends Homey.Device {
         try {
             if (value) {
                 await this.powerOn(device, childId);
-                await getStatus();
             } else {
                 await this.powerOff(device, childId);
-                await getStatus();
             }
         } catch (err) {
             this.log("Error in onCapabilityOnoff:", err.message);
