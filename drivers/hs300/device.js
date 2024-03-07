@@ -27,7 +27,7 @@ class TPlinkPlugDevice extends Homey.Device {
     generateRandomInterval() {
         let interval;
         do {
-            interval = 20 + Math.random() * 15; // Random interval between 20 and 35 seconds
+            interval = 10 + Math.random() * 20; // Random interval between 20 and 35 seconds
         } while (this.isIntervalTooClose(interval, this.lastInterval));
         this.lastInterval = interval; // Update the last interval
         return interval;
@@ -328,7 +328,7 @@ class TPlinkPlugDevice extends Homey.Device {
 
         try {
             const sysInfo = await client.getSysInfo(device);
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo, childId: childId });
 
             // Check the relay state of the specific socket
             const childSocket = sysInfo.children.find(child => child.id === childId);
@@ -338,8 +338,8 @@ class TPlinkPlugDevice extends Homey.Device {
             this.log('Relay state for child socket ' + childId + ' is ' + (relayState ? 'on' : 'off'));
 
             // Get real-time electricity metrics
-            const realtimeStats = await this.plug.emeter.getRealtime({ childId: childId });
-
+            const realtimeStats = await this.plug.emeter.getRealtime(this.plug, childId);
+            
             if (realtimeStats) {
                 const power = realtimeStats.power || 0;
                 const voltage = realtimeStats.voltage || 0;
@@ -351,7 +351,7 @@ class TPlinkPlugDevice extends Homey.Device {
                 this.setCapabilityValue('measure_current', current).catch(this.error);
                 this.setCapabilityValue('meter_power', total).catch(this.error);
 
-                this.log(`Updated stats for child socket ${childId}: Power - ${power}W, Voltage - ${voltage}V, Current - ${current}mA, Total - ${total}kWh`);
+                this.log(`Updated stats for child socket ${childId}: Power - ${power}W, Voltage - ${voltage}V, Current - ${current}A, Total - ${total}kWh`);
             }
         } catch (err) {
             this.handleErrors(err, settings);
