@@ -72,7 +72,7 @@ class TPlinkBulbDriver extends Homey.Driver {
             client.on('bulb-new', async (bulb) => {
                 logEvent('Found Bulb-new type', bulb);
                 const sysInfo = await bulb.getSysInfo();
-                const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model; //Fallback as per sysinfo available data
+                const deviceName = sysInfo.alias || sysInfo.dev_name || sysInfo.model; //Fallback as per sysinfo available data
 
                 if (bulb.model.match(myRegEx) && !devIds.hasOwnProperty(bulb.deviceId)) {
                     if (!discoveredDevicesArray.some(device => device.deviceId === bulb.deviceId)) {
@@ -89,7 +89,7 @@ class TPlinkBulbDriver extends Homey.Driver {
             client.on('bulb-online', async (bulb) => {
                 logEvent('bulb-online check', bulb);
                 const sysInfo = await bulb.getSysInfo();
-                const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model; //Fallback as per sysinfo available data
+                const deviceName = sysInfo.alias || sysInfo.dev_name || sysInfo.model; //Fallback as per sysinfo available data
 
                 if (bulb.model.match(myRegEx) && !devIds.hasOwnProperty(bulb.deviceId)) {
                     if (!discoveredDevicesArray.some(device => device.deviceId === bulb.deviceId)) {
