@@ -6,9 +6,7 @@
 // need Homey module, see SDK Guidelines
 const Homey = require('homey');
 
-const {
-    Client
-} = require('tplink-smarthome-api');
+const {Client} = require('tplink-smarthome-api');
 
 const client = new Client({
     //    logLevel: 'debug' // Set the log level to 'debug' for detailed logs
@@ -43,11 +41,15 @@ class TPlinkPlugDriver extends Homey.Driver {
         try {
             let apidevices = this.getDevices();
             Object.values(apidevices).forEach(device => {
-                devIds[device.getSettings().deviceId] = "";
-            })
-            this.log("Existing devices with devIDs: " + JSON.stringify(devIds));
+                let deviceId = device.getData().id;
+                devIds[deviceId] = "";
+                this.log("Found already pairded device with ID: " + deviceId);
+            });
+            if (Object.keys(devIds).length === 0) {
+                this.log("No existing devices found.");
+            }
         } catch (err) {
-            this.log(err);
+            this.log("Error: ", err);
         }
 
         var id = guid();
@@ -67,22 +69,37 @@ class TPlinkPlugDriver extends Homey.Driver {
 
             let discoveredDevicesArray = []; // Initialize an array to store discovered devices
 
-            var discoveryOptions = {
-                deviceTypes: 'plug',
-                discoveryInterval: 1500,
-                discoveryTimeout: 3000,
-                breakoutChildren: true,
+            if (Array.isArray(data) && data.length > 0 && data[0].ip && data[0].ip !== '') {
+
+                var discoveryOptions = {
+                    deviceTypes: 'plug',
+                    discoveryInterval: 1500,
+                    discoveryTimeout: 3000,
+                    breakoutChildren: true,
+                    devices: [data[0].ip]  // Setting the 'devices' property
+                };
+            } else {
+                // If data[0].ip is not defined
+                var discoveryOptions = {
+                    deviceTypes: 'plug',
+                    discoveryInterval: 1500,
+                    discoveryTimeout: 3000,
+                    breakoutChildren: true
+                };
             }
-            this.log('Starting Plug Discovery...');
+
+            this.log('Starting Plug Discovery with options...' + JSON.stringify(discoveryOptions));
+
             client.startDiscovery(discoveryOptions);
 
-            client.on('plug-new', async (plug) => {
-                logEvent('Found plug-new type', plug);
-                const sysInfo = await plug.getSysInfo();
+            try {             
 
-                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {
+                client.on('plug-new', async (plug) => {
+                    logEvent('Found plug-new type', plug);                  
+                     // const sysInfo = await plug.getSysInfo();
+                    if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {
 
-                    if (sysInfo.children) {
+                        // if (sysInfo.children) {
                         const childrenMap = plug.children; // Get the map of children
                         childrenMap.forEach((child, childId) => {
                             const childName = child.alias || `Socket${childId}`;
@@ -95,89 +112,100 @@ class TPlinkPlugDriver extends Homey.Driver {
                                     deviceId: plug.deviceId,
                                     childId: childId
                                 });
+
                             }
+
                         });
+                        //} 
+
                     }
-                }
-            });
+
+                });
+
+            } catch (error) {
+                this.log('Error in discovery process:', error);
+            }
 
 
-            client.on('plug-online', (plug) => {
-                logEvent('Found plug-online type', plug);
+            try {
+                client.on('plug-online', async (plug) => {
+                    logEvent('Found plug-online type', plug);
+                    
 
-                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-                    let deviceName = plug.alias || `Device ${plug.deviceId}`;
-                    let childId = plug.childId || null; // null for non-child devices
+                    if (Array.isArray(data) && data.length > 0 && data[0].ip && data[0].ip !== '') {
 
-                    if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId && device.childId === childId)) {
-                        this.log(`New Socket found online: ${deviceName} in ${plug.host} with Device ID: ${plug.deviceId} and Child ID: ${childId}`);
-                        discoveredDevicesArray.push({
-                            ip: plug.host,
-                            name: deviceName,
-                            deviceId: plug.deviceId,
-                            childId: childId
-                        });
+                        const userEnteredIp = data[0].ip; // Assuming this is the user-entered IP address
+                                                
+                        if ( plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId) && plug.host === userEnteredIp) {
+                            
+
+                            let deviceName = plug.alias || `Device ${plug.deviceId}`;
+                            let childId = plug.childId || null; // null for non-child devices
+
+                            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId && device.childId === childId)) {
+                                if (plug.host === userEnteredIp) {
+                                    this.log(`New Socket found online (discovery): ${deviceName} in ${plug.host} with Device ID: ${plug.deviceId} and Child ID: ${childId}`);
+                                    discoveredDevicesArray.push({
+                                        ip: plug.host,
+                                        name: deviceName,
+                                        deviceId: plug.deviceId,
+                                        childId: childId
+                                    });
+                                    
+                                }
+
+                            }
+                            }
+
+                        } // If data[0].ip is not defined
+                        else if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {
+
+                            let deviceName = plug.alias || `Device ${plug.deviceId}`;
+                            let childId = plug.childId || null; // null for non-child devices
+
+                            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId && device.childId === childId)) {
+                                
+                                    this.log(`Socket found online (manual IP): ${deviceName} in ${plug.host} with Device ID: ${plug.deviceId} and Child ID: ${childId}`);
+                                    discoveredDevicesArray.push({
+                                        ip: plug.host,
+                                        name: deviceName,
+                                        deviceId: plug.deviceId,
+                                        childId: childId
+                                    });
+                                
+                            }
+                        
                     }
-                }
-            });
+                });
+
+            } catch (error) {
+                this.log('Error in plug-online process:', error);
+            }
+
 
             setTimeout(() => {
                 if (discoveredDevicesArray.length > 0) {
                     session.emit('discovered_devices', discoveredDevicesArray); // Emit the array of discovered devices
                     this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
-                    return discoveredDevicesArray; // Return the array
+                    //return discoveredDevicesArray; // Return the array
                 } else {
                     this.log("No devices discovered");
                     session.emit('discovery_failed', { devicesFound: false });
                     return []; // Return an empty array if no devices were discovered
                 }
             }, discoveryOptions.discoveryTimeout);
-            client.stopDiscovery();
+
+
         });
+
+
 
         // this is called when the user presses "Next to select" button in start.html
         session.setHandler("get_devices", async (data) => {
             this.log("Received get_devices data: " + JSON.stringify(data));
 
-            if (data[0].name === "HS300dummy") {
-                this.log("Processing device based on manually entered IP");
-
-                // Manually entered IP, initiate specific discovery
-                let specificDeviceOptions = {
-                    deviceTypes: ['plug'],
-                    devices: [{ host: data[0].ip }]
-                };
-                client.startDiscovery(specificDeviceOptions);
-
-                client.on('plug-new', async (plug) => {
-                    if (plug.host === data[0].ip && plug.model.match(myRegEx)) {
-                        const sysInfo = await plug.getSysInfo();
-                        if (sysInfo.children) {
-                            let devices = sysInfo.children.map(child => {
-                                let deviceId = guid();
-                                return {
-                                    data: { id: deviceId, childId: child.id },
-                                    name: child.alias || data[0].name,
-                                    settings: {
-                                        "settingIPAddress": plug.host,
-                                        "dynamicIp": false,
-                                        "totalOffset": 0
-                                    }
-                                };
-                            });
-
-                            this.log("Processed devices for manual IP: " + JSON.stringify(devices));
-                            session.emit('continue', null);
-
-                            session.setHandler("list_devices", async () => {
-                                return devices;
-                            });
-                        }
-                    }
-                });
-
-            } else {
-                this.log("Processed devices for autodiscovered devices");
+            try {
+                this.log("Processing device(s) from autodiscovery");
                 // Handle normally for autodiscovered devices
                 let inputData = Array.isArray(data) ? data : [data];
 
@@ -212,6 +240,8 @@ class TPlinkPlugDriver extends Homey.Driver {
                     return devices;
                 });
 
+            } catch (error) {
+                this.log('Error in discovery process:', error);
             }
 
 
@@ -219,10 +249,12 @@ class TPlinkPlugDriver extends Homey.Driver {
 
         session.setHandler("cancel", () => {
             this.log("Pairing cancelled, state reset.");
+            client.stopDiscovery();
         });
 
         session.setHandler("disconnect", () => {
             this.log("Pairing is finished (done or aborted)");
+            client.stopDiscovery();
         })
     }
 }

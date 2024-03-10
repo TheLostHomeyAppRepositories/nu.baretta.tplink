@@ -23,6 +23,7 @@
 
 		if (errorMessage) {
 			Homey.alert(errorMessage, 'error');
+			$('#saveSettings').removeClass('is-loading');
 			Homey.done();
 		}
 	});
@@ -65,11 +66,12 @@
 	);
 
 
-	function saveSettings() {
+	async function saveSettings() {
 		// Check if devices have been discovered
 		if (discoveredDevices.length > 0) {
 			Homey.emit('get_devices', discoveredDevices);
 		} else {
+			$('#saveSettings').addClass('is-loading');
 			// variables
 			var inputIPAddress = document.getElementById('ipAddress').value;
 			//var inputDeviceName = document.getElementById('deviceName').value;
@@ -92,9 +94,16 @@
 					ip: inputIPAddress,
 					name: inputDeviceName
 				}];
+				$('#saveSettings').addClass('is-loading');
+				document.getElementById('discovery').style.display = 'block';
+				Homey.emit('discover', data, function (err, result) {
+					console.log("Discovery results" + 'result');
+				});
+				
+				await new Promise(resolve => setTimeout(resolve, 4000));
 
 				// Continue to back-end, pass along data
-				Homey.emit('get_devices', data);
+				Homey.emit('get_devices', discoveredDevices);
 
 			} else {
 
@@ -132,7 +141,7 @@
 			<td><input id="ipAddress" type="text" value="" placeholder="192.168.1.10" /></td>
 		</tr>
 		<tr>
-	<!--		<td style="width:100px;"><span data-i18n="pair.start.deviceName"></span></td>
+			<!--		<td style="width:100px;"><span data-i18n="pair.start.deviceName"></span></td>
 			<td><input id="deviceName" type="text" value="" placeholder="TP-Link Device" /></td>-->
 		</tr>
 	</table>
