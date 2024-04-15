@@ -24,7 +24,7 @@ var TPlinkModel = getDriverName().toUpperCase();
 
 class TPlinkPlugDevice extends Homey.Device {
 
-  async onInit() {
+    async onInit() {
         this.log('device init');
         let device = this;
         var interval = 10;
@@ -56,16 +56,16 @@ class TPlinkPlugDevice extends Homey.Device {
         this.registerCapabilityListener('onoff', this.onCapabilityOnoff.bind(this));
         // actually quite useless to have the 'ledonoff' function in the mobile interface...
         this.registerCapabilityListener('ledonoff', this.onCapabilityLedOnoff.bind(this));
-        
+
         // Register flow card action listeners
         this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
             return args.device.ledOn(args.device.getSettings().settingIPAddress);
         });
-        
+
         this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
             return args.device.ledOff(args.device.getSettings().settingIPAddress);
         });
-    
+
         this.homey.flow.getActionCard('meter_reset').registerRunListener(async (args, state) => {
             return args.device.meter_reset(args.device.getSettings().settingIPAddress);
         });
@@ -82,7 +82,7 @@ class TPlinkPlugDevice extends Homey.Device {
         let settings = this.getSettings();
         var interval = 10;
 
-        this.pollDevice(interval);
+        //        this.pollDevice(interval);
     }
 
     // this method is called when the Device is deleted
@@ -104,7 +104,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.powerOff(device);
         }
         // Then, emit a callback ( err, result )
-     		return(null);
+        return (null);
     }
 
     async onCapabilityLedOnoff(value, opts, callback) {
@@ -118,7 +118,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.ledOff(device);
         }
         // Then, emit a callback ( err, result )
-  		return "null";
+        return "null";
     }
 
     // start functions
@@ -142,104 +142,104 @@ class TPlinkPlugDevice extends Homey.Device {
                         break;
                 }
             }
-			return "true";
+            return "true";
         } catch (error) {
- 			return "error";
+            return "error";
         }
     }
 
-async powerOn(device) {
-    try {
-        this.log('Turning device on ' + device);
-        const sysInfo = await client.getSysInfo(device);
-				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
-        await this.plug.setPowerState(true);
-    } catch (err) {
-        this.log('Error turning device on: ', err.message);
-        // Handle the error appropriately
+    async powerOn(device) {
+        try {
+            this.log('Turning device on ' + device);
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            await this.plug.setPowerState(true);
+        } catch (err) {
+            this.log('Error turning device on: ', err.message);
+            // Handle the error appropriately
+        }
     }
-}
 
 
-async powerOff(device) {
-    try {
-        this.log('Turning device off ' + device);
-        const sysInfo = await client.getSysInfo(device);
-				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
-        await this.plug.setPowerState(false);
-    } catch (err) {
-        this.log('Error turning device off: ', err.message);
-        // Handle the error appropriately
+    async powerOff(device) {
+        try {
+            this.log('Turning device off ' + device);
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            await this.plug.setPowerState(false);
+        } catch (err) {
+            this.log('Error turning device off: ', err.message);
+            // Handle the error appropriately
+        }
     }
-}
 
     getPower(device) {
-		const sysInfo = client.getSysInfo(device);
-				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
+        const sysInfo = client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
         this.plug.getSysInfo().then((sysInfo) => {
-                if (sysInfo.relay_state === 1) {
-                    this.log('Relay state is on ');
-			return "true";	
-                } else {
-                    this.log('Relay state is off ');
-			return "false";
-                }
-            })
+            if (sysInfo.relay_state === 1) {
+                this.log('Relay state is on ');
+                return "true";
+            } else {
+                this.log('Relay state is off ');
+                return "false";
+            }
+        })
             .catch((err) => {
                 this.log("Caught error in getPower function: " + err.message);
             });
     }
 
     getLed(device) {
-		const sysInfo = client.getSysInfo(device);
-				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
+        const sysInfo = client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
         this.plug.getSysInfo().then((sysInfo) => {
-                if (sysInfo.led_off === 0) {
-                    this.log('LED on ');
-                    return "true";
-                } else {
-                    this.log('LED off ');
-                    return "false";
-                }
-            })
+            if (sysInfo.led_off === 0) {
+                this.log('LED on ');
+                return "true";
+            } else {
+                this.log('LED off ');
+                return "false";
+            }
+        })
             .catch((err) => {
                 this.log("Caught error in getLed function: " + err.message);
             });
 
     }
 
-async ledOn(device) {
-    try {
-        this.log('Turning LED on for device ' + device);
-        const sysInfo = await client.getSysInfo(device);
-				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
-        await this.plug.setLedState(true);
-        await this.setCapabilityValue('ledonoff', true);
-    } catch (err) {
-        this.log('Error turning LED on: ', err.message);
-        // Handle the error appropriately
+    async ledOn(device) {
+        try {
+            this.log('Turning LED on for device ' + device);
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            await this.plug.setLedState(true);
+            await this.setCapabilityValue('ledonoff', true);
+        } catch (err) {
+            this.log('Error turning LED on: ', err.message);
+            // Handle the error appropriately
+        }
     }
-}
 
 
-async ledOff(device) {
-    try {
-        this.log('Turning LED off for device ' + device);
-        const sysInfo = await client.getSysInfo(device);
-				this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
-        await this.plug.setLedState(false);
-        await this.setCapabilityValue('ledonoff', false);
-    } catch (err) {
-        this.log('Error turning LED off: ', err.message);
-        // Handle the error appropriately
+    async ledOff(device) {
+        try {
+            this.log('Turning LED off for device ' + device);
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            await this.plug.setLedState(false);
+            await this.setCapabilityValue('ledonoff', false);
+        } catch (err) {
+            this.log('Error turning LED off: ', err.message);
+            // Handle the error appropriately
+        }
     }
-}
 
 
     meter_reset(device) {
         this.log('Reset meter ');
         const sysInfo = client.getSysInfo(device);
-        this.plug = client.getPlug({ host: device,  sysInfo: sysInfo });
+        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
         // reset meter for counters in Kasa app. Does not actually clear the total counter though...
         // this.plug.emeter.eraseStats(null);
         this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
@@ -261,75 +261,79 @@ async ledOff(device) {
     async getStatus() {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
-	    let TPlinkModel = getDriverName().toUpperCase();
+        let TPlinkModel = getDriverName().toUpperCase();
         this.log("getStatus device: " + device);
 
         try {
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({
-                host: device,  sysInfo: sysInfo
+                host: device, sysInfo: sysInfo
             });
 
             this.plug.getInfo().catch((err) => {
                 this.log("Error getting plug info: " + err.message);
             }).then((data) => {
-                    //this.log("DeviceID: " + settings["deviceId"]);
-                    //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
+                //this.log("DeviceID: " + settings["deviceId"]);
+                //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
 
-                    if (settings["deviceId"] === undefined) {
-                        this.setSettings({
-                            deviceId: data.sysInfo.deviceId
-                        }).catch(this.error);
-                        this.log("DeviceId added: " + settings["deviceId"])
-                    }
+                if (settings["deviceId"] === undefined) {
+                    this.setSettings({
+                        deviceId: data.sysInfo.deviceId
+                    }).catch(this.error);
+                    this.log("DeviceId added: " + settings["deviceId"])
+                }
 
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" && TPlinkModel != "EP10" && TPlinkModel != "ES20M") {
+                if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" &&
+                    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" &&
+                    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
 
-                        oldpowerState = this.getCapabilityValue('measure_power');
-                        oldtotalState = this.getCapabilityValue('meter_power');
-                        oldvoltageState = this.getCapabilityValue('measure_voltage');
-                        oldcurrentState = this.getCapabilityValue('measure_current');
+                    oldpowerState = this.getCapabilityValue('measure_power');
+                    oldtotalState = this.getCapabilityValue('meter_power');
+                    oldvoltageState = this.getCapabilityValue('measure_voltage');
+                    oldcurrentState = this.getCapabilityValue('measure_current');
 
-                        var total = data.emeter.realtime.total;
-                        var corrected_total = total - totalOffset;
-                    }
+                    var total = data.emeter.realtime.total;
+                    var corrected_total = total - totalOffset;
+                }
 
-                    if (data.sysInfo.relay_state === 1) {
-                        this.log('Relay state is on ');
-                        this.setCapabilityValue('onoff', true)
+                if (data.sysInfo.relay_state === 1) {
+                    this.log('Relay state is on ');
+                    this.setCapabilityValue('onoff', true)
+                        .catch(this.error);
+                } else {
+                    this.log('Relay state is off ');
+                    this.setCapabilityValue('onoff', false)
+                        .catch(this.error);
+                }
+
+                // update realtime data only in case it changed
+                if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" &&
+                    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" &&
+                    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
+
+                    if (oldtotalState != corrected_total) {
+                        this.log("Total - Offset: " + corrected_total);
+                        this.setCapabilityValue('meter_power', corrected_total)
                             .catch(this.error);
-                    } else {
-                        this.log('Relay state is off ');
-                        this.setCapabilityValue('onoff', false)
+                    }
+
+                    if (oldpowerState != data.emeter.realtime.power) {
+                        this.log('Power changed: ' + data.emeter.realtime.power);
+                        this.setCapabilityValue('measure_power', data.emeter.realtime.power)
                             .catch(this.error);
                     }
-
-                    // update realtime data only in case it changed
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" && TPlinkModel != "EP10" && TPlinkModel != "ES20M") {
-
-                        if (oldtotalState != corrected_total) {
-                            this.log("Total - Offset: " + corrected_total);
-                            this.setCapabilityValue('meter_power', corrected_total)
-                                .catch(this.error);
-                        }
-
-                        if (oldpowerState != data.emeter.realtime.power) {
-                            this.log('Power changed: ' + data.emeter.realtime.power);
-                            this.setCapabilityValue('measure_power', data.emeter.realtime.power)
-                                .catch(this.error);
-                        }
-                        if (oldvoltageState != data.emeter.realtime.voltage) {
-                            this.log('Voltage changed: ' + data.emeter.realtime.voltage);
-                            this.setCapabilityValue('measure_voltage', data.emeter.realtime.voltage)
-                                .catch(this.error);
-                        }
-                        if (oldcurrentState != data.emeter.realtime.current) {
-                            this.log('Current changed: ' + data.emeter.realtime.current);
-                            this.setCapabilityValue('measure_current', data.emeter.realtime.current)
-                                .catch(this.error);
-                        }
+                    if (oldvoltageState != data.emeter.realtime.voltage) {
+                        this.log('Voltage changed: ' + data.emeter.realtime.voltage);
+                        this.setCapabilityValue('measure_voltage', data.emeter.realtime.voltage)
+                            .catch(this.error);
                     }
-                })
+                    if (oldcurrentState != data.emeter.realtime.current) {
+                        this.log('Current changed: ' + data.emeter.realtime.current);
+                        this.setCapabilityValue('measure_current', data.emeter.realtime.current)
+                            .catch(this.error);
+                    }
+                }
+            })
                 .catch((err) => {
                     var errRegEx = new RegExp("EHOSTUNREACH", 'g')
                     if (err.message.match(errRegEx)) {

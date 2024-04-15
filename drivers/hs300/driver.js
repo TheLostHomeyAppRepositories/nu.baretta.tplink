@@ -6,7 +6,7 @@
 // need Homey module, see SDK Guidelines
 const Homey = require('homey');
 
-const {Client} = require('tplink-smarthome-api');
+const { Client } = require('tplink-smarthome-api');
 
 const client = new Client({
     //    logLevel: 'debug' // Set the log level to 'debug' for detailed logs
@@ -92,11 +92,11 @@ class TPlinkPlugDriver extends Homey.Driver {
 
             client.startDiscovery(discoveryOptions);
 
-            try {             
+            try {
 
                 client.on('plug-new', async (plug) => {
-                    logEvent('Found plug-new type', plug);                  
-                     // const sysInfo = await plug.getSysInfo();
+                    logEvent('Found plug-new type', plug);
+                    // const sysInfo = await plug.getSysInfo();
                     if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {
 
                         // if (sysInfo.children) {
@@ -130,14 +130,14 @@ class TPlinkPlugDriver extends Homey.Driver {
             try {
                 client.on('plug-online', async (plug) => {
                     logEvent('Found plug-online type', plug);
-                    
+
 
                     if (Array.isArray(data) && data.length > 0 && data[0].ip && data[0].ip !== '') {
 
                         const userEnteredIp = data[0].ip; // Assuming this is the user-entered IP address
-                                                
-                        if ( plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId) && plug.host === userEnteredIp) {
-                            
+
+                        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId) && plug.host === userEnteredIp) {
+
 
                             let deviceName = plug.alias || `Device ${plug.deviceId}`;
                             let childId = plug.childId || null; // null for non-child devices
@@ -151,30 +151,30 @@ class TPlinkPlugDriver extends Homey.Driver {
                                         deviceId: plug.deviceId,
                                         childId: childId
                                     });
-                                    
+
                                 }
 
                             }
-                            }
+                        }
 
-                        } // If data[0].ip is not defined
-                        else if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {
+                    } // If data[0].ip is not defined
+                    else if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId) && !devIds.hasOwnProperty(plug.childId)) {
 
-                            let deviceName = plug.alias || `Device ${plug.deviceId}`;
-                            let childId = plug.childId || null; // null for non-child devices
+                        let deviceName = plug.alias || `Device ${plug.deviceId}`;
+                        let childId = plug.childId || null; // null for non-child devices
 
-                            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId && device.childId === childId)) {
-                                
-                                    this.log(`Socket found online (manual IP): ${deviceName} in ${plug.host} with Device ID: ${plug.deviceId} and Child ID: ${childId}`);
-                                    discoveredDevicesArray.push({
-                                        ip: plug.host,
-                                        name: deviceName,
-                                        deviceId: plug.deviceId,
-                                        childId: childId
-                                    });
-                                
-                            }
-                        
+                        if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId && device.childId === childId)) {
+
+                            this.log(`Socket found online (manual IP): ${deviceName} in ${plug.host} with Device ID: ${plug.deviceId} and Child ID: ${childId}`);
+                            discoveredDevicesArray.push({
+                                ip: plug.host,
+                                name: deviceName,
+                                deviceId: plug.deviceId,
+                                childId: childId
+                            });
+
+                        }
+
                     }
                 });
 

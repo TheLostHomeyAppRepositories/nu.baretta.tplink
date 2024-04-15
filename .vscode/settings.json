@@ -1,4 +1,14 @@
 {"editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
-    }
+    },
+    "formatFiles.excludedFolders": [
+        "node_modules",
+        ".vscode",
+        ".git",
+        "dist",
+        ".chrome",
+        "**/assets/**"
+    ],
+    "formatFiles.excludePattern": "**/*.jpg,**/*.svg,**/*.png",
+    "formatFiles.extensionsToInclude": ""
 }

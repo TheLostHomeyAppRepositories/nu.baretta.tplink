@@ -57,69 +57,69 @@ class TPlinkPlugDriver extends Homey.Driver {
             } // initial settings
         }];
 
-// discover function
-session.setHandler("discover", async (data) => {
+        // discover function
+        session.setHandler("discover", async (data) => {
 
-    let discoveredDevicesArray = []; // Initialize an array to store discovered devices
+            let discoveredDevicesArray = []; // Initialize an array to store discovered devices
 
-    var discoveryOptions = {
-        deviceTypes: 'plug',
-        discoveryInterval: 1500,
-        discoveryTimeout: 2000
-    }
-    client.startDiscovery(discoveryOptions);
-    this.log('Starting Plug Discovery');
-    client.on('plug-new', async (plug) => {
-        logEvent('Found plug-new type', plug);
-        const sysInfo = await plug.getSysInfo();
-        const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model ; //Fallback as per sysinfo available data
-    
-        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
-                this.log("New Plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
-                discoveredDevicesArray.push({
-                    ip: plug.host,
-                    name: deviceName,
-                    deviceId: plug.deviceId // Store the device ID
-                });
+            var discoveryOptions = {
+                deviceTypes: 'plug',
+                discoveryInterval: 1500,
+                discoveryTimeout: 2000
             }
-        }
-    });
+            client.startDiscovery(discoveryOptions);
+            this.log('Starting Plug Discovery');
+            client.on('plug-new', async (plug) => {
+                logEvent('Found plug-new type', plug);
+                const sysInfo = await plug.getSysInfo();
+                const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model; //Fallback as per sysinfo available data
 
-    client.on('plug-online', async (plug) => {
-        
-        const sysInfo = await plug.getSysInfo();
-        const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model ; //Fallback as per sysinfo available data
+                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
+                    if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
+                        this.log("New Plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
+                        discoveredDevicesArray.push({
+                            ip: plug.host,
+                            name: deviceName,
+                            deviceId: plug.deviceId // Store the device ID
+                        });
+                    }
+                }
+            });
 
-        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
-                this.log("Online plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
-                discoveredDevicesArray.push({
-                    ip: plug.host,
-                    name: deviceName,
-                    deviceId: plug.deviceId // Store the device ID
-                });
-            }
-        }
-    });
+            client.on('plug-online', async (plug) => {
 
-    setTimeout(() => {
-        if (discoveredDevicesArray.length > 0) {
-            session.emit('discovered_devices', discoveredDevicesArray); // Emit the array of discovered devices
-            this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
-            return discoveredDevicesArray; // Return the array
-        } else {
-            this.log("No devices discovered");
-            session.emit('discovery_failed', { devicesFound: false });
-            return []; // Return an empty array if no devices were discovered
-        }
+                const sysInfo = await plug.getSysInfo();
+                const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model; //Fallback as per sysinfo available data
+
+                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
+                    if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
+                        this.log("Online plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
+                        discoveredDevicesArray.push({
+                            ip: plug.host,
+                            name: deviceName,
+                            deviceId: plug.deviceId // Store the device ID
+                        });
+                    }
+                }
+            });
+
+            setTimeout(() => {
+                if (discoveredDevicesArray.length > 0) {
+                    session.emit('discovered_devices', discoveredDevicesArray); // Emit the array of discovered devices
+                    this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
+                    return discoveredDevicesArray; // Return the array
+                } else {
+                    this.log("No devices discovered");
+                    session.emit('discovery_failed', { devicesFound: false });
+                    return []; // Return an empty array if no devices were discovered
+                }
             }, discoveryOptions.discoveryTimeout);
             client.stopDiscovery();
-});
+        });
 
         // this is called when the user presses save settings button in start.html
         session.setHandler("get_devices", async (data) => {
-            this.log("Received get_devices data: " + JSON.stringify(data));            
+            this.log("Received get_devices data: " + JSON.stringify(data));
 
             // Ensure data is always treated as an array
             let inputData = Array.isArray(data) ? data : [data];

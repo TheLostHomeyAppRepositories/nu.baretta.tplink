@@ -3,6 +3,7 @@ const Homey = require('homey');
 const {
     Client
 } = require('tplink-smarthome-api');
+
 const client = new Client();
 
 // get driver name based on dirname
@@ -82,7 +83,7 @@ class TPlinkPlugDevice extends Homey.Device {
         let settings = this.getSettings();
         var interval = 10;
 
-        this.pollDevice(interval);
+//        this.pollDevice(interval);
     }
 
     // this method is called when the Device is deleted
@@ -283,7 +284,9 @@ async ledOff(device) {
                         this.log("DeviceId added: " + settings["deviceId"])
                     }
 
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" && TPlinkModel != "EP10" && TPlinkModel != "ES20M") {
+                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && 
+    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" && 
+    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
 
                         oldpowerState = this.getCapabilityValue('measure_power');
                         oldtotalState = this.getCapabilityValue('meter_power');
@@ -305,7 +308,9 @@ async ledOff(device) {
                     }
 
                     // update realtime data only in case it changed
-                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" && TPlinkModel != "EP10" && TPlinkModel != "ES20M") {
+                    if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" && 
+    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" && 
+    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
 
                         if (oldtotalState != corrected_total) {
                             this.log("Total - Offset: " + corrected_total);

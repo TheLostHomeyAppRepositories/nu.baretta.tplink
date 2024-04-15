@@ -78,24 +78,24 @@ class TPlinkBulbDevice extends Homey.Device {
 
         // register flow card actions
 
-  		this.homey.flow.getActionCard('circadianModeOn').registerRunListener(async (args, state) => {
-			return args.device.circadianModeOn(args.device.getSettings().settingIPAddress);
-		});
+        this.homey.flow.getActionCard('circadianModeOn').registerRunListener(async (args, state) => {
+            return args.device.circadianModeOn(args.device.getSettings().settingIPAddress);
+        });
 
-		this.homey.flow.getActionCard('circadianModeOff').registerRunListener(async (args, state) => {
-			return args.device.circadianModeOff(args.device.getSettings().settingIPAddress);
-		});
+        this.homey.flow.getActionCard('circadianModeOff').registerRunListener(async (args, state) => {
+            return args.device.circadianModeOff(args.device.getSettings().settingIPAddress);
+        });
 
-		this.homey.flow.getActionCard('transitionOn').registerRunListener(async (args, state) => {
-			var transition = args.transition * 1000;
-			return args.device.onTransition(args.device.getSettings().settingIPAddress, transition);
-		});
+        this.homey.flow.getActionCard('transitionOn').registerRunListener(async (args, state) => {
+            var transition = args.transition * 1000;
+            return args.device.onTransition(args.device.getSettings().settingIPAddress, transition);
+        });
 
-		this.homey.flow.getActionCard('transitionOff').registerRunListener(async (args, state) => {
-			var transition = args.transition * 1000;
-			return args.device.offTransition(args.device.getSettings().settingIPAddress, transition);
-		});
-        
+        this.homey.flow.getActionCard('transitionOff').registerRunListener(async (args, state) => {
+            var transition = args.transition * 1000;
+            return args.device.offTransition(args.device.getSettings().settingIPAddress, transition);
+        });
+
 
 
     } // end onInit
@@ -126,7 +126,7 @@ class TPlinkBulbDevice extends Homey.Device {
             this.powerOff(device);
         }
         // Then, emit a callback ( err, result )
-        return(null, true);
+        return (null, true);
     }
 
     onCapabilityDim(value, opts, callback) {
@@ -147,7 +147,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('dim', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        return(null, value);
+        return (null, value);
     }
 
     onCapabilityHue(value, opts, callback) {
@@ -169,7 +169,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('light_hue', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        return(null, value);
+        return (null, value);
     }
 
     onCapabilitySaturation(value, opts, callback) {
@@ -190,7 +190,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('light_saturation', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        return(null, value);
+        return (null, value);
     }
 
     onCapabilityTemperature(value, opts, callback) {
@@ -214,7 +214,7 @@ class TPlinkBulbDevice extends Homey.Device {
             this.setCapabilityValue('light_temperature', value)
                 .catch(this.error);
             // Then, emit a callback ( err, result )
-            return(null, value);
+            return (null, value);
         }
     }
 
@@ -229,7 +229,7 @@ class TPlinkBulbDevice extends Homey.Device {
         this.setCapabilityValue('light_mode', value)
             .catch(this.error);
         // Then, emit a callback ( err, result )
-        return(null, value);
+        return (null, value);
     }
 
     // start functions
@@ -247,81 +247,81 @@ class TPlinkBulbDevice extends Homey.Device {
                         break;
                 }
             }
-            return(null, true)
+            return (null, true)
         } catch (error) {
             return "error";
         }
     }
 
 
-async powerOn(device) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 300, "on_off": 1 };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in powerOn method: ', err.message);
-        // Handle the error appropriately
+    async powerOn(device) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 300, "on_off": 1 };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in powerOn method: ', err.message);
+            // Handle the error appropriately
+        }
     }
-}
 
-async powerOff(device) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 1000, "on_off": 0 };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in powerOff method: ', err.message);
+    async powerOff(device) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 1000, "on_off": 0 };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in powerOff method: ', err.message);
+        }
     }
-}
 
-async dim(device, dimLevel) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 30, "brightness": dimLevel };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in dim method: ', err.message);
+    async dim(device, dimLevel) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 30, "brightness": dimLevel };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in dim method: ', err.message);
+        }
     }
-}
 
-async color_temp(device, tempLevel) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 30, "color_temp": tempLevel };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in color_temp method: ', err.message);
+    async color_temp(device, tempLevel) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 30, "color_temp": tempLevel };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in color_temp method: ', err.message);
+        }
     }
-}
 
 
-async set_hue(device, hueLevel) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 30, "hue": hueLevel, "color_temp": 0 };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in set_hue method: ', err.message);
+    async set_hue(device, hueLevel) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 30, "hue": hueLevel, "color_temp": 0 };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in set_hue method: ', err.message);
+        }
     }
-}
 
 
-async set_saturation(device, saturationLevel) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 30, "saturation": saturationLevel };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in set_saturation method: ', err.message);
+    async set_saturation(device, saturationLevel) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 30, "saturation": saturationLevel };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in set_saturation method: ', err.message);
+        }
     }
-}
 
 
     getPower(device) {
@@ -331,61 +331,61 @@ async set_saturation(device, saturationLevel) {
         this.bulb.getSysInfo().then((sysInfo) => {
             if (sysInfo.relay_state === 1) {
                 Homey.log('TP Link smartbulb app - light is on ');
-                return(null, true);
+                return (null, true);
             } else {
                 Homey.log('TP Link smartbulb app - light is off ');
-                return(null, false);
+                return (null, false);
             }
         });
     }
 
     // mode 'normal', 'circadian'
-async circadianModeOn(device) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 100, "mode": "circadian" };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in circadianModeOn method: ', err.message);
+    async circadianModeOn(device) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 100, "mode": "circadian" };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in circadianModeOn method: ', err.message);
+        }
     }
-}
 
 
-async circadianModeOff(device) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": 100, "mode": "normal", "brightness": 100 };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in circadianModeOff method: ', err.message);
+    async circadianModeOff(device) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": 100, "mode": "normal", "brightness": 100 };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in circadianModeOff method: ', err.message);
+        }
     }
-}
 
 
-async onTransition(device, transition) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": transition, "on_off": 1, "brightness": 100 };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in onTransition method: ', err.message);
+    async onTransition(device, transition) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": transition, "on_off": 1, "brightness": 100 };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in onTransition method: ', err.message);
+        }
     }
-}
 
 
-async offTransition(device, transition) {
-    try {
-        const sysInfo = await client.getSysInfo(device);
-				this.bulb = client.getBulb({ host: device,  sysInfo: sysInfo });
-        options = { "transition_period": transition, "on_off": 0 };
-        await this.bulb.lighting.setLightState(options);
-    } catch (err) {
-        this.log('Error in offTransition method: ', err.message);
+    async offTransition(device, transition) {
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.bulb = client.getBulb({ host: device, sysInfo: sysInfo });
+            options = { "transition_period": transition, "on_off": 0 };
+            await this.bulb.lighting.setLightState(options);
+        } catch (err) {
+            this.log('Error in offTransition method: ', err.message);
+        }
     }
-}
 
 
 
@@ -400,7 +400,7 @@ async offTransition(device, transition) {
         try {
             const sysInfo = await client.getSysInfo(device);
             this.bulb = client.getBulb({
-                host: device,  sysInfo: sysInfo
+                host: device, sysInfo: sysInfo
             });
 
             if (settings["deviceId"] === undefined) {
@@ -425,65 +425,65 @@ async offTransition(device, transition) {
             oldMode = mode[this.getCapabilityValue('light_mode')];
 
             await this.bulb.lighting.getLightState().then((bulbState) => {
-                    this.log('getLightState: ' + JSON.stringify(bulbState));
-                    if (bulbState.on_off === 1) {
-                        this.log('TP Link smartbulb app - bulb on ');
-                        this.setCapabilityValue('onoff', true)
-                            .catch(this.error);
+                this.log('getLightState: ' + JSON.stringify(bulbState));
+                if (bulbState.on_off === 1) {
+                    this.log('TP Link smartbulb app - bulb on ');
+                    this.setCapabilityValue('onoff', true)
+                        .catch(this.error);
 
-                        // bulbState mode: circadian or normal. Only for LB130/120 and KL130/120
-                        if ((TPlinkModel == "LB130") || (TPlinkModel == "LB120") || (TPlinkModel == "KL130") || (TPlinkModel == "KL120")) {
-                            if (bulbState.mode == "normal") {
-                                this.log('Bulb state: normal');
-                            } else
+                    // bulbState mode: circadian or normal. Only for LB130/120 and KL130/120
+                    if ((TPlinkModel == "LB130") || (TPlinkModel == "LB120") || (TPlinkModel == "KL130") || (TPlinkModel == "KL120")) {
+                        if (bulbState.mode == "normal") {
+                            this.log('Bulb state: normal');
+                        } else
                             if (bulbState.mode == "circadian") {
                                 this.log('Bulb state: circadian');
                             }
 
-                            if (bulbState.color_temp == 0) {
-                                var new_light_temperature = 0
-                            } else {
-                                var new_light_temperature = this.round(1 - ((bulbState.color_temp - kelvinLow) / (kelvinHigh - kelvinLow)), 2);
-                            }
-
-                            if (oldColorTemp != new_light_temperature) {
-                                this.log('ColorTemp changed: ' + new_light_temperature);
-                                this.setCapabilityValue('light_temperature', new_light_temperature)
-                                    .catch(this.error);
-                            }
-                            if (oldSaturation != bulbState.saturation / 100) {
-                                this.log('Saturation changed: ' + bulbState.saturation);
-                                this.setCapabilityValue('light_saturation', bulbState.saturation / 100)
-                                    .catch(this.error);
-                            }
+                        if (bulbState.color_temp == 0) {
+                            var new_light_temperature = 0
+                        } else {
+                            var new_light_temperature = this.round(1 - ((bulbState.color_temp - kelvinLow) / (kelvinHigh - kelvinLow)), 2);
                         }
 
-                        if ((TPlinkModel == "LB130") || (TPlinkModel == "KL130")) {
-                            if (oldHue != this.round((bulbState.hue / 360), 2)) {
-                                this.log('Hue changed: ' + this.round((bulbState.hue / 360), 2));
-                                this.setCapabilityValue('light_hue', this.round((bulbState.hue / 360), 2))
-                                    .catch(this.error);
-                            }
-                        }
-
-                        if (oldBrightness != bulbState.brightness / 100) {
-                            this.log('Brightness changed: ' + bulbState.brightness / 100);
-                            this.setCapabilityValue('dim', bulbState.brightness / 100)
+                        if (oldColorTemp != new_light_temperature) {
+                            this.log('ColorTemp changed: ' + new_light_temperature);
+                            this.setCapabilityValue('light_temperature', new_light_temperature)
                                 .catch(this.error);
                         }
-
-                        if (oldMode != this.getCapabilityValue('light_mode')) {
-                            this.log('Light_mode changed: ' + this.getCapabilityValue('light_mode'));
+                        if (oldSaturation != bulbState.saturation / 100) {
+                            this.log('Saturation changed: ' + bulbState.saturation);
+                            this.setCapabilityValue('light_saturation', bulbState.saturation / 100)
+                                .catch(this.error);
                         }
-
-                    } else if (bulbState.on_off === 0) {
-                        this.log('Bulb off ');
-                        this.setCapabilityValue('onoff', false)
-                            .catch(this.error);
-                    } else {
-                        this.log("BulbState.on_off undefined")
                     }
-                })
+
+                    if ((TPlinkModel == "LB130") || (TPlinkModel == "KL130")) {
+                        if (oldHue != this.round((bulbState.hue / 360), 2)) {
+                            this.log('Hue changed: ' + this.round((bulbState.hue / 360), 2));
+                            this.setCapabilityValue('light_hue', this.round((bulbState.hue / 360), 2))
+                                .catch(this.error);
+                        }
+                    }
+
+                    if (oldBrightness != bulbState.brightness / 100) {
+                        this.log('Brightness changed: ' + bulbState.brightness / 100);
+                        this.setCapabilityValue('dim', bulbState.brightness / 100)
+                            .catch(this.error);
+                    }
+
+                    if (oldMode != this.getCapabilityValue('light_mode')) {
+                        this.log('Light_mode changed: ' + this.getCapabilityValue('light_mode'));
+                    }
+
+                } else if (bulbState.on_off === 0) {
+                    this.log('Bulb off ');
+                    this.setCapabilityValue('onoff', false)
+                        .catch(this.error);
+                } else {
+                    this.log("BulbState.on_off undefined")
+                }
+            })
                 .catch((err) => {
                     var errRegEx = new RegExp("EHOSTUNREACH", 'g')
                     if (err.message.match(errRegEx)) {

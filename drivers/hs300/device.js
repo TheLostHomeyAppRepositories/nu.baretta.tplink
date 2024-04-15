@@ -9,7 +9,7 @@ const {
 
 const client = new Client({
     //debug for API
-//    logLevel: 'debug' // Set the log level to 'debug' for detailed logs
+    //    logLevel: 'debug' // Set the log level to 'debug' for detailed logs
 });
 
 // get driver name based on dirname

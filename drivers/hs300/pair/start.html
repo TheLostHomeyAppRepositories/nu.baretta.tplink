@@ -99,7 +99,7 @@
 				Homey.emit('discover', data, function (err, result) {
 					console.log("Discovery results" + 'result');
 				});
-				
+
 				await new Promise(resolve => setTimeout(resolve, 4000));
 
 				// Continue to back-end, pass along data
