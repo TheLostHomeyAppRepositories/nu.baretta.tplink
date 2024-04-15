@@ -106,5 +106,8 @@
   },
   "0.2.21": {
     "en": "Experimental support for ES20M dimmer (motion not supported)"
+  },
+  "0.2.22": {
+    "en": "Remove meter_power for HS210"
   }
 }
