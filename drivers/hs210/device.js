@@ -356,65 +356,70 @@ class TPlinkPlugDevice extends Homey.Device {
 
     }
 
-    pollDevice(interval) {
-        clearInterval(this.pollingInterval);
-
-        this.pollingInterval = setInterval(() => {
-            // poll status
-            try {
-                this.getStatus();
-            } catch (err) {
-                this.log("Error: " + err.message)
-            }
-        }, 1000 * interval);
-    }
-
-    discover() {
-        // TODO: rewrite with API's discovery options (timeout, excluded MAC addresses, interval)
-        let settings = this.getSettings();
-        var discoveryOptions = {
-            deviceTypes: 'plug',
-            discoveryInterval: 10000,
-            discoveryTimeout: 5000,
-            offlineTolerance: 3
+pollDevice(interval) {
+    clearInterval(this.pollingInterval);
+    this.pollingInterval = setInterval(async () => {
+        try {
+            await this.getStatus();
+        } catch (err) {
+            this.log("Error during polling: " + err.message);
+            // Optionally, handle reconnection or retry logic here
         }
-        // discover new plugs
-        client.startDiscovery(discoveryOptions);
-        client.on('plug-new', (plug) => {
-            this.log("Settings deviceId: " + settings["deviceId"]);
-            this.log("Host: " + plug.host + " deviceId: " + plug.deviceId);
-            if (plug.deviceId == settings["deviceId"]) {
-                this.setSettings({
-                    settingIPAddress: plug.host
-                }).catch(this.error);
-                setTimeout(function () {
-                    client.stopDiscovery()
-                }, 1000);
-                this.log("Discovered online plug: " + plug.deviceId);
-                this.log("Resetting unreachable count to 0");
-                unreachableCount = 0;
-                discoverCount = 0;
-                this.setAvailable();
+    }, 1000 * interval);
+}
+
+
+    async discover() {
+    let settings = this.getSettings();
+    var discoveryOptions = {
+        deviceTypes: 'plug',
+        discoveryInterval: 10000,
+        discoveryTimeout: 5000,
+        offlineTolerance: 3
+    };
+
+    try {
+        // As startDiscovery does not return a promise, it does not need await but errors should be handled appropriately
+        const discovery = client.startDiscovery(discoveryOptions);
+        
+        // Handle new plug event
+        discovery.on('plug-new', async (plug) => {
+            try {
+                if (plug.deviceId === settings["deviceId"]) {
+                    await this.setSettings({ settingIPAddress: plug.host });
+                    // Stopping discovery after finding the device, assuming one device setup per call
+                    client.stopDiscovery();
+                    this.log("Discovered online plug: " + plug.deviceId);
+                    this.setAvailable();
+                    this.log("Resetting unreachable count to 0");
+                    unreachableCount = 0;
+                    discoverCount = 0;
+                }
+            } catch (err) {
+                this.log('Error updating settings during discovery: ' + err.message);
             }
-        })
-        client.on('plug-online', (plug) => {
-            this.log("Settings deviceId: " + settings["deviceId"]);
-            this.log("Host: " + plug.host + " deviceId: " + plug.deviceId);
-            if (plug.deviceId == settings["deviceId"]) {
-                this.setSettings({
-                    settingIPAddress: plug.host
-                }).catch(this.error);
-                setTimeout(function () {
-                    client.stopDiscovery()
-                }, 1000);
-                this.log("Discovered online plug: " + plug.deviceId);
-                this.log("Resetting unreachable count to 0");
-                unreachableCount = 0;
-                discoverCount = 0;
-                this.setAvailable();
+        });
+
+        // Optionally handle plug-online event if needed
+        discovery.on('plug-online', async (plug) => {
+            try {
+                if (plug.deviceId === settings["deviceId"]) {
+                    await this.setSettings({ settingIPAddress: plug.host });
+                    // Similar to plug-new, stop discovery once the intended device is online
+                    client.stopDiscovery();
+                    this.log("Discovered online plug: " + plug.deviceId + " is back online");
+                    this.setAvailable();
+                }
+            } catch (err) {
+                this.log('Error handling online plug during discovery: ' + err.message);
             }
-        })
+        });
+    } catch (err) {
+        this.log('Discovery failed: ' + err.message);
+        // Implement retry logic or further error handling as needed
     }
+}
+
 }
 
 module.exports = TPlinkPlugDevice;

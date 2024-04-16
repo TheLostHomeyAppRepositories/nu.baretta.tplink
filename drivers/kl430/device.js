@@ -505,18 +505,18 @@ class TPlinkBulbDevice extends Homey.Device {
         }
     }
 
-    pollDevice(interval) {
-        clearInterval(this.pollingInterval);
+pollDevice(interval) {
+    clearInterval(this.pollingInterval);
+    this.pollingInterval = setInterval(async () => {
+        try {
+            await this.getStatus();
+        } catch (err) {
+            this.log("Error during polling: " + err.message);
+            // Optionally, handle reconnection or retry logic here
+        }
+    }, 1000 * interval);
+}
 
-        this.pollingInterval = setInterval(() => {
-            // poll status
-            try {
-                this.getStatus();
-            } catch (err) {
-                this.log("Error: " + err.message)
-            }
-        }, 1000 * interval);
-    }
 
     round(value, decimals) {
         return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);

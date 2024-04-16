@@ -397,7 +397,7 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
 
-    discover() {
+    async discover() {
         let settings = this.getSettings();
         var discoveryOptions = {
             deviceTypes: 'plug',
@@ -405,47 +405,56 @@ class TPlinkPlugDevice extends Homey.Device {
             discoveryTimeout: 5000,
             offlineTolerance: 3
         };
-
+    
         try {
             // Start discovering new plugs
-            client.startDiscovery(discoveryOptions);
-
-            client.on('plug-new', (plug) => {
-                this.log("Discovered new plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
-
-                if (plug.deviceId === settings["deviceId"]) {
-                    this.setSettings({
-                        settingIPAddress: plug.host
-                    }).catch(this.error);
-
-                    setTimeout(() => client.stopDiscovery(), 1000);
-                    this.log("Updated settings for discovered plug: " + plug.deviceId);
-                    unreachableCount = 0;
-                    discoverCount = 0;
-                    this.setAvailable();
+            const discovery = client.startDiscovery(discoveryOptions);
+    
+            // Handle the event when a new plug is discovered
+            discovery.on('plug-new', async (plug) => {
+                try {
+                    this.log("Discovered new plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
+    
+                    if (plug.deviceId === settings["deviceId"]) {
+                        await this.setSettings({
+                            settingIPAddress: plug.host
+                        });
+                        client.stopDiscovery();
+                        this.log("Updated settings for discovered plug: " + plug.deviceId);
+                        unreachableCount = 0;
+                        discoverCount = 0;
+                        this.setAvailable();
+                    }
+                } catch (error) {
+                    this.log('Error handling new plug discovery: ' + error.message);
                 }
             });
-
-            client.on('plug-online', (plug) => {
-                this.log("Discovered online plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
-
-                if (plug.deviceId === settings["deviceId"]) {
-                    this.setSettings({
-                        settingIPAddress: plug.host
-                    }).catch(this.error);
-
-                    setTimeout(() => client.stopDiscovery(), 1000);
-                    this.log("Updated settings for online plug: " + plug.deviceId);
-                    unreachableCount = 0;
-                    discoverCount = 0;
-                    this.setAvailable();
+    
+            // Handle the event when a plug comes online
+            discovery.on('plug-online', async (plug) => {
+                try {
+                    this.log("Discovered online plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
+    
+                    if (plug.deviceId === settings["deviceId"]) {
+                        await this.setSettings({
+                            settingIPAddress: plug.host
+                        });
+                        client.stopDiscovery();
+                        this.log("Updated settings for online plug: " + plug.deviceId);
+                        unreachableCount = 0;
+                        discoverCount = 0;
+                        this.setAvailable();
+                    }
+                } catch (error) {
+                    this.log('Error handling online plug: ' + error.message);
                 }
             });
         } catch (err) {
             this.log("Caught error in discover function: " + err.message);
-            // Handle the error accordingly
+            // Implement retry logic or further error handling as needed
         }
     }
+    
 
 }
 
