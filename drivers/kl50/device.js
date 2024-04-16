@@ -126,7 +126,7 @@ class TPlinkBulbDevice extends Homey.Device {
             this.powerOff(device);
         }
         // Then, emit a callback ( err, result )
-        return (null, true);
+        return true;
     }
 
     onCapabilityDim(value, opts, callback) {
@@ -331,10 +331,10 @@ class TPlinkBulbDevice extends Homey.Device {
         this.bulb.getSysInfo().then((sysInfo) => {
             if (sysInfo.relay_state === 1) {
                 Homey.log('TP Link smartbulb app - light is on ');
-                return (null, true);
+                return true;
             } else {
                 Homey.log('TP Link smartbulb app - light is off ');
-                return (null, false);
+                return false;
             }
         });
     }

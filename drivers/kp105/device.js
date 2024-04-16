@@ -181,10 +181,10 @@ class TPlinkPlugDevice extends Homey.Device {
         this.plug.getSysInfo().then((sysInfo) => {
             if (sysInfo.relay_state === 1) {
                 this.log('Relay state is on ');
-                return (null, true);
+                return true;
             } else {
                 this.log('Relay state is off ');
-                return (null, false);
+                return false;
             }
         })
             .catch((err) => {
@@ -198,7 +198,7 @@ class TPlinkPlugDevice extends Homey.Device {
         this.plug.getSysInfo().then((sysInfo) => {
             if (sysInfo.led_off === 0) {
                 this.log('LED on ');
-                return "true";
+                return true;
             } else {
                 this.log('LED off ');
                 return false;
