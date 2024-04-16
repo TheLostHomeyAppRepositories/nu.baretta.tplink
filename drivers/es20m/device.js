@@ -206,7 +206,7 @@ getPower(device) {
         })
         .catch(err => {
             this.log("Caught error in getPower function: " + err.message);
-            throw err;  // Re-throw or handle the error appropriately
+            
         });
 }
 
@@ -227,7 +227,7 @@ getLed(device) {
         })
         .catch(err => {
             this.log("Caught error in getLed function: " + err.message);
-            throw err;  // Re-throw or handle the error appropriately
+            
         });
 }
 
