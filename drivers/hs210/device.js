@@ -173,40 +173,47 @@ class TPlinkPlugDevice extends Homey.Device {
         }
     }
 
-    getPower(device) {
-        const sysInfo = client.getSysInfo(device);
-        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-        this.plug.getSysInfo().then((sysInfo) => {
+getPower(device) {
+    return client.getSysInfo(device)  // Ensure this function returns a promise
+        .then(sysInfo => {
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            return this.plug.getSysInfo();
+        })
+        .then(sysInfo => {
             if (sysInfo.relay_state === 1) {
-                this.log('Relay state is on ');
-                return true;
+                this.log('Relay state is on');
+                return true;  // Return true when the relay is on
             } else {
-                this.log('Relay state is off ');
-                return false;
+                this.log('Relay state is off');
+                return false; // Return false when the relay is off
             }
         })
-            .catch((err) => {
-                this.log("Caught error in getPower function: " + err.message);
-            });
-    }
+        .catch(err => {
+            this.log("Caught error in getPower function: " + err.message);
+            throw err;  // Re-throw or handle the error appropriately
+        });
+}
 
-    getLed(device) {
-        const sysInfo = client.getSysInfo(device);
-        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-        this.plug.getSysInfo().then((sysInfo) => {
+getLed(device) {
+    return client.getSysInfo(device)  // Ensure this function returns a promise
+        .then(sysInfo => {
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            return this.plug.getSysInfo();
+        })
+        .then(sysInfo => {
             if (sysInfo.led_off === 0) {
-                this.log('LED on ');
-                return true;
+                this.log('LED on');
+                return true;  // Return true if LED is on
             } else {
-                this.log('LED off ');
-                return false;
+                this.log('LED off');
+                return false; // Return false if LED is off
             }
         })
-            .catch((err) => {
-                this.log("Caught error in getLed function: " + err.message);
-            });
-
-    }
+        .catch(err => {
+            this.log("Caught error in getLed function: " + err.message);
+            throw err;  // Re-throw or handle the error appropriately
+        });
+}
 
     async ledOn(device) {
         try {
