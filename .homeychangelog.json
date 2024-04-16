@@ -109,5 +109,8 @@
   },
   "0.2.22": {
     "en": "Remove meter_power for HS210"
+  },
+  "0.2.23": {
+    "en": "Polling and discovery adjustments"
   }
 }
