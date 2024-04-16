@@ -245,7 +245,7 @@ class TPlinkPlugDevice extends Homey.Device {
             return "error";
         }
     }
-    //REWORK !!! -  
+    
     async getLed(device) {
         try {
             const sysInfo = await client.getSysInfo(device);
@@ -274,7 +274,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.setCapabilityValue('ledonoff', true);
         } catch (err) {
             this.log('Error turning LED on: ', err.message);
-            // Handle the error appropriately
+            
         }
     }
 
@@ -287,7 +287,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.setCapabilityValue('ledonoff', false);
         } catch (err) {
             this.log('Error turning LED off: ', err.message);
-            // Handle the error appropriately
+            
         }
     }
 
@@ -405,16 +405,16 @@ class TPlinkPlugDevice extends Homey.Device {
             discoveryTimeout: 5000,
             offlineTolerance: 3
         };
-    
+
         try {
             // Start discovering new plugs
             const discovery = client.startDiscovery(discoveryOptions);
-    
+
             // Handle the event when a new plug is discovered
             discovery.on('plug-new', async (plug) => {
                 try {
                     this.log("Discovered new plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
-    
+
                     if (plug.deviceId === settings["deviceId"]) {
                         await this.setSettings({
                             settingIPAddress: plug.host
@@ -429,12 +429,12 @@ class TPlinkPlugDevice extends Homey.Device {
                     this.log('Error handling new plug discovery: ' + error.message);
                 }
             });
-    
+
             // Handle the event when a plug comes online
             discovery.on('plug-online', async (plug) => {
                 try {
                     this.log("Discovered online plug: Host - " + plug.host + ", Device ID - " + plug.deviceId);
-    
+
                     if (plug.deviceId === settings["deviceId"]) {
                         await this.setSettings({
                             settingIPAddress: plug.host
@@ -454,7 +454,7 @@ class TPlinkPlugDevice extends Homey.Device {
             // Implement retry logic or further error handling as needed
         }
     }
-    
+
 
 }
 

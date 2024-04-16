@@ -262,7 +262,7 @@ class TPlinkBulbDevice extends Homey.Device {
             await this.bulb.lighting.setLightState(options);
         } catch (err) {
             this.log('Error in powerOn method: ', err.message);
-            // Handle the error appropriately
+            
         }
     }
 

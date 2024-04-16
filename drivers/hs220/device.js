@@ -161,7 +161,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.plug.setPowerState(true);
         } catch (err) {
             this.log('Error turning device on: ', err.message);
-            // Handle the error appropriately
+            
         }
     }
 
@@ -174,7 +174,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.plug.setPowerState(false);
         } catch (err) {
             this.log('Error turning device off: ', err.message);
-            // Handle the error appropriately
+            
         }
     }
 
@@ -240,7 +240,7 @@ getLed(device) {
             await this.setCapabilityValue('ledonoff', true);
         } catch (err) {
             this.log('Error turning LED on: ', err.message);
-            // Handle the error appropriately
+            
         }
     }
 
@@ -253,7 +253,7 @@ getLed(device) {
             await this.setCapabilityValue('ledonoff', false);
         } catch (err) {
             this.log('Error turning LED off: ', err.message);
-            // Handle the error appropriately
+            
         }
     }
 
