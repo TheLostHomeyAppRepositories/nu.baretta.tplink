@@ -115,5 +115,11 @@
   },
   "0.2.24": {
     "en": "Small adjustments of getPower and getLED"
+  },
+  "0.2.25": {
+    "en": "Interval configurable now in device settings (except of HS300)"
+  },
+  "0.2.26": {
+    "en": "Interval configurable now in device settings (except of HS300)"
   }
 }
