@@ -193,6 +193,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -285,6 +303,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -378,6 +414,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -470,6 +524,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -574,10 +646,24 @@
                 "en": "IP address",
                 "nl": "IP adres"
               },
-              "value": "0.0.0.0",
+              "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
               "hint": {
-                "en": "Only change the IP address here if the device's IP address has changed! This does not change the IP adres on the device.",
-                "nl": "Pas het IP adres hier alleen aan als het IP adres van de TP-Link veranderd is! De instelling veranderd het IP van de TP-Link niet."
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
               }
             }
           ]
@@ -683,11 +769,7 @@
                 "en": "IP address",
                 "nl": "IP adres"
               },
-              "value": "0.0.0.0",
-              "hint": {
-                "en": "Only change the IP address here if the device's IP address has changed! This does not change the IP adres on the device.",
-                "nl": "Pas het IP adres hier alleen aan als het IP adres van de TP-Link veranderd is! De instelling veranderd het IP van de TP-Link niet."
-              }
+              "value": "0.0.0.0"
             }
           ]
         },
@@ -792,10 +874,24 @@
                 "en": "IP address",
                 "nl": "IP adres"
               },
-              "value": "0.0.0.0",
+              "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
               "hint": {
-                "en": "Only change the IP address here if the device's IP address has changed! This does not change the IP adres on the device.",
-                "nl": "Pas het IP adres hier alleen aan als het IP adres van de TP-Link veranderd is! De instelling veranderd het IP van de TP-Link niet."
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
               }
             }
           ]
@@ -889,6 +985,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -981,6 +1095,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1086,6 +1218,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1178,6 +1328,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1271,6 +1439,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1364,6 +1550,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1446,6 +1650,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1528,6 +1750,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1613,6 +1853,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1699,6 +1957,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1785,6 +2061,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1871,6 +2165,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -1953,6 +2265,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -2035,6 +2365,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -2117,6 +2465,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -2202,6 +2568,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },
@@ -2288,6 +2672,24 @@
                 "nl": "IP adres"
               },
               "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
             }
           ]
         },

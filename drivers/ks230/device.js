@@ -23,7 +23,6 @@ class TPlinkPlugDevice extends Homey.Device {
     async onInit() {
         this.log('device init');
         let device = this;
-        var interval = 10;
 
         // console.dir(this.getSettings()); // for debugging
         // console.dir(this.getData()); // for debugging
@@ -47,6 +46,23 @@ class TPlinkPlugDevice extends Homey.Device {
 
         this.log('settings totalOffset: ', settings["totalOffset"])
         totalOffset = settings["totalOffset"];
+
+        let interval;
+        // Ensures that the pollingInterval is properly set during initialization
+        if (typeof settings["pollingInterval"] === 'number') {
+            this.log("Polling interval is set: " + settings["pollingInterval"] + " seconds");
+            interval = parseInt(settings["pollingInterval"], 10); // Safely parse it to an integer
+        } else {
+            // Default value set if pollingInterval is not defined or is incorrectly set
+            try {
+                await this.setSettings({ pollingInterval: 10 }); // Use await to ensure settings are applied
+                this.log("Polling interval was undefined, set to default: 10 seconds");
+                interval = 10; // Set interval to default after ensuring settings are applied
+            } catch (error) {
+                this.error('Failed to set default polling interval:', error);
+                interval = 10; // Optionally set a default even in case of error to ensure continuity
+            }
+        }
 
         this.pollDevice(interval);
 
@@ -84,10 +100,7 @@ class TPlinkPlugDevice extends Homey.Device {
     onAdded() {
         let id = this.getData().id;
         this.log("Device added: " + id);
-        let settings = this.getSettings();
-        var interval = 10;
-
-        //        this.pollDevice(interval);
+        let settings = this.getSettings();        
     }
 
     // this method is called when the Device is deleted
@@ -126,8 +139,7 @@ class TPlinkPlugDevice extends Homey.Device {
         return (null);
     }
 
-    // start functions
-    onSettings(settings, newSettingsObj, changedKeysArr, callback) {
+ onSettings(settings, newSettingsObj, changedKeysArr, callback) {
         try {
             for (var i = 0; i < changedKeysArr.length; i++) {
                 this.log("Key: " + changedKeysArr[i]);

@@ -40,7 +40,7 @@ var options = {};
 class TPlinkBulbDevice extends Homey.Device {
 
     async onInit() {
-        var interval = 10;
+
 
         this.log('device init');
         //        console.dir(this.getSettings()); // for debugging
@@ -61,6 +61,23 @@ class TPlinkBulbDevice extends Homey.Device {
             this.setSettings({
                 dynamicIp: false
             }).catch(this.error);
+        }
+
+        let interval;
+        // Ensures that the pollingInterval is properly set during initialization
+        if (typeof settings["pollingInterval"] === 'number') {
+            this.log("Polling interval is set: " + settings["pollingInterval"] + " seconds");
+            interval = parseInt(settings["pollingInterval"], 10); // Safely parse it to an integer
+        } else {
+            // Default value set if pollingInterval is not defined or is incorrectly set
+            try {
+                await this.setSettings({ pollingInterval: 10 }); // Use await to ensure settings are applied
+                this.log("Polling interval was undefined, set to default: 10 seconds");
+                interval = 10; // Set interval to default after ensuring settings are applied
+            } catch (error) {
+                this.error('Failed to set default polling interval:', error);
+                interval = 10; // Optionally set a default even in case of error to ensure continuity
+            }
         }
 
         this.pollDevice(interval);
@@ -103,7 +120,7 @@ class TPlinkBulbDevice extends Homey.Device {
     onAdded() {
         let id = this.getData().id;
         this.log("Device added: " + id);
-        var interval = 10;
+
         this.pollDevice(interval);
     }
 
@@ -232,24 +249,34 @@ class TPlinkBulbDevice extends Homey.Device {
         return (null, value);
     }
 
-    // start functions
-    onSettings(settings, newSettingsObj, changedKeysArr, callback) {
+async onSettings({ oldSettings, newSettings, changedKeys }) {
         try {
-            for (var i = 0; i < changedKeysArr.length; i++) {
-                switch (changedKeysArr[i]) {
+            for (const key of changedKeys) {
+                switch (key) {
                     case 'settingIPAddress':
-                        this.log('IP address changed to ' + newSettingsObj.settingIPAddress);
-                        settings.settingIPAddress = newSettingsObj.settingIPAddress;
+                        this.log('IP address changed to ' + newSettings.settingIPAddress);
+                        // Re-initialize connection if IP address changes
+                        if (!newSettings.dynamicIp) { // Only reconnect if dynamic IP is not used
+                            await this.reinitializeConnection(newSettings.settingIPAddress);
+                        }
                         break;
-
+                    case 'pollingInterval':
+                        const interval = parseInt(newSettings.pollingInterval, 10) || 10; // Ensure there's a fallback interval
+                        this.log('Polling interval changed to ' + interval + ' seconds');
+                        clearInterval(this.pollingInterval);
+                        this.pollDevice(interval); // Start polling with the defined interval
+                        break;
+                    case 'dynamicIp':
+                        this.log('Dynamic IP setting changed to ' + newSettings.dynamicIp);
+                        break;
                     default:
-                        this.log("Key not matched: " + i);
+                        this.log('Unhandled setting change detected for key:', key);
                         break;
                 }
             }
-            return (null, true)
         } catch (error) {
-            return "error";
+            this.error('Failed to handle settings change:', error);
+            throw new Error('Failed to update settings: ' + error.message);
         }
     }
 
@@ -262,7 +289,7 @@ class TPlinkBulbDevice extends Homey.Device {
             await this.bulb.lighting.setLightState(options);
         } catch (err) {
             this.log('Error in powerOn method: ', err.message);
-            
+
         }
     }
 
@@ -505,17 +532,17 @@ class TPlinkBulbDevice extends Homey.Device {
         }
     }
 
-pollDevice(interval) {
-    clearInterval(this.pollingInterval);
-    this.pollingInterval = setInterval(async () => {
-        try {
-            await this.getStatus();
-        } catch (err) {
-            this.log("Error during polling: " + err.message);
-            // Optionally, handle reconnection or retry logic here
-        }
-    }, 1000 * interval);
-}
+    pollDevice(interval) {
+        clearInterval(this.pollingInterval);
+        this.pollingInterval = setInterval(async () => {
+            try {
+                await this.getStatus();
+            } catch (err) {
+                this.log("Error during polling: " + err.message);
+                // Optionally, handle reconnection or retry logic here
+            }
+        }, 1000 * interval);
+    }
 
 
     round(value, decimals) {

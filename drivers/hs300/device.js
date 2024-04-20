@@ -63,7 +63,7 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log('class: ', this.getClass());
         this.log('settings IP address: ', settings["settingIPAddress"])
         this.log('Driver ID: ', TPlinkModel);
-
+        
         // In case the device was not paired with a version including the dynamicIp setting, set it to false
         if (settings["dynamicIp"] === undefined || typeof settings["dynamicIp"] !== 'boolean') {
             this.setSettings({
@@ -161,30 +161,34 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
     // rework needed !!!
-    // start functions
-    onSettings(settings, newSettingsObj, changedKeysArr, callback) {
+async onSettings({ oldSettings, newSettings, changedKeys }) {
         try {
-            for (var i = 0; i < changedKeysArr.length; i++) {
-                this.log("Key: " + changedKeysArr[i]);
-                switch (changedKeysArr[i]) {
+            for (const key of changedKeys) {
+                switch (key) {
                     case 'settingIPAddress':
-                        this.log('IP address changed to ' + newSettingsObj.settingIPAddress);
-                        settings.settingIPAddress = newSettingsObj.settingIPAddress;
+                        this.log('IP address changed to ' + newSettings.settingIPAddress);
+                        // Re-initialize connection if IP address changes
+                        if (!newSettings.dynamicIp) { // Only reconnect if dynamic IP is not used
+                            await this.reinitializeConnection(newSettings.settingIPAddress);
+                        }
                         break;
-
+                    case 'pollingInterval':
+                        const interval = parseInt(newSettings.pollingInterval, 10) || 10; // Ensure there's a fallback interval
+                        this.log('Polling interval changed to ' + interval + ' seconds');
+                        clearInterval(this.pollingInterval);
+                        this.pollDevice(interval); // Start polling with the defined interval
+                        break;
                     case 'dynamicIp':
-                        this.log('DynamicIp option changed to ' + newSettingsObj.dynamicIp);
-                        settings.dynamicIp = newSettingsObj.dynamicIp;
+                        this.log('Dynamic IP setting changed to ' + newSettings.dynamicIp);
                         break;
-
                     default:
-                        this.log("Key not matched: " + i);
+                        this.log('Unhandled setting change detected for key:', key);
                         break;
                 }
             }
-            return true;
         } catch (error) {
-            return "error";
+            this.error('Failed to handle settings change:', error);
+            throw new Error('Failed to update settings: ' + error.message);
         }
     }
 

@@ -27,7 +27,6 @@ class TPlinkPlugDevice extends Homey.Device {
     async onInit() {
         this.log('device init');
         let device = this;
-        var interval = 10;
 
         // console.dir(this.getSettings()); // for debugging
         // console.dir(this.getData()); // for debugging
@@ -38,6 +37,7 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log('class: ', this.getClass());
         this.log('settings IP address: ', settings["settingIPAddress"])
         this.log('Driver ID: ', TPlinkModel);
+        this.log('Polling interval set to: ', interval, ' seconds');
 
         // in case the device was not paired with a version including the dynamicIp setting, set it to false
         if ((settings["dynamicIp"] != undefined) && (typeof (settings["dynamicIp"]) === 'boolean')) {
@@ -50,6 +50,23 @@ class TPlinkPlugDevice extends Homey.Device {
 
         this.log('settings totalOffset: ', settings["totalOffset"])
         totalOffset = settings["totalOffset"];
+
+        let interval;
+        // Ensures that the pollingInterval is properly set during initialization
+        if (typeof settings["pollingInterval"] === 'number') {
+            this.log("Polling interval is set: " + settings["pollingInterval"] + " seconds");
+            interval = parseInt(settings["pollingInterval"], 10); // Safely parse it to an integer
+        } else {
+            // Default value set if pollingInterval is not defined or is incorrectly set
+            try {
+                await this.setSettings({ pollingInterval: 10 }); // Use await to ensure settings are applied
+                this.log("Polling interval was undefined, set to default: 10 seconds");
+                interval = 10; // Set interval to default after ensuring settings are applied
+            } catch (error) {
+                this.error('Failed to set default polling interval:', error);
+                interval = 10; // Optionally set a default even in case of error to ensure continuity
+            }
+        }
 
         this.pollDevice(interval);
 
@@ -79,10 +96,7 @@ class TPlinkPlugDevice extends Homey.Device {
     onAdded() {
         let id = this.getData().id;
         this.log("Device added: " + id);
-        let settings = this.getSettings();
-        var interval = 10;
-
-        //        this.pollDevice(interval);
+        let settings = this.getSettings();        
     }
 
     // this method is called when the Device is deleted
@@ -121,30 +135,34 @@ class TPlinkPlugDevice extends Homey.Device {
         return "null";
     }
 
-    // start functions
-    onSettings(settings, newSettingsObj, changedKeysArr, callback) {
+async onSettings({ oldSettings, newSettings, changedKeys }) {
         try {
-            for (var i = 0; i < changedKeysArr.length; i++) {
-                this.log("Key: " + changedKeysArr[i]);
-                switch (changedKeysArr[i]) {
+            for (const key of changedKeys) {
+                switch (key) {
                     case 'settingIPAddress':
-                        this.log('IP address changed to ' + newSettingsObj.settingIPAddress);
-                        settings.settingIPAddress = newSettingsObj.settingIPAddress;
+                        this.log('IP address changed to ' + newSettings.settingIPAddress);
+                        // Re-initialize connection if IP address changes
+                        if (!newSettings.dynamicIp) { // Only reconnect if dynamic IP is not used
+                            await this.reinitializeConnection(newSettings.settingIPAddress);
+                        }
                         break;
-
+                    case 'pollingInterval':
+                        const interval = parseInt(newSettings.pollingInterval, 10) || 10; // Ensure there's a fallback interval
+                        this.log('Polling interval changed to ' + interval + ' seconds');
+                        clearInterval(this.pollingInterval);
+                        this.pollDevice(interval); // Start polling with the defined interval
+                        break;
                     case 'dynamicIp':
-                        this.log('DynamicIp option changed to ' + newSettingsObj.dynamicIp);
-                        settings.dynamicIp = newSettingsObj.dynamicIp;
+                        this.log('Dynamic IP setting changed to ' + newSettings.dynamicIp);
                         break;
-
                     default:
-                        this.log("Key not matched: " + i);
+                        this.log('Unhandled setting change detected for key:', key);
                         break;
                 }
             }
-            return true;
         } catch (error) {
-            return "error";
+            this.error('Failed to handle settings change:', error);
+            throw new Error('Failed to update settings: ' + error.message);
         }
     }
 
@@ -156,7 +174,7 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.plug.setPowerState(true);
         } catch (err) {
             this.log('Error turning device on: ', err.message);
-            
+
         }
     }
 
@@ -169,51 +187,51 @@ class TPlinkPlugDevice extends Homey.Device {
             await this.plug.setPowerState(false);
         } catch (err) {
             this.log('Error turning device off: ', err.message);
-            
+
         }
     }
 
-getPower(device) {
-    return client.getSysInfo(device)  // Ensure this function returns a promise
-        .then(sysInfo => {
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            return this.plug.getSysInfo();
-        })
-        .then(sysInfo => {
-            if (sysInfo.relay_state === 1) {
-                this.log('Relay state is on');
-                return true;  // Return true when the relay is on
-            } else {
-                this.log('Relay state is off');
-                return false; // Return false when the relay is off
-            }
-        })
-        .catch(err => {
-            this.log("Caught error in getPower function: " + err.message);
-            
-        });
-}
+    getPower(device) {
+        return client.getSysInfo(device)  // Ensure this function returns a promise
+            .then(sysInfo => {
+                this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+                return this.plug.getSysInfo();
+            })
+            .then(sysInfo => {
+                if (sysInfo.relay_state === 1) {
+                    this.log('Relay state is on');
+                    return true;  // Return true when the relay is on
+                } else {
+                    this.log('Relay state is off');
+                    return false; // Return false when the relay is off
+                }
+            })
+            .catch(err => {
+                this.log("Caught error in getPower function: " + err.message);
 
-getLed(device) {
-    return client.getSysInfo(device)  // Ensure this function returns a promise
-        .then(sysInfo => {
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            return this.plug.getSysInfo();
-        })
-        .then(sysInfo => {
-            if (sysInfo.led_off === 0) {
-                this.log('LED on');
-                return true;  // Return true if LED is on
-            } else {
-                this.log('LED off');
-                return false; // Return false if LED is off
-            }
-        })
-        .catch(err => {
-            this.log("Caught error in getLed function: " + err.message);
-            
-        });
-}
+            });
+    }
+
+    getLed(device) {
+        return client.getSysInfo(device)  // Ensure this function returns a promise
+            .then(sysInfo => {
+                this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+                return this.plug.getSysInfo();
+            })
+            .then(sysInfo => {
+                if (sysInfo.led_off === 0) {
+                    this.log('LED on');
+                    return true;  // Return true if LED is on
+                } else {
+                    this.log('LED off');
+                    return false; // Return false if LED is off
+                }
+            })
+            .catch(err => {
+                this.log("Caught error in getLed function: " + err.message);
+
+            });
+    }
 
     async ledOn(device) {
         try {
@@ -224,7 +242,7 @@ getLed(device) {
             await this.setCapabilityValue('ledonoff', true);
         } catch (err) {
             this.log('Error turning LED on: ', err.message);
-            
+
         }
     }
 
@@ -238,7 +256,7 @@ getLed(device) {
             await this.setCapabilityValue('ledonoff', false);
         } catch (err) {
             this.log('Error turning LED off: ', err.message);
-            
+
         }
     }
 
@@ -363,69 +381,69 @@ getLed(device) {
 
     }
 
-pollDevice(interval) {
-    clearInterval(this.pollingInterval);
-    this.pollingInterval = setInterval(async () => {
-        try {
-            await this.getStatus();
-        } catch (err) {
-            this.log("Error during polling: " + err.message);
-            // Optionally, handle reconnection or retry logic here
-        }
-    }, 1000 * interval);
-}
+    pollDevice(interval) {
+        clearInterval(this.pollingInterval);
+        this.pollingInterval = setInterval(async () => {
+            try {
+                await this.getStatus();
+            } catch (err) {
+                this.log("Error during polling: " + err.message);
+                // Optionally, handle reconnection or retry logic here
+            }
+        }, 1000 * interval);
+    }
 
 
     async discover() {
-    let settings = this.getSettings();
-    var discoveryOptions = {
-        deviceTypes: 'plug',
-        discoveryInterval: 10000,
-        discoveryTimeout: 5000,
-        offlineTolerance: 3
-    };
+        let settings = this.getSettings();
+        var discoveryOptions = {
+            deviceTypes: 'plug',
+            discoveryInterval: 10000,
+            discoveryTimeout: 5000,
+            offlineTolerance: 3
+        };
 
-    try {
-        // As startDiscovery does not return a promise, it does not need await but errors should be handled appropriately
-        const discovery = client.startDiscovery(discoveryOptions);
-        
-        // Handle new plug event
-        discovery.on('plug-new', async (plug) => {
-            try {
-                if (plug.deviceId === settings["deviceId"]) {
-                    await this.setSettings({ settingIPAddress: plug.host });
-                    // Stopping discovery after finding the device, assuming one device setup per call
-                    client.stopDiscovery();
-                    this.log("Discovered online plug: " + plug.deviceId);
-                    this.setAvailable();
-                    this.log("Resetting unreachable count to 0");
-                    unreachableCount = 0;
-                    discoverCount = 0;
-                }
-            } catch (err) {
-                this.log('Error updating settings during discovery: ' + err.message);
-            }
-        });
+        try {
+            // As startDiscovery does not return a promise, it does not need await but errors should be handled appropriately
+            const discovery = client.startDiscovery(discoveryOptions);
 
-        // Optionally handle plug-online event if needed
-        discovery.on('plug-online', async (plug) => {
-            try {
-                if (plug.deviceId === settings["deviceId"]) {
-                    await this.setSettings({ settingIPAddress: plug.host });
-                    // Similar to plug-new, stop discovery once the intended device is online
-                    client.stopDiscovery();
-                    this.log("Discovered online plug: " + plug.deviceId + " is back online");
-                    this.setAvailable();
+            // Handle new plug event
+            discovery.on('plug-new', async (plug) => {
+                try {
+                    if (plug.deviceId === settings["deviceId"]) {
+                        await this.setSettings({ settingIPAddress: plug.host });
+                        // Stopping discovery after finding the device, assuming one device setup per call
+                        client.stopDiscovery();
+                        this.log("Discovered online plug: " + plug.deviceId);
+                        this.setAvailable();
+                        this.log("Resetting unreachable count to 0");
+                        unreachableCount = 0;
+                        discoverCount = 0;
+                    }
+                } catch (err) {
+                    this.log('Error updating settings during discovery: ' + err.message);
                 }
-            } catch (err) {
-                this.log('Error handling online plug during discovery: ' + err.message);
-            }
-        });
-    } catch (err) {
-        this.log('Discovery failed: ' + err.message);
-        // Implement retry logic or further error handling as needed
+            });
+
+            // Optionally handle plug-online event if needed
+            discovery.on('plug-online', async (plug) => {
+                try {
+                    if (plug.deviceId === settings["deviceId"]) {
+                        await this.setSettings({ settingIPAddress: plug.host });
+                        // Similar to plug-new, stop discovery once the intended device is online
+                        client.stopDiscovery();
+                        this.log("Discovered online plug: " + plug.deviceId + " is back online");
+                        this.setAvailable();
+                    }
+                } catch (err) {
+                    this.log('Error handling online plug during discovery: ' + err.message);
+                }
+            });
+        } catch (err) {
+            this.log('Discovery failed: ' + err.message);
+            // Implement retry logic or further error handling as needed
+        }
     }
-}
 
 }
 
