@@ -421,7 +421,7 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let deviceId = settings.deviceId;
-        this.log("getStatus device: " + device);
+        this.log("getStatus device: " + device + ", name: " + this.getName());
         //this.log("DeviceId device: " + deviceId);
 
         try {
@@ -442,7 +442,7 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
                     this.log("Caught error in setting deviceId: " + err.message);
                 }
             } else {
-                this.log("DeviceId: " + settings["deviceId"])
+                //this.log("DeviceId: " + settings["deviceId"])
             }
 
             oldColorTemp = this.getCapabilityValue('light_temperature');
@@ -454,7 +454,7 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
             await this.bulb.lighting.getLightState().then((bulbState) => {
                 this.log('getLightState: ' + JSON.stringify(bulbState));
                 if (bulbState.on_off === 1) {
-                    this.log('TP Link smartbulb app - bulb on ');
+                    this.log('Bulb poll state - on');
                     this.setCapabilityValue('onoff', true)
                         .catch(this.error);
 
@@ -493,10 +493,15 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
                         }
                     }
 
-                    if (oldBrightness != bulbState.brightness / 100) {
-                        this.log('Brightness changed: ' + bulbState.brightness / 100);
-                        this.setCapabilityValue('dim', bulbState.brightness / 100)
-                            .catch(this.error);
+                    if (typeof bulbState.brightness === 'number') {
+                        let newBrightness = bulbState.brightness / 100;
+                        if (oldBrightness !== newBrightness) {
+                            this.log('Brightness changed: ' + newBrightness);
+                            this.setCapabilityValue('dim', newBrightness)
+                                .catch(this.error);
+                        }
+                    } else {
+                        this.log('Brightness data not available or not changed.');
                     }
 
                     if (oldMode != this.getCapabilityValue('light_mode')) {
@@ -504,7 +509,7 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
                     }
 
                 } else if (bulbState.on_off === 0) {
-                    this.log('Bulb off ');
+                    this.log('Bulb poll state - off ');
                     this.setCapabilityValue('onoff', false)
                         .catch(this.error);
                 } else {

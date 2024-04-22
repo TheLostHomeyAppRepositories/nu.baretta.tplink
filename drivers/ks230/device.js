@@ -209,10 +209,10 @@ getPower(device) {
         })
         .then(sysInfo => {
             if (sysInfo.relay_state === 1) {
-                this.log('Relay state is on');
+                this.log('State - relay state is on');
                 return true;  // Return true when the relay is on
             } else {
-                this.log('Relay state is off');
+                this.log('Plug poll - relay is off');
                 return false; // Return false when the relay is off
             }
         })
@@ -287,7 +287,7 @@ getLed(device) {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let TPlinkModel = getDriverName().toUpperCase();
-        this.log("getStatus device: " + device);
+        this.log("getStatus device: " + device + ", name: " + this.getName());
 
         try {
             this.plug = await client.getPlug({
@@ -313,19 +313,23 @@ getLed(device) {
                     oldtotalState = this.getCapabilityValue('meter_power');
                     oldvoltageState = this.getCapabilityValue('measure_voltage');
                     oldcurrentState = this.getCapabilityValue('measure_current');
+                    oldRelayState = this.getCapabilityValue('onoff') ? 1 : 0;
 
                     var total = data.emeter.realtime.total;
                     var corrected_total = total - totalOffset;
                 }
 
-                if (data.sysInfo.relay_state === 1) {
-                    this.log('Relay state is on ');
-                    this.setCapabilityValue('onoff', true)
-                        .catch(this.error);
-                } else {
-                    this.log('Relay state is off ');
-                    this.setCapabilityValue('onoff', false)
-                        .catch(this.error);
+                if (oldRelayState !== data.sysInfo.relay_state) {
+                    if (data.sysInfo.relay_state === 1) {
+                        this.log('Plug poll - relay is on ');
+                        this.setCapabilityValue('onoff', true)
+                            .catch(this.error);
+                    } else {
+                        this.log('Plug poll - relay is off ');
+                        this.setCapabilityValue('onoff', false)
+                            .catch(this.error);
+                    }
+                    oldRelayState = data.sysInfo.relay_state; // Update the oldRelayState to the new value
                 }
 
                 // update realtime data only in case it changed
@@ -360,7 +364,7 @@ getLed(device) {
                 if (TPlinkModel === "HS220" || TPlinkModel === "ES20M" || TPlinkModel === "KS230") {
                     try {
                         const brightness = this.plug.dimmer.brightness;
-                        this.log('Brightness level: ' + brightness);
+                        this.log('State - brightness level: ' + brightness);
                         // Update Homey device state for brightness
                     } catch (err) {
                         this.log('Error getting brightness: ', err.message);

@@ -19,6 +19,7 @@ var oldvoltageState = 0;
 var oldcurrentState = 0;
 var unreachableCount = 0;
 var discoverCount = 0;
+var oldRelayState = null;
 var util = require('util');
 var TPlinkModel = getDriverName().toUpperCase();
 
@@ -199,10 +200,10 @@ class TPlinkPlugDevice extends Homey.Device {
             })
             .then(sysInfo => {
                 if (sysInfo.relay_state === 1) {
-                    this.log('Relay state is on');
+                    this.log('State - relay state is on');
                     return true;  // Return true when the relay is on
                 } else {
-                    this.log('Relay state is off');
+                    this.log('Plug poll - relay is off');
                     return false; // Return false when the relay is off
                 }
             })
@@ -287,7 +288,7 @@ class TPlinkPlugDevice extends Homey.Device {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let TPlinkModel = getDriverName().toUpperCase();
-        this.log("getStatus device: " + device);
+        this.log("getStatus device: " + device + ", name: " + this.getName());
 
         try {
             const sysInfo = await client.getSysInfo(device);
@@ -316,19 +317,23 @@ class TPlinkPlugDevice extends Homey.Device {
                     oldtotalState = this.getCapabilityValue('meter_power');
                     oldvoltageState = this.getCapabilityValue('measure_voltage');
                     oldcurrentState = this.getCapabilityValue('measure_current');
+                    oldRelayState = this.getCapabilityValue('onoff') ? 1 : 0;
 
                     var total = data.emeter.realtime.total;
                     var corrected_total = total - totalOffset;
                 }
 
-                if (data.sysInfo.relay_state === 1) {
-                    this.log('Relay state is on ');
-                    this.setCapabilityValue('onoff', true)
-                        .catch(this.error);
-                } else {
-                    this.log('Relay state is off ');
-                    this.setCapabilityValue('onoff', false)
-                        .catch(this.error);
+                if (oldRelayState !== data.sysInfo.relay_state) {
+                    if (data.sysInfo.relay_state === 1) {
+                        this.log('Plug poll - relay is on ');
+                        this.setCapabilityValue('onoff', true)
+                            .catch(this.error);
+                    } else {
+                        this.log('Plug poll - relay is off ');
+                        this.setCapabilityValue('onoff', false)
+                            .catch(this.error);
+                    }
+                    oldRelayState = data.sysInfo.relay_state; // Update the oldRelayState to the new value
                 }
 
                 // update realtime data only in case it changed

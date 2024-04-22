@@ -25,7 +25,7 @@ var oldvoltageState = 0;
 var oldcurrentState = 0;
 var unreachableCount = 0;
 var discoverCount = 0;
-var util = require('util');
+var oldRelayState = null;
 var TPlinkModel = getDriverName().toUpperCase();
 
 
