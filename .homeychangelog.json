@@ -121,5 +121,8 @@
   },
   "0.2.26": {
     "en": "Interval configurable now in device settings (except of HS300)"
+  },
+  "0.2.27": {
+    "en": "Code optimisation for plug state updates + logging improvements + better handling of bulb brightness"
   }
 }
