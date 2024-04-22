@@ -10,6 +10,7 @@ var oldSaturation = "";
 var oldBrightness = "";
 var unreachableCount = 0;
 var discoverCount = 0;
+var oldBulbState = null;
 
 // mode: enum: color, temperature
 const mode = {
@@ -450,11 +451,30 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
             oldSaturation = this.getCapabilityValue('light_saturation');
             oldBrightness = this.getCapabilityValue('dim');
             oldMode = mode[this.getCapabilityValue('light_mode')];
+            oldBulbState = this.getCapabilityValue('onoff') === true ? 1 : 0;
 
             await this.bulb.lighting.getLightState().then((bulbState) => {
-                this.log('getLightState: ' + JSON.stringify(bulbState));
+
+                    if (oldBulbState !== bulbState.on_off) {
+                         this.log('getLightState after change: ' + JSON.stringify(bulbState));
+                        if (bulbState.on_off === 1) {
+                            this.log('Bulb poll state - on');
+                            this.setCapabilityValue('onoff', true)
+                                .catch(this.error);
+                        } else if (bulbState.on_off === 0) {
+                            this.log('Bulb poll state - off ');
+                            this.setCapabilityValue('onoff', false)
+                                .catch(this.error);
+                        } else {
+                        //    this.log("BulbState.on_off undefined");
+                        }
+                        oldBulbState = bulbState.on_off; 
+                    } else {
+                        //    this.log("Bulb state unchanged.");
+                    }
+
                 if (bulbState.on_off === 1) {
-                    this.log('Bulb poll state - on');
+                    //this.log('Bulb poll state - on');
                     this.setCapabilityValue('onoff', true)
                         .catch(this.error);
 
@@ -508,12 +528,8 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
                         this.log('Light_mode changed: ' + this.getCapabilityValue('light_mode'));
                     }
 
-                } else if (bulbState.on_off === 0) {
-                    this.log('Bulb poll state - off ');
-                    this.setCapabilityValue('onoff', false)
-                        .catch(this.error);
                 } else {
-                    this.log("BulbState.on_off undefined")
+                    //    this.log("BulbState.on_off undefined or not changed")
                 }
             })
                 .catch((err) => {
