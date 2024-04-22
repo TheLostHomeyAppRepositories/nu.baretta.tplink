@@ -124,5 +124,8 @@
   },
   "0.2.27": {
     "en": "Code optimisation for plug state updates + logging improvements + better handling of bulb brightness"
+  },
+  "0.2.28": {
+    "en": "Experimental support of KP200"
   }
 }
