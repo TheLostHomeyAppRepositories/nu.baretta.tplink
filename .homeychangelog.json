@@ -127,5 +127,8 @@
   },
   "0.2.28": {
     "en": "Experimental support of KP200"
+  },
+  "0.2.29": {
+    "en": "Fixes for KP105,HS220 + trying to address isuess with some ES20M devices"
   }
 }
