@@ -122,7 +122,7 @@ class TPlinkBulbDevice extends Homey.Device {
         let id = this.getData().id;
         this.log("Device added: " + id);
 
-        this.pollDevice(interval);
+        //this.pollDevice(interval);
     }
 
     // this method is called when the Device is deleted

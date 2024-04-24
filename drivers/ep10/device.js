@@ -37,7 +37,6 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log('class: ', this.getClass());
         this.log('settings IP address: ', settings["settingIPAddress"])
         this.log('Driver ID: ', TPlinkModel);
-        this.log('Polling interval set to: ', interval, ' seconds');
 
         // in case the device was not paired with a version including the dynamicIp setting, set it to false
         if ((settings["dynamicIp"] != undefined) && (typeof (settings["dynamicIp"]) === 'boolean')) {

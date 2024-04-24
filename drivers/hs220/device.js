@@ -16,6 +16,7 @@ var oldvoltageState = 0;
 var oldcurrentState = 0;
 var unreachableCount = 0;
 var discoverCount = 0;
+var oldRelayState = null;
 var util = require('util')
 
 class TPlinkPlugDevice extends Homey.Device {
