@@ -142,5 +142,8 @@
   },
   "0.2.33": {
     "en": "Another workaround for missing alias on ES20M"
+  },
+  "0.2.34": {
+    "en": "Fixes for ES20M and KS230"
   }
 }
