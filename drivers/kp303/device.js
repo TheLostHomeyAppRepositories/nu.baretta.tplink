@@ -39,7 +39,7 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
     async onInit() {
-        this.log('KP200 device initialization');
+        this.log('KP303 device initialization');
         // Generate a random interval and assign it to 'interval'
         let interval = this.generateRandomInterval();
         let device = this;
