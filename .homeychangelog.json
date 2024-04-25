@@ -139,5 +139,8 @@
   },
   "0.2.32": {
     "en": "ES20M polling attempt fix"
+  },
+  "0.2.33": {
+    "en": "Another workaround for missing alias on ES20M"
   }
 }
