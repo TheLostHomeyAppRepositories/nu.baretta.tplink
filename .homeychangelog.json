@@ -133,5 +133,8 @@
   },
   "0.2.30": {
     "en": "Experimental support of KP303"
+  },
+  "0.2.31": {
+    "en": "KP200 and KP303 fixes"
   }
 }
