@@ -297,14 +297,7 @@ getLed(device) {
 
             await this.plug.getInfo().then((data) => {
                 //this.log("DeviceID: " + settings["deviceId"]);
-                //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
-                
-                if (data.sysInfo.alias) {
-                    this.log(`Device alias: ${data.sysInfo.alias}`);
-                } else {
-                    data.sysInfo.alias = ''; // Assigning empty string if alias is undefined
-                    this.log('Device alias is undefined, assigned empty alias.');
-                }
+                //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);              
 
                 if (settings["deviceId"] === undefined) {
                     this.setSettings({
