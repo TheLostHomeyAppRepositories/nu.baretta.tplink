@@ -42,7 +42,8 @@
       "KL400",
       "KL430",
       "ES20M",
-      "KP200"
+      "KP200",
+      "KP303"
     ],
     "nl": [
       "KASA",
@@ -77,10 +78,11 @@
       "KL400",
       "KL430",
       "ES20M",
-      "KP200"
+      "KP200",
+      "KP303"
     ]
   },
-  "version": "0.2.29",
+  "version": "0.2.30",
   "compatibility": ">=5.0.0",
   "author": {
     "name": "Bretislav Kubesa",
@@ -948,12 +950,95 @@
             ]
           },
           {
-            "id": "sensor",
+            "id": "toggle",
             "capabilities": [
-              "meter_power",
-              "measure_power",
-              "measure_current",
-              "measure_voltage"
+              "onoff"
+            ]
+          }
+        ]
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_plugs"
+          }
+        },
+        {
+          "id": "add_plugs",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "General settings",
+            "nl": "Algemene instellingen"
+          },
+          "children": [
+            {
+              "id": "settingIPAddress",
+              "type": "text",
+              "label": {
+                "en": "IP address",
+                "nl": "IP adres"
+              },
+              "value": "0.0.0.0"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "collapsed": "true",
+          "label": {
+            "en": "Optional connection setting",
+            "nl": "Optionele verbindingsinstelling"
+          },
+          "children": [
+            {
+              "id": "dynamicIp",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Enable for dynamic IP address:",
+                "nl": "Inschakelen voor dynamisch IP-adres:"
+              },
+              "hint": {
+                "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kp303",
+      "name": {
+        "en": "KP303(US)",
+        "nl": "KP303(US)"
+      },
+      "icon": "drivers/kp303/assets/icons/icon.svg",
+      "images": {
+        "large": "drivers/kp303/assets/images/large.jpg",
+        "small": "drivers/kp303/assets/images/small.jpg"
+      },
+      "class": "socket",
+      "capabilities": [
+        "onoff",
+        "ledonoff"
+      ],
+      "mobile": {
+        "components": [
+          {
+            "id": "icon",
+            "capabilities": [
+              "onoff"
             ]
           },
           {
