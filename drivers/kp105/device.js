@@ -305,9 +305,7 @@ getLed(device) {
                     this.log("DeviceId added: " + settings["deviceId"])
                 }
 
-                if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" &&
-                    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" &&
-                    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
+                if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
 
                     oldpowerState = this.getCapabilityValue('measure_power');
                     oldtotalState = this.getCapabilityValue('meter_power');
@@ -333,9 +331,7 @@ getLed(device) {
                 }
 
                 // update realtime data only in case it changed
-                if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" &&
-                    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" &&
-                    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
+                if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
 
                     if (oldtotalState != corrected_total) {
                         this.log("Total - Offset: " + corrected_total);

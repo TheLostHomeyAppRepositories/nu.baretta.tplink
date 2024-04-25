@@ -291,8 +291,10 @@ class TPlinkPlugDevice extends Homey.Device {
         this.log("getStatus device: " + device + ", name: " + this.getName());
 
         try {
-            this.plug = await client.getPlug({
-                host: device
+            const sysInfo = await client.getSysInfo(device); 
+            this.plug = client.getPlug({
+                host: device,
+                sysInfo: sysInfo
             });
 
             await this.plug.getInfo().then((data) => {
@@ -306,9 +308,7 @@ class TPlinkPlugDevice extends Homey.Device {
                     this.log("DeviceId added: " + settings["deviceId"])
                 }
 
-                if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" &&
-                    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" &&
-                    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
+                if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
 
                     oldpowerState = this.getCapabilityValue('measure_power');
                     oldtotalState = this.getCapabilityValue('meter_power');
@@ -334,9 +334,7 @@ class TPlinkPlugDevice extends Homey.Device {
                 }
 
                 // update realtime data only in case it changed
-                if (TPlinkModel != "HS100" && TPlinkModel != "HS200" && TPlinkModel != "HS220" &&
-                    TPlinkModel != "KS230" && TPlinkModel != "KP405" && TPlinkModel != "HS103" &&
-                    TPlinkModel != "EP10" && TPlinkModel != "ES20M" && TPlinkModel != "HS210") {
+                if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
 
                     if (oldtotalState != corrected_total) {
                         this.log("Total - Offset: " + corrected_total);
@@ -390,19 +388,6 @@ class TPlinkPlugDevice extends Homey.Device {
                 });
         } catch (err) {
             this.log("Caught error in getStatus function: " + err.message);
-
-            // Specific error handling for missing alias
-            if (err.message.includes("Cannot read properties of undefined (reading 'alias')")) {
-                try {
-                    await this.plug.setAlias("none");
-                    this.log('Recovered by setting alias to "none".');
-                } catch (setAliasError) {
-                    this.log('Failed to set alias due to: ' + setAliasError.message);
-                }
-            } else {
-                // Handle other errors that might occur
-                this.log("Error not related to alias, unable to handle.");
-            }
         }
 
     }
