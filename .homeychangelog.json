@@ -136,5 +136,8 @@
   },
   "0.2.31": {
     "en": "KP200 and KP303 fixes"
+  },
+  "0.2.32": {
+    "en": "ES20M polling attempt fix"
   }
 }
