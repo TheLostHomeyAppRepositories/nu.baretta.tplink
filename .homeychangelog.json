@@ -145,5 +145,8 @@
   },
   "0.2.34": {
     "en": "Fixes for ES20M and KS230"
+  },
+  "0.2.35": {
+    "en": "Experimental KS240 - on/off only"
   }
 }
