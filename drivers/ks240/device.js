@@ -214,6 +214,10 @@ class TPlinkPlugDevice extends Homey.Device {
         try {
             const sysInfo = await client.getSysInfo(device);
             this.plug = client.getPlug({ host: device, sysInfo: sysInfo, childId: childId });
+            
+            // temporary debug
+            this.log("DeviceID: " + settings["deviceId"]);
+            this.log("GetStatus sysInfo.deviceId: " + sysInfo.deviceId);   
 
             // Check the relay state of the specific socket
             const childSocket = sysInfo.children.find(child => child.id === childId);
