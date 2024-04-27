@@ -151,5 +151,8 @@
   },
   "0.2.36": {
     "en": "Additional logging for KS240"
+  },
+  "0.2.37": {
+    "en": "Support of EP40"
   }
 }
