@@ -154,5 +154,8 @@
   },
   "0.2.37": {
     "en": "Support of EP40"
+  },
+  "0.2.38": {
+    "en": "Disabling KS240 for now (TAPO like, unssuported by API)"
   }
 }
