@@ -72,7 +72,7 @@ class TPlinkPlugDriver extends Homey.Driver {
             client.on('plug-new', async (plug) => {
                 logEvent('Found plug-new type', plug);
                 const sysInfo = await plug.getSysInfo();
-                const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model; //Fallback as per sysinfo available data
+                const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name  || sysInfo.model; //Fallback as per sysinfo available data
 
                 if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
                     if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
@@ -89,7 +89,7 @@ class TPlinkPlugDriver extends Homey.Driver {
             client.on('plug-online', async (plug) => {
 
                 const sysInfo = await plug.getSysInfo();
-                const deviceName = sysInfo.dev_name || sysInfo.alias || sysInfo.model; //Fallback as per sysinfo available data
+                const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name  || sysInfo.model; //Fallback as per sysinfo available data
 
                 if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
                     if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
