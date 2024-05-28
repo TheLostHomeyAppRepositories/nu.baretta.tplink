@@ -157,5 +157,8 @@
   },
   "0.2.38": {
     "en": "Disabling KS240 for now (TAPO like, unssuported by API)"
+  },
+  "0.2.39": {
+    "en": "Pairing process adjusted to get beter name of devices"
   }
 }
