@@ -45,7 +45,8 @@
       "KP200",
       "KP303",
       "KS240",
-      "EP40"
+      "EP40",
+      "EP25"
     ],
     "nl": [
       "KASA",
@@ -83,7 +84,8 @@
       "KP200",
       "KP303",
       "KS240",
-      "EP40"
+      "EP40",
+      "EP25"
     ]
   },
   "version": "0.2.39",
@@ -269,6 +271,129 @@
             "id": "icon",
             "capabilities": [
               "onoff"
+            ]
+          },
+          {
+            "id": "toggle",
+            "capabilities": [
+              "onoff"
+            ]
+          }
+        ]
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_plugs"
+          }
+        },
+        {
+          "id": "add_plugs",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "General settings",
+            "nl": "Algemene instellingen"
+          },
+          "children": [
+            {
+              "id": "settingIPAddress",
+              "type": "text",
+              "label": {
+                "en": "IP address",
+                "nl": "IP adres"
+              },
+              "value": "0.0.0.0"
+            },
+            {
+              "id": "pollingInterval",
+              "type": "number",
+              "label": {
+                "en": "Polling Interval (seconds)",
+                "nl": "Polling Interval (seconden)"
+              },
+              "value": 10,
+              "attr": {
+                "min": 2,
+                "max": 60,
+                "step": 1
+              },
+              "hint": {
+                "en": "Defines how often to poll the device for updates. Minimum is 2 seconds, maximum is 60 seconds.",
+                "nl": "Bepaalt hoe vaak het apparaat wordt gepolst voor updates. Minimum is 2 seconden, maximum is 60 seconden."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "collapsed": "true",
+          "label": {
+            "en": "Optional connection setting",
+            "nl": "Optionele verbindingsinstelling"
+          },
+          "children": [
+            {
+              "id": "dynamicIp",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Enable for dynamic IP address:",
+                "nl": "Inschakelen voor dynamisch IP-adres:"
+              },
+              "hint": {
+                "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ep25",
+      "name": {
+        "en": "EP25",
+        "nl": "EP25"
+      },
+      "icon": "drivers/ep25/assets/icons/icon.svg",
+      "images": {
+        "large": "drivers/ep25/assets/images/large.jpg",
+        "small": "drivers/ep25/assets/images/small.jpg"
+      },
+      "class": "socket",
+      "capabilities": [
+        "onoff",
+        "measure_power",
+        "meter_power",
+        "measure_current",
+        "measure_voltage",
+        "ledonoff"
+      ],
+      "mobile": {
+        "components": [
+          {
+            "id": "icon",
+            "capabilities": [
+              "onoff"
+            ]
+          },
+          {
+            "id": "sensor",
+            "capabilities": [
+              "meter_power",
+              "measure_power",
+              "measure_current",
+              "measure_voltage"
             ]
           },
           {
@@ -3019,7 +3144,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|hs210|hs220|kp115|ks230|kp105|hs300"
+            "filter": "driver_id=hs100|hs110|hs200|hs210|hs220|kp115|ks230|kp105|hs300|ep25"
           }
         ]
       },
@@ -3037,7 +3162,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs100|hs110|hs200|hs210|hs220|kp115|ks230|kp105|hs300"
+            "filter": "driver_id=hs100|hs110|hs200|hs210|hs220|kp115|ks230|kp105|hs300|ep25"
           }
         ]
       },
@@ -3055,7 +3180,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs110|hs200|hs210|hs220|kp115|hs300"
+            "filter": "driver_id=hs110|hs200|hs210|hs220|kp115|hs300|ep25"
           }
         ]
       },
@@ -3073,7 +3198,7 @@
           {
             "name": "device",
             "type": "device",
-            "filter": "driver_id=hs110|hs200|hs210|hs220|kp115|hs300"
+            "filter": "driver_id=hs110|hs200|hs210|hs220|kp115|hs300|ep25"
           }
         ]
       },
