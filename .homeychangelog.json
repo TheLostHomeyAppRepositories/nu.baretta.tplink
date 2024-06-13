@@ -160,5 +160,8 @@
   },
   "0.2.39": {
     "en": "Pairing process adjusted to get beter name of devices"
+  },
+  "0.2.40": {
+    "en": "Added EP25"
   }
 }
