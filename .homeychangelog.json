@@ -166,5 +166,8 @@
   },
   "0.2.41": {
     "en": "Minor modifications to catch network errors"
+  },
+  "0.2.42": {
+    "en": "Multiple fixes"
   }
 }
