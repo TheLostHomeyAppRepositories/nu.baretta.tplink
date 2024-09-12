@@ -163,5 +163,8 @@
   },
   "0.2.40": {
     "en": "Added EP25"
+  },
+  "0.2.41": {
+    "en": "Minor modifications to catch network errors"
   }
 }
