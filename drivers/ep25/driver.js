@@ -69,39 +69,46 @@ class TPlinkPlugDriver extends Homey.Driver {
             }
             client.startDiscovery(discoveryOptions);
             this.log('Starting Plug Discovery');
-            client.on('plug-new', async (plug) => {
-                logEvent('Found plug-new type', plug);
-                const sysInfo = await plug.getSysInfo();
-                const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name  || sysInfo.model; //Fallback as per sysinfo available data
+client.on('plug-new', async (plug) => {
+    try {
+        logEvent('Found plug-new type', plug);
+        const sysInfo = await plug.getSysInfo();
+        const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name || sysInfo.model; // Fallback as per sysinfo available data
 
-                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-                    if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
-                        this.log("New Plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
-                        discoveredDevicesArray.push({
-                            ip: plug.host,
-                            name: deviceName,
-                            deviceId: plug.deviceId // Store the device ID
-                        });
-                    }
-                }
-            });
+        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
+            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
+                this.log("New Plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
+                discoveredDevicesArray.push({
+                    ip: plug.host,
+                    name: deviceName,
+                    deviceId: plug.deviceId // Store the device ID
+                });
+            }
+        }
+    } catch (err) {
+        this.log(`Error discovering new plug: ${err.message}`);
+    }
+});
 
-            client.on('plug-online', async (plug) => {
+client.on('plug-online', async (plug) => {
+    try {
+        const sysInfo = await plug.getSysInfo();
+        const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name || sysInfo.model; // Fallback as per sysinfo available data
 
-                const sysInfo = await plug.getSysInfo();
-                const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name  || sysInfo.model; //Fallback as per sysinfo available data
-
-                if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-                    if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
-                        this.log("Online plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
-                        discoveredDevicesArray.push({
-                            ip: plug.host,
-                            name: deviceName,
-                            deviceId: plug.deviceId // Store the device ID
-                        });
-                    }
-                }
-            });
+        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
+            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
+                this.log("Online plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
+                discoveredDevicesArray.push({
+                    ip: plug.host,
+                    name: deviceName,
+                    deviceId: plug.deviceId // Store the device ID
+                });
+            }
+        }
+    } catch (err) {
+        this.log(`Error discovering online plug: ${err.message}`);
+    }
+});
 
             setTimeout(() => {
                 if (discoveredDevicesArray.length > 0) {

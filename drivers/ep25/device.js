@@ -262,8 +262,9 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
 
-    meter_reset(device) {
-        this.log('Reset meter ');
+meter_reset(device) {
+    this.log('Reset meter ');
+    try {
         const sysInfo = client.getSysInfo(device);
         this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
         // reset meter for counters in Kasa app. Does not actually clear the total counter though...
@@ -273,7 +274,10 @@ class TPlinkPlugDevice extends Homey.Device {
         this.setSettings({
             totalOffset: totalOffset
         }).catch(this.error);
+    } catch (err) {
+        this.log('Error resetting meter: ', err.message);
     }
+}
 
     undo_meter_reset(device) {
         this.log('Undo reset meter, setting totalOffset to 0 ');
