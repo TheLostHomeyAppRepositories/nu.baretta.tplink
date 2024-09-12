@@ -112,9 +112,9 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
     // this method is called when the Device has requested a state change (turned on or off)
-    async onCapabilityOnoff(value, opts, callback) {
-        // ... set value to real device
-        this.log("Capability called: onoff value: ", value);
+async onCapabilityOnoff(value, opts) {
+    try {
+        this.log("Capability called: onoff value:", value);
         let settings = this.getSettings();
         let device = settings["settingIPAddress"];
         if (value) {
@@ -122,13 +122,16 @@ class TPlinkPlugDevice extends Homey.Device {
         } else {
             await this.powerOff(device);
         }
-        // Then, emit a callback ( err, result )
-        return (null);
+        return null;
+    } catch (err) {
+        this.error('Error in onCapabilityOnoff:', err);
+        throw err;
     }
+}
 
-    async onCapabilityLedOnoff(value, opts, callback) {
-        this.log("Capability called: LED onoff value: ", value);
-        this.log("Capability called: opts", opts);
+async onCapabilityLedOnoff(value, opts) {
+    try {
+        this.log("Capability called: LED onoff value:", value);
         let settings = this.getSettings();
         let device = settings["settingIPAddress"];
         if (value) {
@@ -136,9 +139,12 @@ class TPlinkPlugDevice extends Homey.Device {
         } else {
             await this.ledOff(device);
         }
-        // Then, emit a callback ( err, result )
-        return (null);
+        return null;
+    } catch (err) {
+        this.error('Error in onCapabilityLedOnoff:', err);
+        throw err;
     }
+}
 
 async onSettings({ oldSettings, newSettings, changedKeys }) {
         try {
@@ -171,30 +177,42 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
         }
     }
 
-    async powerOn(device) {
-        try {
-            this.log('Turning device on ' + device);
-            const sysInfo = await client.getSysInfo(device);
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            await this.plug.setPowerState(true);
-        } catch (err) {
-            this.log('Error turning device on: ', err.message);
-            
-        }
+async reinitializeConnection(ipAddress) {
+    // Implement the logic to reinitialize the connection
+    // For example, update the plug instance
+    try {
+        const sysInfo = await client.getSysInfo(ipAddress);
+        this.plug = client.getPlug({ host: ipAddress, sysInfo });
+        this.log('Reinitialized connection to', ipAddress);
+    } catch (err) {
+        this.error('Error reinitializing connection:', err);
     }
+}
+
+async powerOn(device) {
+    try {
+        this.log('Turning device on ' + device);
+        const sysInfo = await client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo });
+        await this.plug.setPowerState(true);
+    } catch (err) {
+        this.error('Error turning device on:', err);
+        throw err;
+    }
+}
 
 
-    async powerOff(device) {
-        try {
-            this.log('Turning device off ' + device);
-            const sysInfo = await client.getSysInfo(device);
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            await this.plug.setPowerState(false);
-        } catch (err) {
-            this.log('Error turning device off: ', err.message);
-            
-        }
+async powerOff(device) {
+    try {
+        this.log('Turning device off ' + device);
+        const sysInfo = await client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo });
+        await this.plug.setPowerState(false);
+    } catch (err) {
+        this.error('Error turning device off:', err);
+        throw err;
     }
+}
 
     async setBrightness(device, brightness) {
         try {
@@ -207,46 +225,32 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
         }
     }
 
-getPower(device) {
-    return client.getSysInfo(device)  // Ensure this function returns a promise
-        .then(sysInfo => {
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            return this.plug.getSysInfo();
-        })
-        .then(sysInfo => {
-            if (sysInfo.relay_state === 1) {
-                this.log('State - relay state is on');
-                return true;  // Return true when the relay is on
-            } else {
-                this.log('Plug poll - relay is off');
-                return false; // Return false when the relay is off
-            }
-        })
-        .catch(err => {
-            this.log("Caught error in getPower function: " + err.message);
-            
-        });
+async getPower(device) {
+    try {
+        const sysInfo = await client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo });
+        const plugInfo = await this.plug.getSysInfo();
+        const isOn = plugInfo.relay_state === 1;
+        this.log(`State - relay state is ${isOn ? 'on' : 'off'}`);
+        return isOn;
+    } catch (err) {
+        this.log("Caught error in getPower function: " + err.message);
+        return false; // or throw err;
+    }
 }
 
-getLed(device) {
-    return client.getSysInfo(device)  // Ensure this function returns a promise
-        .then(sysInfo => {
-            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-            return this.plug.getSysInfo();
-        })
-        .then(sysInfo => {
-            if (sysInfo.led_off === 0) {
-                this.log('LED on');
-                return true;  // Return true if LED is on
-            } else {
-                this.log('LED off');
-                return false; // Return false if LED is off
-            }
-        })
-        .catch(err => {
-            this.log("Caught error in getLed function: " + err.message);
-            
-        });
+async getLed(device) {
+    try {
+        const sysInfo = await client.getSysInfo(device);
+        this.plug = client.getPlug({ host: device, sysInfo });
+        const plugInfo = await this.plug.getSysInfo();
+        const isLedOn = plugInfo.led_off === 0;
+        this.log(`LED is ${isLedOn ? 'on' : 'off'}`);
+        return isLedOn;
+    } catch (err) {
+        this.error('Caught error in getLed function:', err);
+        return false;
+    }
 }
 
     async ledOn(device) {

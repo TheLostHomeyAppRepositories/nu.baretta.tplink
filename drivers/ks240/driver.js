@@ -183,20 +183,20 @@ class TPlinkPlugDriver extends Homey.Driver {
             }
 
 
-            setTimeout(() => {
-                if (discoveredDevicesArray.length > 0) {
-                    session.emit('discovered_devices', discoveredDevicesArray); // Emit the array of discovered devices
-                    this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
-                    //return discoveredDevicesArray; // Return the array
-                } else {
-                    this.log("No devices discovered");
-                    session.emit('discovery_failed', { devicesFound: false });
-                    return []; // Return an empty array if no devices were discovered
-                }
-            }, discoveryOptions.discoveryTimeout);
+setTimeout(() => {
+  client.stopDiscovery(); // Stop discovery after timeout
 
-
-        });
+  if (discoveredDevicesArray.length > 0) {
+    session.emit("discovered_devices", discoveredDevicesArray);
+    this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
+    return discoveredDevicesArray;
+  } else {
+    this.log("No devices discovered");
+    session.emit("discovery_failed", { devicesFound: false });
+    return [];
+  }
+}, discoveryOptions.discoveryTimeout);
+});
 
 
 

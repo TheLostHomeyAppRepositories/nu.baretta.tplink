@@ -97,7 +97,7 @@ class TPlinkPlugDevice extends Homey.Device {
     onAdded() {
         let id = this.getData().id;
         this.log("Device added: " + id);
-        let settings = this.getSettings();        
+        let settings = this.getSettings();
     }
 
     // this method is called when the Device is deleted
@@ -108,32 +108,38 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
     // this method is called when the Device has requested a state change (turned on or off)
-    async onCapabilityOnoff(value, opts, callback) {
-        // ... set value to real device
-        this.log("Capability called: onoff value: ", value);
-        let settings = this.getSettings();
-        let device = settings["settingIPAddress"];
-        if (value) {
-            await this.powerOn(device);
-        } else {
-            await this.powerOff(device);
+    async onCapabilityOnoff(value, opts) {
+        try {
+            this.log("Capability called: onoff value:", value);
+            let settings = this.getSettings();
+            let device = settings["settingIPAddress"];
+            if (value) {
+                await this.powerOn(device);
+            } else {
+                await this.powerOff(device);
+            }
+            return null;
+        } catch (err) {
+            this.error('Error in onCapabilityOnoff:', err);
+            throw err;
         }
-        // Then, emit a callback ( err, result )
-        return (null);
     }
 
-    async onCapabilityLedOnoff(value, opts, callback) {
-        this.log("Capability called: LED onoff value: ", value);
-        this.log("Capability called: opts", opts);
-        let settings = this.getSettings();
-        let device = settings["settingIPAddress"];
-        if (value) {
-            await this.ledOn(device);
-        } else {
-            await this.ledOff(device);
+    async onCapabilityLedOnoff(value, opts) {
+        try {
+            this.log("Capability called: LED onoff value:", value);
+            let settings = this.getSettings();
+            let device = settings["settingIPAddress"];
+            if (value) {
+                await this.ledOn(device);
+            } else {
+                await this.ledOff(device);
+            }
+            return null;
+        } catch (err) {
+            this.error('Error in onCapabilityLedOnoff:', err);
+            throw err;
         }
-        // Then, emit a callback ( err, result )
-        return "null";
     }
 
     async onSettings({ oldSettings, newSettings, changedKeys }) {
@@ -164,6 +170,18 @@ class TPlinkPlugDevice extends Homey.Device {
         } catch (error) {
             this.error('Failed to handle settings change:', error);
             throw new Error('Failed to update settings: ' + error.message);
+        }
+    }
+
+    async reinitializeConnection(ipAddress) {
+        // Implement the logic to reinitialize the connection
+        // For example, update the plug instance
+        try {
+            const sysInfo = await client.getSysInfo(ipAddress);
+            this.plug = client.getPlug({ host: ipAddress, sysInfo });
+            this.log('Reinitialized connection to', ipAddress);
+        } catch (err) {
+            this.error('Error reinitializing connection:', err);
         }
     }
 
@@ -262,22 +280,22 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
 
-meter_reset(device) {
-    this.log('Reset meter ');
-    try {
-        const sysInfo = client.getSysInfo(device);
-        this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
-        // reset meter for counters in Kasa app. Does not actually clear the total counter though...
-        // this.plug.emeter.eraseStats(null);
-        this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
-        totalOffset = oldtotalState;
-        this.setSettings({
-            totalOffset: totalOffset
-        }).catch(this.error);
-    } catch (err) {
-        this.log('Error resetting meter: ', err.message);
+    async meter_reset(device) {
+        this.log('Reset meter ');
+        try {
+            const sysInfo = await client.getSysInfo(device);
+            this.plug = client.getPlug({ host: device, sysInfo: sysInfo });
+            // reset meter for counters in Kasa app. Does not actually clear the total counter though...
+            // this.plug.emeter.eraseStats(null);
+            this.log('Setting totalOffset to oldtotalState: ' + oldtotalState);
+            totalOffset = oldtotalState;
+            await this.setSettings({
+                totalOffset: totalOffset
+            }).catch(this.error);
+        } catch (err) {
+            this.log('Error resetting meter: ', err.message);
+        }
     }
-}
 
     undo_meter_reset(device) {
         this.log('Undo reset meter, setting totalOffset to 0 ');
@@ -296,94 +314,89 @@ meter_reset(device) {
 
         try {
             const sysInfo = await client.getSysInfo(device);
-            this.plug = client.getPlug({
-                host: device, sysInfo: sysInfo
-            });
+            this.plug = client.getPlug({ host: device, sysInfo });
 
-            this.plug.getInfo().catch((err) => {
-                this.log("Error getting plug info: " + err.message);
-            }).then((data) => {
-                //this.log("DeviceID: " + settings["deviceId"]);
-                //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
+            const data = await this.plug.getInfo();
 
-                if (settings["deviceId"] === undefined) {
-                    this.setSettings({
-                        deviceId: data.sysInfo.deviceId
-                    }).catch(this.error);
-                    this.log("DeviceId added: " + settings["deviceId"])
+            // **Processing data starts here**
+
+            if (settings["deviceId"] === undefined) {
+                try {
+                    await this.setSettings({ deviceId: data.sysInfo.deviceId });
+                    this.log("DeviceId added: " + settings["deviceId"]);
+                } catch (error) {
+                    this.log("Error setting deviceId: " + error.message);
                 }
+            }
 
-                if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
+            if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
+                oldpowerState = this.getCapabilityValue('measure_power');
+                oldtotalState = this.getCapabilityValue('meter_power');
+                oldvoltageState = this.getCapabilityValue('measure_voltage');
+                oldcurrentState = this.getCapabilityValue('measure_current');
+                oldRelayState = this.getCapabilityValue('onoff') ? 1 : 0;
 
-                    oldpowerState = this.getCapabilityValue('measure_power');
-                    oldtotalState = this.getCapabilityValue('meter_power');
-                    oldvoltageState = this.getCapabilityValue('measure_voltage');
-                    oldcurrentState = this.getCapabilityValue('measure_current');
-                    oldRelayState = this.getCapabilityValue('onoff') ? 1 : 0;
+                var total = data.emeter.realtime.total;
+                var corrected_total = total - totalOffset;
+            }
 
-                    var total = data.emeter.realtime.total;
-                    var corrected_total = total - totalOffset;
-                }
-
-                if (oldRelayState !== data.sysInfo.relay_state) {
+            if (oldRelayState !== data.sysInfo.relay_state) {
+                try {
                     if (data.sysInfo.relay_state === 1) {
                         this.log('Plug poll - relay is on ');
-                        this.setCapabilityValue('onoff', true)
-                            .catch(this.error);
+                        await this.setCapabilityValue('onoff', true);
                     } else {
                         this.log('Plug poll - relay is off ');
-                        this.setCapabilityValue('onoff', false)
-                            .catch(this.error);
+                        await this.setCapabilityValue('onoff', false);
                     }
-                    oldRelayState = data.sysInfo.relay_state; // Update the oldRelayState to the new value
+                    oldRelayState = data.sysInfo.relay_state;
+                } catch (error) {
+                    this.log("Error setting capability value: " + error.message);
                 }
+            }
 
-                // update realtime data only in case it changed
-                if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
+            // Update realtime data only if it changed
+            if (!["HS100", "HS200", "HS220", "KS230", "KP405", "HS103", "EP10", "ES20M", "HS210"].includes(TPlinkModel)) {
 
+                try {
                     if (oldtotalState != corrected_total) {
                         this.log("Total - Offset: " + corrected_total);
-                        this.setCapabilityValue('meter_power', corrected_total)
-                            .catch(this.error);
+                        await this.setCapabilityValue('meter_power', corrected_total);
                     }
 
                     if (oldpowerState != data.emeter.realtime.power) {
                         this.log('Power changed: ' + data.emeter.realtime.power);
-                        this.setCapabilityValue('measure_power', data.emeter.realtime.power)
-                            .catch(this.error);
+                        await this.setCapabilityValue('measure_power', data.emeter.realtime.power);
                     }
                     if (oldvoltageState != data.emeter.realtime.voltage) {
                         this.log('Voltage changed: ' + data.emeter.realtime.voltage);
-                        this.setCapabilityValue('measure_voltage', data.emeter.realtime.voltage)
-                            .catch(this.error);
+                        await this.setCapabilityValue('measure_voltage', data.emeter.realtime.voltage);
                     }
                     if (oldcurrentState != data.emeter.realtime.current) {
                         this.log('Current changed: ' + data.emeter.realtime.current);
-                        this.setCapabilityValue('measure_current', data.emeter.realtime.current)
-                            .catch(this.error);
+                        await this.setCapabilityValue('measure_current', data.emeter.realtime.current);
                     }
+                } catch (error) {
+                    this.log("Error updating capability values: " + error.message);
                 }
-            })
-                .catch((err) => {
-                    var errRegEx = new RegExp("EHOSTUNREACH", 'g')
-                    if (err.message.match(errRegEx)) {
-                        unreachableCount += 1;
-                        this.log("Device unreachable. Unreachable count: " + unreachableCount + " Discover count: " + discoverCount + " DynamicIP option: " + settings["dynamicIp"]);
+            }
 
-                        // attempt autodiscovery once every hour
-                        if ((unreachableCount % 360 == 3) && settings["dynamicIp"]) {
-                            this.setUnavailable("Device offline");
-                            discoverCount += 1;
-                            this.log("Unreachable, starting autodiscovery");
-                            this.discover();
-                        }
-                    }
-                    this.log("Caught error in getStatus / getSysInfo function: " + err.message);
-                });
         } catch (err) {
+            var errRegEx = new RegExp("EHOSTUNREACH", 'g');
+            if (err.message.match(errRegEx)) {
+                unreachableCount += 1;
+                this.log("Device unreachable. Unreachable count: " + unreachableCount + " Discover count: " + discoverCount + " DynamicIP option: " + settings["dynamicIp"]);
+
+                // Attempt autodiscovery once every hour
+                if ((unreachableCount % 360 == 3) && settings["dynamicIp"]) {
+                    this.setUnavailable("Device offline");
+                    discoverCount += 1;
+                    this.log("Unreachable, starting autodiscovery");
+                    this.discover();
+                }
+            }
             this.log("Caught error in getStatus function: " + err.message);
         }
-
     }
 
     pollDevice(interval) {

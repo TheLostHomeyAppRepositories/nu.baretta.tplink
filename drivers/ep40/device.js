@@ -158,6 +158,18 @@ class TPlinkPlugDevice extends Homey.Device {
         }
     }
 
+async reinitializeConnection(ipAddress) {
+    // Implement the logic to reinitialize the connection
+    // For example, update the plug instance
+    try {
+        const sysInfo = await client.getSysInfo(ipAddress);
+        this.plug = client.getPlug({ host: ipAddress, sysInfo });
+        this.log('Reinitialized connection to', ipAddress);
+    } catch (err) {
+        this.error('Error reinitializing connection:', err);
+    }
+}
+
     async setPowerState(device, childId, powerState) {
         try {
             const sysInfo = await client.getSysInfo(device);

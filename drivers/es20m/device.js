@@ -112,9 +112,9 @@ class TPlinkPlugDevice extends Homey.Device {
     }
 
     // this method is called when the Device has requested a state change (turned on or off)
-    async onCapabilityOnoff(value, opts, callback) {
-        // ... set value to real device
-        this.log("Capability called: onoff value: ", value);
+async onCapabilityOnoff(value, opts) {
+    try {
+        this.log("Capability called: onoff value:", value);
         let settings = this.getSettings();
         let device = settings["settingIPAddress"];
         if (value) {
@@ -122,13 +122,16 @@ class TPlinkPlugDevice extends Homey.Device {
         } else {
             await this.powerOff(device);
         }
-        // Then, emit a callback ( err, result )
-        return (null);
+        return null;
+    } catch (err) {
+        this.error('Error in onCapabilityOnoff:', err);
+        throw err;
     }
+}
 
-    async onCapabilityLedOnoff(value, opts, callback) {
-        this.log("Capability called: LED onoff value: ", value);
-        this.log("Capability called: opts", opts);
+async onCapabilityLedOnoff(value, opts) {
+    try {
+        this.log("Capability called: LED onoff value:", value);
         let settings = this.getSettings();
         let device = settings["settingIPAddress"];
         if (value) {
@@ -136,9 +139,12 @@ class TPlinkPlugDevice extends Homey.Device {
         } else {
             await this.ledOff(device);
         }
-        // Then, emit a callback ( err, result )
-        return (null);
+        return null;
+    } catch (err) {
+        this.error('Error in onCapabilityLedOnoff:', err);
+        throw err;
     }
+}
 
     onSettings(settings, newSettingsObj, changedKeysArr, callback) {
         try {
