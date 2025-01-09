@@ -32,6 +32,7 @@
       "KL60",
       "KL110",
       "KL120",
+      "KL125",
       "KL130",
       "KP115",
       "KP105",
@@ -71,6 +72,7 @@
       "KL60",
       "KL110",
       "KL120",
+      "KL125",
       "KL130",
       "KP115",
       "KP105",
@@ -575,6 +577,98 @@
       ]
     },
     {
+      "id": "kp400",
+      "name": {
+        "en": "KP400(US)",
+        "nl": "KP400(US)"
+      },
+      "icon": "drivers/kp400/assets/icons/icon.svg",
+      "images": {
+        "large": "drivers/kp400/assets/images/large.jpg",
+        "small": "drivers/kp400/assets/images/small.jpg"
+      },
+      "class": "socket",
+      "capabilities": [
+        "onoff",
+        "ledonoff"
+      ],
+      "mobile": {
+        "components": [
+          {
+            "id": "icon",
+            "capabilities": [
+              "onoff"
+            ]
+          },
+          {
+            "id": "toggle",
+            "capabilities": [
+              "onoff"
+            ]
+          }
+        ]
+      },
+      "pair": [
+        {
+          "id": "start"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_plugs"
+          }
+        },
+        {
+          "id": "add_plugs",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "General settings",
+            "nl": "Algemene instellingen"
+          },
+          "children": [
+            {
+              "id": "settingIPAddress",
+              "type": "text",
+              "label": {
+                "en": "IP address",
+                "nl": "IP adres"
+              },
+              "value": "0.0.0.0"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "collapsed": "true",
+          "label": {
+            "en": "Optional connection setting",
+            "nl": "Optionele verbindingsinstelling"
+          },
+          "children": [
+            {
+              "id": "dynamicIp",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Enable for dynamic IP address:",
+                "nl": "Inschakelen voor dynamisch IP-adres:"
+              },
+              "hint": {
+                "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
+                "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "es20m",
       "name": {
         "en": "ES20M dimmer",
@@ -688,8 +782,8 @@
     {
       "id": "hs103",
       "name": {
-        "en": "HS103",
-        "nl": "HS103"
+        "en": "HS103/HS105",
+        "nl": "HS103/HS105"
       },
       "icon": "{{driverAssetsPath}}/icon.svg",
       "images": {
@@ -3026,8 +3120,8 @@
     {
       "id": "kl130",
       "name": {
-        "en": "KL130",
-        "nl": "KL130"
+        "en": "KL130/KL125",
+        "nl": "KL130/KL125"
       },
       "icon": "{{driverAssetsPath}}/icon.svg",
       "images": {
