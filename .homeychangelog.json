@@ -169,5 +169,8 @@
   },
   "0.2.42": {
     "en": "Multiple fixes"
+  },
+  "0.2.43": {
+    "en": "Added KP400 and aliases for KL125 and HS105"
   }
 }
