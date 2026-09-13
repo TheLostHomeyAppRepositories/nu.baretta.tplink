@@ -199,5 +199,8 @@
   },
   "0.3.4": {
     "en": "Improved automatic IP rediscovery across affected TP-Link devices, including timeout recovery, isolated discovery sessions, and safer retry handling."
+  },
+  "0.3.5": {
+    "en": "Fixed KS240 support, logging improvements, HS220 support for new transport method"
   }
 }
