@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = {
+  async testCredentials({ homey, body }) {
+    return homey.app.testGlobalCredentials(body || {});
+  },
+
   async getCredentialStatus({ homey }) {
     return homey.app.getCredentialStatus();
   },

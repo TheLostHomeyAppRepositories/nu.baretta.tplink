@@ -6,9 +6,9 @@ const { createRequire } = require('node:module');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const AUTHENTICATED = new Set(['ep10', 'ks225', 'ks240', 's500d']);
+const AUTHENTICATED = new Set(['ep10', 'hs210', 'hs220', 'ks225', 'ks240', 's500d']);
 
-function fixture(id = 'hs110') {
+function fixture(id = 'hs110', { Client: ClientOverride } = {}) {
   const filename = path.resolve(__dirname, '../../drivers', id, 'device.js');
   const recoveryFile = path.resolve(__dirname, '../../lib/tplink-recovery.js');
   const state = { now: 0, clients: [], timers: new Set(), requests: [], writes: [], logs: [], commands: [] };
@@ -32,6 +32,7 @@ function fixture(id = 'hs110') {
     getPlug(options) {
       state.lastPlugOptions = options;
       return {
+        dimmer: { get brightness() { return sysInfo().brightness; } },
         getInfo: async () => {
           if (state.infoError) throw state.infoError;
           return { sysInfo: sysInfo(), emeter: { realtime } };
@@ -39,6 +40,12 @@ function fixture(id = 'hs110') {
         getSysInfo: async () => {
           if (state.infoError) throw state.infoError;
           return sysInfo();
+        },
+        sendSmartCommand: async (method, params, childId) => {
+          if (state.infoError) throw state.infoError;
+          if (method === 'get_device_info') return sysInfo();
+          state.commands.push({ ...options, command: method, params, childId });
+          return {};
         },
         emeter: { getRealtime: async () => {
           if (state.infoError) throw state.infoError;
@@ -85,7 +92,7 @@ function fixture(id = 'hs110') {
       module, __dirname: path.dirname(file),
       require: name => {
         if (name === 'homey') return { Device: class {} };
-        if (name === 'tplink-smarthome-api') return { Client };
+        if (name === 'tplink-smarthome-api') return { Client: ClientOverride || Client };
         if (localRequire.resolve(name) === recoveryFile) return load(recoveryFile);
         return localRequire(name);
       },
@@ -103,14 +110,24 @@ function fixture(id = 'hs110') {
     device.values = { onoff: false, measure_power: 0, meter_power: 0,
       measure_voltage: 0, measure_current: 0, dim: 0, light_mode: 'normal',
       light_temperature: 0, light_hue: 0, light_saturation: 0 };
+    device.store = {};
+    device.capabilityOptions = {};
+    device.optionWrites = [];
     Object.assign(device, {
       available: true, unreachableCount: 0, discoverCount: 0, totalOffset: 0,
       oldRelayState: 0, childId: 'child-1', channelType: 'light',
+      getStoreValue(key) { return this.store[key]; },
+      async setStoreValue(key, value) { if (state.storeError) throw state.storeError; if (state.storeGate) await state.storeGate; this.store[key] = value; },
       getSettings() { return { ...this.settings }; },
       getData: () => ({ id: 'existing-homey-id', childId: 'child-1' }),
       getName: () => 'Test ' + id.toUpperCase(), getClass: () => 'socket',
       hasCapability(key) { return Object.hasOwn(this.values, key); },
       getCapabilityValue(key) { return this.values[key]; },
+      getCapabilityOptions(key) { return this.capabilityOptions[key] || {}; },
+      async setCapabilityOptions(key, options) {
+        this.optionWrites.push({ key, options });
+        this.capabilityOptions[key] = options;
+      },
       async setCapabilityValue(key, value) { this.values[key] = value; },
       getAvailable() { return this.available; },
       async setAvailable() { this.available = true; },
@@ -130,7 +147,7 @@ function fixture(id = 'hs110') {
         setInterval: setTimer,
       },
     });
-    if (AUTHENTICATED.has(id)) device.client = new Client();
+    if (AUTHENTICATED.has(id)) device.client = new (ClientOverride || Client)({ logLevel: 'silent' });
     return device;
   };
   state.device = state.makeDevice();

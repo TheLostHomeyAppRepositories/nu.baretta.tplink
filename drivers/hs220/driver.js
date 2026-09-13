@@ -1,174 +1,373 @@
 'use strict';
-// need Homey module, see SDK Guidelines
+
 const Homey = require('homey');
-
+const { isIP } = require('node:net');
+const { Client } = require('tplink-smarthome-api');
 const {
-    Client
-} = require('tplink-smarthome-api');
-const client = new Client();
+  getTpLinkDiscoveryClientOptions,
+  isValidTpLinkTransport,
+} = require('../../lib/tplink-auth');
+const {
+  getPairedCredentialSettings,
+  getSafeErrorMessage,
+  hasCredentialInput,
+  isAuthenticationError,
+  resolvePairingCredentials,
+} = require('../../lib/tplink-credentials');
 
-// get driver name based on dirname
-function getDriverName() {
-    var parts = __dirname.replace(/\\/g, '/').split('/');
-    return parts[parts.length - 1].split('.')[0];
-}
-var TPlinkModel = getDriverName().toUpperCase();
-var myRegEx = new RegExp(TPlinkModel, 'g');
-
-//var devIds = {};
-var logEvent = function (eventName, plug) {
-    //this.log(`${(new Date()).toISOString()} ${eventName} ${plug.model} ${plug.host} ${plug.deviceId}`);
-    console.log(`${(new Date()).toISOString()} ${eventName} ${plug.model} ${plug.host}`);
-};
+const TPLINK_MODEL = 'HS220';
 
 function guid() {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+}
+
+function getPairingInput(value) {
+  const input = value && typeof value === 'object' ? value : {};
+  const data = input.data && typeof input.data === 'object' ? input.data : {};
+  const settings = input.settings && typeof input.settings === 'object' ? input.settings : {};
+  return {
+    ip:
+      typeof input.ip === 'string'
+        ? input.ip.trim()
+        : typeof settings.settingIPAddress === 'string'
+          ? settings.settingIPAddress.trim()
+          : '',
+    name: typeof input.name === 'string' ? input.name.trim() : '',
+    deviceId: typeof input.deviceId === 'string' ? input.deviceId : '',
+    transport: isValidTpLinkTransport(input.transport)
+      ? input.transport
+      : isValidTpLinkTransport(data.transport)
+        ? data.transport
+        : undefined,
+    deviceUsername:
+      input.deviceUsername ?? input.username ?? settings.deviceUsername ?? '',
+    devicePassword:
+      input.devicePassword ?? input.password ?? settings.devicePassword ?? '',
+  };
+}
+
+function getDiscoveryDeviceName(plug, sysInfo) {
+  return [
+    sysInfo && sysInfo.name,
+    sysInfo && sysInfo.alias,
+    sysInfo && sysInfo.dev_name,
+    plug && plug.alias,
+    plug && plug.name,
+    sysInfo && sysInfo.model,
+    plug && plug.model,
+  ].find(value => typeof value === 'string' && value.length > 0) || TPLINK_MODEL;
+}
+
+function isAuthenticatedTransport(transport) {
+  return transport === 'klap' || transport === 'aes';
+}
+
+function getCredentialSettings(resolution) {
+  if (!resolution) return {};
+  return {
+    credentialSource: 'override',
+    deviceUsername: resolution.credentials.username,
+    devicePassword: resolution.credentials.password,
+  };
+}
+
+function resolveOptionalPairingCredentials(driver, input) {
+  const app = driver.homey && driver.homey.app;
+  const globalCredentials =
+    app && typeof app.getGlobalCredentials === 'function'
+      ? app.getGlobalCredentials()
+      : null;
+  if (!hasCredentialInput(input) && !globalCredentials) return null;
+
+  if (app && typeof app.resolvePairingCredentials === 'function') {
+    return app.resolvePairingCredentials(input);
+  }
+  return resolvePairingCredentials(input, globalCredentials);
+}
+
+async function finalizeCredentialsForPairing(driver, resolution) {
+  if (
+    driver.homey &&
+    driver.homey.app &&
+    typeof driver.homey.app.finalizePairingCredentials === 'function'
+  ) {
+    return driver.homey.app.finalizePairingCredentials(resolution);
+  }
+  return {
+    ...resolution,
+    settings: getPairedCredentialSettings(resolution),
+  };
 }
 
 class TPlinkPlugDriver extends Homey.Driver {
+  async onPair(session) {
+    const knownDeviceIds = new Set();
+    let activeDiscovery = null;
+    let pairingOpen = true;
+    let requestVersion = 0;
 
-    async onPair(session) {
-        // socket is a direct channel to the front-end
-        var devIds = {};
-
-        try {
-            let apidevices = this.getDevices();
-            Object.values(apidevices).forEach(device => {
-
-                devIds[device.getSettings().deviceId] = "";
-            })
-            this.log("Existing devIDs: " + JSON.stringify(devIds));
-        } catch (err) {
-            this.log(err);
-        }
-
-        var id = guid();
-        let devices = [{
-            "data": {
-                "id": id
-            },
-            "name": "initial_name",
-            "settings": {
-                "settingIPAddress": "0.0.0.0",
-                "totalOffset": 0
-            } // initial settings
-        }];
-
-        // discover function
-        session.setHandler("discover", async (data) => {
-
-            let discoveredDevicesArray = []; // Initialize an array to store discovered devices
-
-            var discoveryOptions = {
-                deviceTypes: 'plug',
-                discoveryInterval: 1500,
-                discoveryTimeout: 2000
-            }
-            client.startDiscovery(discoveryOptions);
-            this.log('Starting Plug Discovery');
-client.on('plug-new', async (plug) => {
     try {
-        logEvent('Found plug-new type', plug);
-        const sysInfo = await plug.getSysInfo();
-        const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name || sysInfo.model; // Fallback as per sysinfo available data
-
-        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
-                this.log("New Plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
-                discoveredDevicesArray.push({
-                    ip: plug.host,
-                    name: deviceName,
-                    deviceId: plug.deviceId // Store the device ID
-                });
-            }
+      this.getDevices().forEach(device => {
+        const deviceId = device.getSettings().deviceId;
+        if (typeof deviceId === 'string' && deviceId.length > 0) {
+          knownDeviceIds.add(deviceId);
         }
-    } catch (err) {
-        this.log(`Error discovering new plug: ${err.message}`);
+      });
+      this.log(`Existing ${TPLINK_MODEL} device IDs: ${knownDeviceIds.size}`);
+    } catch (error) {
+      this.log(`Unable to read existing ${TPLINK_MODEL} devices: ${getSafeErrorMessage(error)}`);
     }
-});
 
-client.on('plug-online', async (plug) => {
-    try {
-        const sysInfo = await plug.getSysInfo();
-        const deviceName = sysInfo.name || sysInfo.alias || sysInfo.dev_name || sysInfo.model; // Fallback as per sysinfo available data
+    const stopActiveDiscovery = () => {
+      if (activeDiscovery) activeDiscovery.finish();
+    };
 
-        if (plug.model.match(myRegEx) && !devIds.hasOwnProperty(plug.deviceId)) {
-            if (!discoveredDevicesArray.some(device => device.deviceId === plug.deviceId)) {
-                this.log("Online plug found: " + plug.host + " model " + plug.model + " name " + plug.name + " id " + plug.deviceId);
-                discoveredDevicesArray.push({
-                    ip: plug.host,
-                    name: deviceName,
-                    deviceId: plug.deviceId // Store the device ID
-                });
+    const discoverHs220Devices = (input, targetHost) => {
+      stopActiveDiscovery();
+      const credentialResolution = resolveOptionalPairingCredentials(this, input);
+      const client = new Client({
+        ...getTpLinkDiscoveryClientOptions(getCredentialSettings(credentialResolution)),
+        logLevel: 'silent',
+        defaultSendOptions: { timeout: 4000 },
+      });
+      const discoveryOptions = {
+        deviceTypes: ['plug'],
+        breakoutChildren: false,
+        filterCallback: info => String(info.model || '').toUpperCase().startsWith(TPLINK_MODEL),
+        discoveryInterval: 1500,
+        discoveryTimeout: 5000,
+        ...(targetHost
+          ? {
+              broadcast: targetHost,
+              devices: [{ host: targetHost }],
             }
-        }
-    } catch (err) {
-        this.log(`Error discovering online plug: ${err.message}`);
-    }
-});
+          : {}),
+      };
 
- setTimeout(() => {
-  client.stopDiscovery(); // Stop discovery after timeout
+      return new Promise(resolve => {
+        const discoveredDevices = [];
+        const attemptedCandidates = new Set();
+        const validations = new Set();
+        let authenticationRequired = false;
+        let authenticationError;
+        let acceptingCandidates = true;
+        let timer = null;
+        let finished = false;
 
-  if (discoveredDevicesArray.length > 0) {
-    session.emit("discovered_devices", discoveredDevicesArray);
-    this.log("Discovered devices: " + JSON.stringify(discoveredDevicesArray));
-    return discoveredDevicesArray;
-  } else {
-    this.log("No devices discovered");
-    session.emit("discovery_failed", { devicesFound: false });
-    return [];
-  }
-}, discoveryOptions.discoveryTimeout);
-});
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          acceptingCandidates = false;
+          if (timer !== null) clearTimeout(timer);
+          client.stopDiscovery();
+          client.removeAllListeners();
+          if (activeDiscovery && activeDiscovery.client === client) {
+            activeDiscovery = null;
+          }
+          Promise.allSettled([...validations]).then(() =>
+            resolve({ devices: discoveredDevices, authenticationRequired, authenticationError }),
+          );
+        };
 
-        // this is called when the user presses save settings button in start.html
-        session.setHandler("get_devices", async (data) => {
-            this.log("Received get_devices data: " + JSON.stringify(data));
+        const validatePlug = async plug => {
+          try {
+            const transport = isValidTpLinkTransport(
+              plug.defaultSendOptions && plug.defaultSendOptions.transport,
+            )
+              ? plug.defaultSendOptions.transport
+              : 'tcp';
+            this.log(`HS220 discovery: ${plug.host}, transport=${transport}, account=${credentialResolution ? credentialResolution.source : 'none'}`);
+            if (isAuthenticatedTransport(transport) && !credentialResolution) {
+              authenticationRequired = true;
+              return;
+            }
 
-            // Ensure data is always treated as an array
-            let inputData = Array.isArray(data) ? data : [data];
+            const sysInfo = await plug.getSysInfo();
+            const model = String(sysInfo.model || plug.model || '').toUpperCase();
+            const deviceId = sysInfo.deviceId || sysInfo.device_id || plug.deviceId;
+            if (
+              !model.startsWith(TPLINK_MODEL) ||
+              !deviceId ||
+              knownDeviceIds.has(deviceId) ||
+              discoveredDevices.some(device => device.deviceId === deviceId)
+            ) {
+              return;
+            }
 
-            let devices = inputData.map(device => {
-                // Generate a unique ID for each device
-                let deviceId = guid();
-                return {
-                    data: { id: deviceId },
-                    name: device.name,
-                    settings: {
-                        "settingIPAddress": device.ip,
-                        "dynamicIp": false,
-                        "totalOffset": 0
-                    }
-                };
+            discoveredDevices.push({
+              ip: plug.host,
+              name: getDiscoveryDeviceName(plug, sysInfo),
+              deviceId,
+              transport,
+              protocol: String(sysInfo.type || sysInfo.mic_type || '').startsWith('IOT.') ? 'iot' : 'smart',
             });
+          } catch (error) {
+            if (isAuthenticationError(error)) authenticationError = getSafeErrorMessage(error, credentialResolution && credentialResolution.credentials);
+            this.log(
+              `Unable to validate a discovered ${TPLINK_MODEL}: ${getSafeErrorMessage(
+                error,
+                credentialResolution && credentialResolution.credentials,
+              )}`,
+            );
+          }
+        };
 
-            // Log and return the processed devices
-            this.log("Processed devices: " + JSON.stringify(devices));
-            //            return devices;
+        const collectPlug = plug => {
+          if (!acceptingCandidates || (targetHost && plug.host !== targetHost)) return;
+          if (!String(plug.model || '').toUpperCase().startsWith(TPLINK_MODEL)) return;
+          const key = plug.host || plug.deviceId;
+          if (!key || attemptedCandidates.has(key)) return;
+          attemptedCandidates.add(key);
+          const validation = validatePlug(plug);
+          validations.add(validation);
+          void validation.finally(() => validations.delete(validation));
+        };
 
-
-            // Set passed pair settings in variables
-            //this.log("Got get_devices from front-end, IP =", data.ipaddress, " Name = ", data.deviceName);
-            session.emit('continue', null);
-
-            // this method is run when Homey.emit('list_devices') is run on the front-end
-            // which happens when you use the template `list_devices`
-
-            session.setHandler("list_devices", async (data) => {
-                //this.log("List_devices data: " + JSON.stringify(data));
-
-                return devices;
-            });
+        client.on('plug-new', collectPlug);
+        client.on('plug-online', collectPlug);
+        client.on('error', error => {
+          if (acceptingCandidates) {
+            this.log(
+              `${TPLINK_MODEL} discovery error: ${getSafeErrorMessage(
+                error,
+                credentialResolution && credentialResolution.credentials,
+              )}`,
+            );
+          }
         });
 
-        session.setHandler("disconnect", () => {
-            this.log("Pairing is finished (done or aborted)");
-        })
-    }
+        activeDiscovery = { client, finish };
+        try {
+          client.startDiscovery(discoveryOptions);
+          timer = setTimeout(finish, discoveryOptions.discoveryTimeout + 25);
+        } catch (error) {
+          this.log(
+            `Unable to start ${TPLINK_MODEL} discovery: ${getSafeErrorMessage(
+              error,
+              credentialResolution && credentialResolution.credentials,
+            )}`,
+          );
+          finish();
+        }
+      });
+    };
+
+    session.setHandler('get_credential_status', async () => {
+      if (
+        this.homey &&
+        this.homey.app &&
+        typeof this.homey.app.getCredentialStatus === 'function'
+      ) {
+        return this.homey.app.getCredentialStatus();
+      }
+      return { configured: false };
+    });
+
+    session.setHandler('discover', async data => {
+      const version = ++requestVersion;
+      const input = getPairingInput(Array.isArray(data) ? data[0] : data);
+      const result = await discoverHs220Devices(input);
+      if (!pairingOpen || version !== requestVersion) return [];
+
+      if (result.devices.length === 0 && result.authenticationError) throw new Error(result.authenticationError);
+      if (result.devices.length > 0) {
+        await session.emit('discovered_devices', result.devices);
+      } else {
+        await session.emit('discovery_failed', {
+          devicesFound: false,
+          authenticationRequired: result.authenticationRequired,
+        });
+      }
+      return result.devices;
+    });
+
+    session.setHandler('get_devices', async data => {
+      const version = ++requestVersion;
+      const inputs = (Array.isArray(data) ? data : [data]).map(getPairingInput);
+      const devices = [];
+
+      for (const input of inputs) {
+        if (isIP(input.ip) !== 4) {
+          throw new Error('A valid IPv4 address is required to pair an HS220 manually.');
+        }
+
+        const result = await discoverHs220Devices(input, input.ip);
+        if (!pairingOpen || version !== requestVersion) return [];
+        const target = result.devices.find(device => device.ip === input.ip);
+        if (!target) {
+          if (result.authenticationError) throw new Error(result.authenticationError);
+          if (result.authenticationRequired) {
+            throw new Error(
+              'This HS220 uses authenticated firmware. Enter complete TP-Link account credentials and try again.',
+            );
+          }
+          throw new Error(
+            'No accessible HS220 was found at the supplied IP address. Check the address and try discovery again.',
+          );
+        }
+        if (input.deviceId && input.deviceId !== target.deviceId) {
+          throw new Error(
+            'The HS220 at the supplied address no longer matches the device selected during discovery.',
+          );
+        }
+        if (knownDeviceIds.has(target.deviceId)) {
+          throw new Error('This HS220 is already paired.');
+        }
+
+        let credentialSettings = {
+          deviceUsername: '',
+          devicePassword: '',
+        };
+        if (isAuthenticatedTransport(target.transport)) {
+          const pairingResolution = resolveOptionalPairingCredentials(this, input);
+          if (!pairingResolution) {
+            throw new Error(
+              'This HS220 uses authenticated firmware. Enter complete TP-Link account credentials and try again.',
+            );
+          }
+          const finalized = await finalizeCredentialsForPairing(this, pairingResolution);
+          credentialSettings = finalized.settings;
+        }
+
+        devices.push({
+          data: {
+            id: guid(),
+            transport: target.transport,
+            protocol: target.protocol,
+          },
+          name: input.name || target.name,
+          settings: {
+            settingIPAddress: target.ip,
+            dynamicIp: false,
+            totalOffset: 0,
+            deviceId: target.deviceId,
+            ...credentialSettings,
+          },
+        });
+      }
+
+      session.setHandler('list_devices', async () => devices);
+      await session.emit('continue', null);
+      return devices;
+    });
+
+    session.setHandler('cancel', () => {
+      pairingOpen = false;
+      requestVersion += 1;
+      stopActiveDiscovery();
+    });
+
+    session.setHandler('disconnect', () => {
+      pairingOpen = false;
+      requestVersion += 1;
+      stopActiveDiscovery();
+    });
+  }
 }
 
 module.exports = TPlinkPlugDriver;

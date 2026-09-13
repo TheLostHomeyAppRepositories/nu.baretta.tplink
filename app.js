@@ -1,10 +1,13 @@
 'use strict';
 
 const Homey = require('homey');
+const { isIP } = require('node:net');
 const { Client } = require('tplink-smarthome-api');
 const {
   getEp10ClientOptions,
+  getDeviceConnectionData,
   getEp10Transport,
+  getKs240SysInfo,
   getTpLinkClientOptions,
 } = require('./lib/tplink-auth');
 const {
@@ -27,7 +30,8 @@ const {
 } = require('./lib/tplink-credentials');
 
 const AUTHENTICATED_DRIVER_IDS = new Set(['ks225', 's500d', 'ks240']);
-const MANAGED_DRIVER_IDS = new Set([...AUTHENTICATED_DRIVER_IDS, 'ep10']);
+const DUAL_TRANSPORT_DRIVER_IDS = new Set(['ep10', 'hs210', 'hs220']);
+const MANAGED_DRIVER_IDS = new Set([...AUTHENTICATED_DRIVER_IDS, ...DUAL_TRANSPORT_DRIVER_IDS]);
 const CREDENTIAL_VALIDATION_TIMEOUT = 4000;
 
 function getDriverId(driver, fallbackId) {
@@ -48,8 +52,8 @@ function createCredentialValidationClient(driverId, device, credentials) {
     credentialSource: CREDENTIAL_SOURCES.OVERRIDE,
   };
   const options =
-    driverId === 'ep10'
-      ? getEp10ClientOptions(device.getData(), settings)
+    DUAL_TRANSPORT_DRIVER_IDS.has(driverId)
+      ? getEp10ClientOptions(getDeviceConnectionData(device), settings)
       : getTpLinkClientOptions(driverId.toUpperCase(), settings);
 
   options.defaultSendOptions.timeout = CREDENTIAL_VALIDATION_TIMEOUT;
@@ -60,6 +64,20 @@ class TpLinkApp extends Homey.App {
   async onInit() {
     this._credentialMutation = Promise.resolve();
     this._globalCredentialRefreshVersion = 0;
+    this._credentialValidation = { status: 'unverified' };
+    if (!this._brightnessActionRegistered) {
+      this.homey.flow.getActionCard('set_brightness').registerRunListener(async ({ device, brightness }) => {
+        if (typeof brightness !== 'number' || !Number.isFinite(brightness) || brightness < 0 || brightness > 100) {
+          throw new Error(this.homey.__('flowErrors.invalidBrightness'));
+        }
+        // KS240 controls a child channel using a normalized level.
+        const result = typeof device.setLevel === 'function'
+          ? await device.setLevel(brightness / 100)
+          : await device.setBrightness(device.getSettings().settingIPAddress, brightness);
+        return result !== false;
+      });
+      this._brightnessActionRegistered = true;
+    }
     this.log('TP-Link credential source management initialized');
   }
 
@@ -99,6 +117,7 @@ class TpLinkApp extends Homey.App {
           password: pairingResolution.credentials.password,
         });
         this._globalCredentialRefreshVersion += 1;
+        this._credentialValidation = { status: 'unverified' };
         resolved = {
           credentials: pairingResolution.credentials,
           source: CREDENTIAL_SOURCES.GLOBAL,
@@ -140,6 +159,7 @@ class TpLinkApp extends Homey.App {
       configured: Boolean(globalCredentials),
       usernameHint: globalCredentials ? maskUsername(globalCredentials.username) : '',
       devices: summary,
+      validation: globalCredentials ? this._credentialValidation : { status: 'unverified' },
     };
   }
 
@@ -159,6 +179,7 @@ class TpLinkApp extends Homey.App {
         password: credentials.password,
       });
       this._globalCredentialRefreshVersion += 1;
+      this._credentialValidation = { ...validation, checkedAt: new Date().toISOString() };
       const refreshed = await this.refreshDevicesUsingGlobalCredentials({
         reason: 'global credentials updated',
         force: true,
@@ -178,6 +199,7 @@ class TpLinkApp extends Homey.App {
     return this.withCredentialMutation(async () => {
       this.homey.settings.unset(GLOBAL_CREDENTIALS_KEY);
       this._globalCredentialRefreshVersion += 1;
+      this._credentialValidation = { status: 'unverified' };
       const refreshed = await this.refreshDevicesUsingGlobalCredentials({
         reason: 'global credentials cleared',
         force: true,
@@ -254,10 +276,27 @@ class TpLinkApp extends Homey.App {
     });
   }
 
-  async validateGlobalCredentials(credentials) {
+  async testGlobalCredentials(input = {}) {
+    const ipAddress = typeof input.ip === 'string' ? input.ip.trim() : '';
+    if (input.ip !== undefined &&
+        (typeof input.ip !== 'string' || (ipAddress && isIP(ipAddress) !== 4))) {
+      throw new Error('Enter a valid device IPv4 address.');
+    }
+    return this.withCredentialMutation(async () => {
+      const credentials = this.getGlobalCredentials();
+      if (!credentials) throw new Error('Save the TP-Link account before testing it.');
+      const validation = await this.validateGlobalCredentials(credentials, ipAddress);
+      this._credentialValidation = { ...validation, checkedAt: new Date().toISOString() };
+      this.log(`TP-Link saved credential test: ${validation.status}`);
+      return { validation: this._credentialValidation, status: await this.getCredentialStatus() };
+    });
+  }
+
+  async validateGlobalCredentials(credentials, targetIp = '') {
     const candidates = [];
     const seenTargets = new Set();
     this.getManagedDevices().forEach(entry => {
+      if (targetIp) return;
       if (!this.isEligibleValidationDevice(entry, credentials)) return;
 
       const settings = entry.device.getSettings();
@@ -269,6 +308,13 @@ class TpLinkApp extends Homey.App {
       seenTargets.add(targetKey);
       candidates.push({ entry, settings, ipAddress });
     });
+
+    if (targetIp) {
+      candidates.push({
+        entry: { driverId: 'ks240', device: { getData: () => ({}) } },
+        ipAddress: targetIp,
+      });
+    }
 
     if (candidates.length === 0) {
       return {
@@ -285,16 +331,22 @@ class TpLinkApp extends Homey.App {
           candidate.entry.device,
           credentials,
         );
-        await client.getSysInfo(candidate.ipAddress);
+        const sysInfo = candidate.entry.driverId === 'ks240'
+          ? await getKs240SysInfo(client, candidate.ipAddress)
+          : await client.getSysInfo(candidate.ipAddress);
+        if (targetIp && (!sysInfo || !sysInfo.model)) {
+          throw new Error('The target did not return TP-Link device information.');
+        }
         return {
           status: 'validated',
-          reason: 'Validated locally against a paired TP-Link device.',
+          reason: 'Local connection succeeded using the saved account settings. This does not test TP-Link cloud login.',
         };
       } catch (error) {
         if (isAuthenticationError(error) && !isReachabilityError(error)) {
           return {
             status: 'rejected',
-            reason: 'The paired TP-Link device rejected the account credentials.',
+            reason: 'The TP-Link device rejected local authentication. Check the device owner account, exact email spelling and password. A KLAP challenge mismatch can also indicate incompatible firmware.',
+            error: getSafeErrorMessage(error, credentials),
           };
         }
 
@@ -311,8 +363,8 @@ class TpLinkApp extends Homey.App {
     return {
       status: 'unverified',
       reason: sawReachabilityError
-        ? 'All eligible paired TP-Link devices were offline or timed out.'
-        : 'All eligible paired TP-Link devices could not provide conclusive local validation.',
+        ? 'The selected TP-Link devices were offline or timed out.'
+        : 'The selected TP-Link devices could not provide conclusive local validation.',
     };
   }
 
@@ -335,7 +387,7 @@ class TpLinkApp extends Homey.App {
       }
 
       devices.forEach((device, index) => {
-        const data = device.getData ? device.getData() : {};
+        const data = device.getData ? getDeviceConnectionData(device) : {};
         entries.push({
           driverId,
           device,
@@ -355,12 +407,12 @@ class TpLinkApp extends Homey.App {
     };
 
     this.getManagedDevices().forEach(entry => {
-      // A persisted TCP transport is a confirmed credential-free EP10. Do not
+      // A persisted TCP transport is a confirmed credential-free device. Do not
       // present it in the account-source summary, even if old settings contain
       // a stale source marker.
       if (
-        entry.driverId === 'ep10' &&
-        entry.device.getData().transport === 'tcp'
+        DUAL_TRANSPORT_DRIVER_IDS.has(entry.driverId) &&
+        getDeviceConnectionData(entry.device).transport === 'tcp'
       ) {
         return;
       }
@@ -391,9 +443,9 @@ class TpLinkApp extends Homey.App {
     }
 
     if (AUTHENTICATED_DRIVER_IDS.has(entry.driverId)) return true;
-    if (entry.driverId !== 'ep10') return false;
+    if (!DUAL_TRANSPORT_DRIVER_IDS.has(entry.driverId)) return false;
 
-    const data = entry.device.getData();
+    const data = getDeviceConnectionData(entry.device);
     return getEp10Transport(data, settings, credentials) !== 'tcp';
   }
 
@@ -403,12 +455,12 @@ class TpLinkApp extends Homey.App {
     if (source === CREDENTIAL_SOURCES.OVERRIDE) return false;
 
     // Unmarked devices with their own complete legacy pair keep that pair until
-    // the user explicitly adopts them. Pre-transport, credential-empty EP10s
+    // the user explicitly adopts them. Pre-transport, credential-empty dual-transport devices
     // also remain TCP and must not be refreshed with a new global account.
     if (!source && hasCompleteCredentials(settings)) return false;
 
-    if (entry.driverId !== 'ep10') return true;
-    const data = entry.device.getData();
+    if (!DUAL_TRANSPORT_DRIVER_IDS.has(entry.driverId)) return true;
+    const data = getDeviceConnectionData(entry.device);
     // A source marker keeps this pre-transport device linked to the global
     // account. On a global clear it must still refresh so its in-memory KLAP
     // client is replaced by the resulting TCP fallback.

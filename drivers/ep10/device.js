@@ -42,7 +42,7 @@ function createClientFromSettings(device, data, settings, activeTransport, { tim
 
     if (timeout) options.defaultSendOptions.timeout = timeout;
 
-    return new Client(options);
+    return new Client({ ...options, logLevel: 'silent' });
 }
 
 function getSafeErrorMessage(error, settings = {}, globalCredentials = null) {
@@ -405,7 +405,6 @@ class TPlinkPlugDevice extends Homey.Device {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let TPlinkModel = getDriverName().toUpperCase();
-        this.log("getStatus device: " + device + ", name: " + this.getName());
 
         try {
             const sysInfo = await this.client.getSysInfo(device);
@@ -591,15 +590,16 @@ class TPlinkPlugDevice extends Homey.Device {
 
     async discover() {
         return getRecovery(this).discover({
-            createClient: settings => new Client(getTpLinkDiscoveryClientOptions(settings, getGlobalCredentials(this))),
+            createClient: settings => new Client({ ...getTpLinkDiscoveryClientOptions(settings, getGlobalCredentials(this)), logLevel: 'silent' }),
             type: 'plug',
             resolveCandidate: async (plug, settings) => {
+                const discoveryId = plug.deviceId;
                 const sysInfo = await plug.getSysInfo();
                 const model = sysInfo.model || plug.model;
                 if (!String(model || '').toUpperCase().startsWith(TPlinkModel)) return null;
                 const transport = getDiscoveredTransport(plug);
                 return {
-                    deviceId: sysInfo.deviceId || sysInfo.device_id || plug.deviceId,
+                    deviceId: discoveryId === settings.deviceId ? discoveryId : sysInfo.deviceId || sysInfo.device_id || plug.deviceId,
                     host: plug.host,
                     afterSave: () => this.updateInMemoryTransport(transport, { ...settings, settingIPAddress: plug.host }),
                 };

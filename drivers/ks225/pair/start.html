@@ -108,19 +108,27 @@
 <div id="manualEntry">
   <p><span data-i18n="pair.start.intro"></span></p>
   <p><button class="homey-button-small" id="startdiscovery"><span data-i18n="pair.start.startdiscovery"></span></button></p>
-  <table class="pairSettings">
-    <tr><td style="width:100px;"><span data-i18n="pair.start.ipAddress"></span></td><td><input id="ipAddress" type="text" placeholder="192.168.1.10" /></td></tr>
-    <tr><td style="width:100px;"><span data-i18n="pair.start.deviceName"></span></td><td><input id="deviceName" type="text" placeholder="TP-Link Device" /></td></tr>
-  </table>
+  <div class="homey-form-group">
+    <label class="homey-form-label" for="ipAddress" data-i18n="pair.start.ipAddress"></label>
+    <input class="homey-form-input" id="ipAddress" type="text" placeholder="192.168.1.10" />
+  </div>
+  <div class="homey-form-group">
+    <label class="homey-form-label" for="deviceName" data-i18n="pair.start.deviceName"></label>
+    <input class="homey-form-input" id="deviceName" type="text" placeholder="TP-Link Device" />
+  </div>
 </div>
 
 <div id="authEntry">
   <p id="credentialStatus" data-i18n="pair.start.credentialsRequired"></p>
   <p data-i18n="pair.start.credentialsOverrideHint"></p>
-  <table class="pairSettings">
-    <tr><td style="width:100px;"><span data-i18n="pair.start.tpLinkEmail"></span></td><td><input id="deviceUsername" type="text" data-i18n="[placeholder]pair.start.tpLinkEmailPlaceholder" /></td></tr>
-    <tr><td style="width:100px;"><span data-i18n="pair.start.tpLinkPassword"></span></td><td><input id="devicePassword" type="password" data-i18n="[placeholder]pair.start.tpLinkPasswordPlaceholder" /></td></tr>
-  </table>
+  <div class="homey-form-group">
+    <label class="homey-form-label" for="deviceUsername" data-i18n="pair.start.tpLinkEmail"></label>
+    <input class="homey-form-input" id="deviceUsername" type="text" data-i18n="[placeholder]pair.start.tpLinkEmailPlaceholder" />
+  </div>
+  <div class="homey-form-group">
+    <label class="homey-form-label" for="devicePassword" data-i18n="pair.start.tpLinkPassword"></label>
+    <input class="homey-form-input" id="devicePassword" type="password" data-i18n="[placeholder]pair.start.tpLinkPasswordPlaceholder" />
+  </div>
 </div>
 
 <fieldset><button class="homey-button-primary-full" id="saveSettings" onclick="saveSettings()"><span data-i18n="pair.start.saveSettings"></span></button></fieldset>

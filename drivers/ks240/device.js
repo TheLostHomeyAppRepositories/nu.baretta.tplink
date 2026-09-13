@@ -5,6 +5,7 @@ const { getRecovery } = require('../../lib/tplink-recovery');
 const { Client } = require('tplink-smarthome-api');
 const {
   getTpLinkClientOptions,
+  getKs240SysInfo,
   normalizeTpLinkCredentials,
 } = require('../../lib/tplink-auth');
 const {
@@ -32,7 +33,7 @@ function createClientFromSettings(device, settings, { timeout } = {}) {
     getGlobalCredentials(device),
   );
   if (timeout) options.defaultSendOptions.timeout = timeout;
-  return new Client(options);
+  return new Client({ ...options, logLevel: 'silent' });
 }
 
 
@@ -72,11 +73,6 @@ class TPlinkKs240Device extends Homey.Device {
     this.registerCapabilityListener('onoff', this.onCapabilityOnoff.bind(this));
     this.registerCapabilityListener('dim', this.onCapabilityDim.bind(this));
 
-    const setBrightnessAction = this.homey.flow.getActionCard('set_brightness');
-    setBrightnessAction.registerRunListener(async args => {
-      await args.device.setLevel(args.brightness);
-      return true;
-    });
 
     await this.getStatus();
     this.pollDevice(normalizedSettings.pollingInterval);
@@ -211,13 +207,12 @@ class TPlinkKs240Device extends Homey.Device {
       timeout: CREDENTIAL_VALIDATION_TIMEOUT,
     });
     try {
-      const sysInfo = await client.getSysInfo(settings.settingIPAddress);
+      const sysInfo = await getKs240SysInfo(client, settings.settingIPAddress);
       return {
         client,
         plug: client.getPlug({
           host: settings.settingIPAddress,
           sysInfo,
-          childId: this.childId,
         }),
       };
     } catch (error) {
@@ -293,6 +288,21 @@ class TPlinkKs240Device extends Homey.Device {
         );
       }
     }
+    if (this.channelType === 'fan' && this.hasCapability('dim')) {
+      try {
+        const title = {
+          en: require('../../locales/en.json').ks240.fanSpeed,
+          nl: require('../../locales/nl.json').ks240.fanSpeed,
+        };
+        const options = this.getCapabilityOptions('dim') || {};
+        if (!options.title || Object.keys(title).some(language => options.title[language] !== title[language])) {
+          await this.setCapabilityOptions('dim', { ...options, title });
+          this.log('Updated KS240 fan control title');
+        }
+      } catch (error) {
+        this.log('Unable to update fan control title: ' + getSafeErrorMessage(error));
+      }
+    }
   }
 
   async reinitializeConnection(ipAddress, { settings = this.getSettings() } = {}) {
@@ -308,11 +318,15 @@ class TPlinkKs240Device extends Homey.Device {
   }
 
   async getPlug(device) {
-    const sysInfo = await this.client.getSysInfo(device);
+    if (typeof this.childId !== 'string' || !this.childId.trim()) {
+      throw new Error('The KS240 channel is missing its child ID.');
+    }
+    const sysInfo = await getKs240SysInfo(this.client, device);
+    // Parent SMART info has no child list. Route channel commands explicitly
+    // instead of constructing a child Plug from incomplete parent metadata.
     this.plug = this.client.getPlug({
       host: device,
       sysInfo,
-      childId: this.childId,
     });
     return { sysInfo, plug: this.plug };
   }
@@ -321,7 +335,7 @@ class TPlinkKs240Device extends Homey.Device {
     const { plug } = await this.getPlug(this.getSettings().settingIPAddress);
 
     if (this.channelType === 'fan' && powerState) {
-      const currentInfo = await plug.getSysInfo();
+      const currentInfo = await plug.sendSmartCommand('get_device_info', undefined, this.childId);
       const currentLevel =
         typeof currentInfo.fan_speed_level === 'number'
           ? currentInfo.fan_speed_level
@@ -332,16 +346,12 @@ class TPlinkKs240Device extends Homey.Device {
         { device_on: true, fan_speed_level: nextLevel },
         this.childId
       );
-      plug.applySmartDeviceInfoPartial(
-        { device_on: true, fan_speed_level: nextLevel },
-        this.childId
-      );
       await this.setCapabilityIfChanged('onoff', true);
       await this.setCapabilityIfChanged('dim', nextLevel / FAN_MAX_LEVEL);
       return true;
     }
 
-    await plug.setPowerState(powerState);
+    await plug.sendSmartCommand('set_device_info', { device_on: powerState }, this.childId);
     await this.setCapabilityIfChanged('onoff', powerState);
 
     if (!powerState) {
@@ -370,12 +380,6 @@ class TPlinkKs240Device extends Homey.Device {
           : { device_on: true, fan_speed_level: fanLevel },
         this.childId
       );
-      plug.applySmartDeviceInfoPartial(
-        fanLevel === 0
-          ? { device_on: false, fan_speed_level: 0 }
-          : { device_on: true, fan_speed_level: fanLevel },
-        this.childId
-      );
 
       await this.setCapabilityIfChanged('onoff', fanLevel > 0);
       await this.setCapabilityIfChanged('dim', fanLevel / FAN_MAX_LEVEL);
@@ -392,10 +396,6 @@ class TPlinkKs240Device extends Homey.Device {
       { device_on: true, brightness },
       this.childId
     );
-    plug.applySmartDeviceInfoPartial(
-      { device_on: true, brightness },
-      this.childId
-    );
     await this.setCapabilityIfChanged('onoff', true);
     await this.setCapabilityIfChanged('dim', brightness / 100);
     return true;
@@ -408,12 +408,11 @@ class TPlinkKs240Device extends Homey.Device {
 
     const settings = this.getSettings();
     const device = settings.settingIPAddress;
-    this.log('getStatus for device: ' + device + ', Child ID: ' + this.childId);
 
     try {
       const { sysInfo, plug } = await this.getPlug(device);
             if (!recovery.isCurrent(poll)) return;
-      const childInfo = await plug.getSysInfo();
+      const childInfo = await plug.sendSmartCommand('get_device_info', undefined, this.childId);
             if (!recovery.responded(poll)) return;
       const deviceId = settings.deviceId || sysInfo.deviceId || sysInfo.device_id;
 
@@ -481,11 +480,10 @@ class TPlinkKs240Device extends Homey.Device {
     this.plug = null;
 
     try {
-      const sysInfo = await client.getSysInfo(settings.settingIPAddress);
+      const sysInfo = await getKs240SysInfo(client, settings.settingIPAddress);
       const plug = client.getPlug({
         host: settings.settingIPAddress,
         sysInfo,
-        childId: this.childId,
       });
       if (
         refreshGeneration !== this.globalCredentialRefreshGeneration ||
@@ -537,8 +535,12 @@ class TPlinkKs240Device extends Homey.Device {
         return getRecovery(this).discover({
             createClient: settings => createClientFromSettings(this, settings),
             type: 'plug',
-            resolveCandidate: plug => String(plug.model || '').startsWith('KS240')
-                ? { deviceId: plug.deviceId, host: plug.host } : null,
+            resolveCandidate: async (plug, settings) => {
+                if (!String(plug.model || '').startsWith('KS240')) return null;
+                const discoveryId = plug.deviceId;
+                const info = await plug.getSysInfo();
+                return { deviceId: discoveryId === settings.deviceId ? discoveryId : info.deviceId, host: plug.host };
+            },
         });
     }
 }

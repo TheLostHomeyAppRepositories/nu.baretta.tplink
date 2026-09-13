@@ -7,6 +7,12 @@
       src="/homey.js"
       data-origin="settings"
     ></script>
+    <style>
+      #credential-validation { padding: 12px; border-radius: 8px; }
+      #credential-validation[data-state="validated"] { color: #14532d; background: #dcfce7; }
+      #credential-validation[data-state="unverified"] { color: #713f12; background: #fef9c3; }
+      #credential-validation[data-state="rejected"] { color: #7f1d1d; background: #fee2e2; }
+    </style>
   </head>
   <body>
     <header class="homey-header">
@@ -17,6 +23,7 @@
     <fieldset class="homey-form-fieldset">
       <legend class="homey-form-legend" data-i18n="settings.credentials.legend"></legend>
       <p id="credential-status" aria-live="polite"></p>
+      <p id="credential-validation" aria-live="polite"></p>
 
       <div class="homey-form-group">
         <label class="homey-form-label" for="username" data-i18n="settings.credentials.username"></label>
@@ -30,6 +37,12 @@
 
       <button class="homey-button-primary-full" id="save" type="button" data-i18n="settings.credentials.save"></button>
       <button class="homey-button-danger-full" id="clear" type="button" data-i18n="settings.credentials.clear"></button>
+      <div class="homey-form-group">
+        <label class="homey-form-label" for="test-ip" data-i18n="settings.credentials.testIp"></label>
+        <input class="homey-form-input" id="test-ip" type="text" inputmode="decimal" />
+      </div>
+      <p class="homey-text-small" data-i18n="settings.credentials.testHint"></p>
+      <button class="homey-button-secondary-full" id="test" type="button" data-i18n="settings.credentials.test"></button>
     </fieldset>
 
     <fieldset class="homey-form-fieldset">
@@ -78,6 +91,9 @@
         Homey.ready();
 
         var statusElement = document.getElementById('credential-status');
+        var validationElement = document.getElementById('credential-validation');
+        var testElement = document.getElementById('test');
+        var testIpElement = document.getElementById('test-ip');
         var usernameElement = document.getElementById('username');
         var passwordElement = document.getElementById('password');
         var saveElement = document.getElementById('save');
@@ -85,13 +101,29 @@
         var adoptElement = document.getElementById('adopt');
 
         function setLoading(isLoading) {
-          [saveElement, clearElement, adoptElement].forEach(function(element) {
+          [saveElement, clearElement, adoptElement, testElement].forEach(function(element) {
             element.disabled = isLoading;
             element.classList.toggle('is-loading', isLoading);
           });
         }
 
         function renderStatus(status, extraMessage) {
+          var validation = status && status.validation || {};
+          var state = status && status.configured && validation.status === 'validated'
+            ? 'validated' : validation.status === 'rejected' ? 'rejected' : 'unverified';
+          validationElement.hidden = !status || !status.configured;
+          validationElement.setAttribute('data-state', state);
+          validationElement.textContent = (state === 'validated' ? '\u2713 ' : '') +
+            Homey.__('settings.credentials.' + state);
+          if (validation.checkedAt) {
+            validationElement.textContent += ' ' + Homey.__('settings.credentials.checkedAt', {
+              time: new Date(validation.checkedAt).toLocaleString(),
+            });
+          }
+          if (validation.reason && state !== 'validated') {
+            validationElement.textContent += ' ' + validation.reason;
+          }
+          if (validation.error) validationElement.textContent += ' ' + validation.error;
           if (!status || !status.configured) {
             statusElement.textContent = extraMessage || Homey.__('settings.credentials.notConfigured');
             return;
@@ -112,6 +144,24 @@
           renderStatus(status, extraMessage);
           return status;
         }
+
+        testElement.addEventListener('click', async function() {
+          if (usernameElement.value || passwordElement.value) {
+            Homey.alert(Homey.__('settings.credentials.saveBeforeTest'), 'error');
+            return;
+          }
+          setLoading(true);
+          try {
+            var result = await callApi(Homey, 'POST', '/credentials/test', {
+              ip: testIpElement.value.trim(),
+            });
+            renderStatus(result.status);
+          } catch (error) {
+            Homey.alert(getErrorMessage(Homey, error), 'error');
+          } finally {
+            setLoading(false);
+          }
+        });
 
         saveElement.addEventListener('click', async function() {
           var username = usernameElement.value.trim();

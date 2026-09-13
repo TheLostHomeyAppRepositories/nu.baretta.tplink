@@ -1,4 +1,6 @@
 {
+  "flowErrors": { "invalidBrightness": "Helderheid moet een getal tussen 0 en 100 zijn." },
+  "ks240": { "fanSpeed": "Ventilatorstand" },
       "pair": {
             "start": {
                   "intro": "Vul het IP adres van de smart plug in, of probeer automatisch te zoeken.",
@@ -24,9 +26,14 @@
                   "credentialsRequired": "Vul volledige TP-Link-accountgegevens in om dit geauthenticeerde apparaat te koppelen.",
                   "credentialsComplete": "Vul zowel de gebruikersnaam als het wachtwoord van het TP-Link-account in, of wis beide velden om het globale account te gebruiken.",
                   "credentialsOverrideHint": "Laat beide velden leeg om het ingestelde globale account te gebruiken. Vul een ander volledig account in voor een apparaatspecifieke overschrijving.",
-                  "globalCredentials": "Het ingestelde TP-Link-account wordt gebruikt ({{username}}).",
+                  "globalCredentials": "Het ingestelde TP-Link-account wordt gebruikt (__username__).",
+                  "devicesFound": "Apparaatkanalen gevonden. Ga verder om ze toe te voegen.",
                   "ep10CredentialsOptional": "TP-Link-accountgegevens zijn optioneel voor TCP EP10-firmware, maar vereist als de geselecteerde EP10 geauthenticeerde KLAP- of AES-firmware gebruikt.",
-                  "ep10CredentialsRequired": "Deze EP10 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw."
+                  "ep10CredentialsRequired": "Deze EP10 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw.",
+                  "hs220CredentialsOptional": "TP-Link-accountgegevens zijn optioneel voor TCP HS220-firmware, maar vereist als de geselecteerde HS220 geauthenticeerde KLAP- of AES-firmware gebruikt.",
+                  "hs210CredentialsOptional": "TP-Link-accountgegevens zijn optioneel voor TCP HS210-firmware, maar vereist als de geselecteerde HS210 geauthenticeerde KLAP- of AES-firmware gebruikt.",
+                  "hs220CredentialsRequired": "Deze HS220 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw.",
+                  "hs210CredentialsRequired": "Deze HS210 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw."
             }
       },
       "settings": {
@@ -38,17 +45,25 @@
                   "password": "Wachtwoord van TP-Link-account",
                   "replaceHint": "Het opgeslagen wachtwoord wordt om veiligheidsredenen nooit getoond. Vul beide velden in om het te vervangen.",
                   "save": "Standaardaccount valideren en opslaan",
+                  "test": "Opgeslagen accountgegevens testen",
+                  "testIp": "IPv4-adres van apparaat (optioneel)",
+                  "testHint": "Vul het IP-adres van een geauthenticeerd SMART-apparaat in om vóór het koppelen te testen, of laat dit leeg om geschikte gekoppelde apparaten te testen. Dit leest lokaal apparaatinformatie; het test geen TP-Link-cloudlogin.",
+                  "saveBeforeTest": "Sla het ingevulde account eerst op, of wis beide velden om het opgeslagen account te testen.",
+                  "validated": "Lokale verbinding geslaagd met de opgeslagen accountinstellingen.",
+                  "unverified": "Account opgeslagen; lokale authenticatie is nog niet bevestigd.",
+                  "rejected": "Het apparaat heeft lokale authenticatie geweigerd.",
+                  "checkedAt": "Laatst getest: __time__.",
                   "clear": "Standaardaccount wissen",
                   "clearConfirm": "Standaard TP-Link-account wissen? Apparaten die de globale bron gebruiken hebben dan geen gegevens meer totdat je een nieuw standaardaccount opslaat of een overschrijving instelt.",
-                  "configured": "Een standaard TP-Link-account is ingesteld voor {{username}}.",
+                  "configured": "Een standaard TP-Link-account is ingesteld voor __username__.",
                   "notConfigured": "Er is geen standaard TP-Link-account ingesteld.",
-                  "deviceSummary": "Apparaten: {{global}} globaal, {{override}} overschrijving, {{legacy}} verouderd, {{unavailable}} zonder bruikbare gegevens.",
+                  "deviceSummary": "Apparaten: __global__ globaal, __override__ overschrijving, __legacy__ verouderd, __unavailable__ zonder bruikbare gegevens.",
                   "saved": "Standaard TP-Link-account opgeslagen.",
                   "cleared": "Standaard TP-Link-account gewist.",
                   "legacyLegend": "Verouderde apparaatgegevens",
                   "legacyHint": "Neem alleen verouderde apparaten over waarvan de volledige lokale gegevens exact overeenkomen met de huidige standaard. Afwijkende lokale accounts blijven ongewijzigd.",
                   "adopt": "Overeenkomende verouderde apparaten overnemen",
-                  "adopted": "{{count}} overeenkomend(e) verouderd(e) apparaat/apparaten overgenomen.",
+                  "adopted": "__count__ overeenkomend(e) verouderd(e) apparaat/apparaten overgenomen.",
                   "error": "TP-Link-accountgegevens kunnen niet worden bijgewerkt."
             }
       }

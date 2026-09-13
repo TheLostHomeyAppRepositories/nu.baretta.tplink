@@ -6,11 +6,57 @@ const test = require('node:test');
 const {
   getEp10ClientOptions,
   getEp10Transport,
+  getKs240SysInfo,
   getTpLinkClientOptions,
   getTpLinkDiscoveryClientOptions,
   isValidTpLinkTransport,
   normalizeTpLinkCredentials,
 } = require('../lib/tplink-auth');
+
+test('KS240 retries the observed AES handshake 1003 once over KLAP and retains its metadata', async () => {
+  const calls = [];
+  const sysInfo = { model: 'KS240(US)', mgt_encrypt_schm: { encrypt_type: 'KLAP', http_port: 80 } };
+  const client = {
+    async getSysInfo(...args) {
+      calls.push(args);
+      if (calls.length === 1) {
+        throw new Error('AesConnection(AES 192.168.10.103:80): handshake failed with error_code 1003');
+      }
+      return sysInfo;
+    },
+  };
+  assert.equal(await getKs240SysInfo(client, '192.168.10.103'), sysInfo);
+  assert.deepEqual(calls, [
+    ['192.168.10.103'],
+    ['192.168.10.103', undefined, { transport: 'klap' }],
+  ]);
+});
+
+test('KS240 preserves successful AES and does not retry login, reachability, or KLAP errors', async () => {
+  const sysInfo = { model: 'KS240' };
+  assert.equal(await getKs240SysInfo({ getSysInfo: async () => sysInfo }, '192.0.2.1'), sysInfo);
+  for (const message of [
+    'AesConnection(AES 192.0.2.1:80): login_device failed with error_code 1003',
+    'connect ECONNREFUSED 192.0.2.1:80',
+    'KlapConnection(KLAP 192.0.2.1:80): authentication failed (challenge mismatch)',
+  ]) {
+    let calls = 0;
+    const error = new Error(message);
+    await assert.rejects(getKs240SysInfo({ getSysInfo: async () => { calls++; throw error; } }, '192.0.2.1'),
+      caught => caught === error);
+    assert.equal(calls, 1);
+  }
+});
+
+test('KS240 reports the KLAP authentication failure instead of masking it with AES 1003', async () => {
+  let calls = 0;
+  const authError = new Error('KlapConnection(KLAP 192.168.10.103:80): authentication failed (challenge mismatch)');
+  await assert.rejects(getKs240SysInfo({ getSysInfo: async () => {
+    if (++calls === 1) throw new Error('AesConnection(AES 192.168.10.103:80): handshake failed with error_code 1003');
+    throw authError;
+  } }, '192.168.10.103'), error => error === authError);
+  assert.equal(calls, 2);
+});
 
 test('uses the fixture-established SMART transport for every supported Homey model', () => {
   [

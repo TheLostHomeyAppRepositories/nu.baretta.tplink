@@ -4,7 +4,7 @@ const { getRecovery } = require('../../lib/tplink-recovery');
 const {
     Client
 } = require('tplink-smarthome-api');
-const client = new Client();
+const client = new Client({ logLevel: 'silent' });
 
 // mode: enum: color, temperature
 const mode = {
@@ -443,7 +443,6 @@ async reinitializeConnection(ipAddress) {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let deviceId = settings.deviceId;
-        this.log("getStatus device: " + device + ", name: " + this.getName());
         //this.log("DeviceId device: " + deviceId);
 
         try {
@@ -493,10 +492,10 @@ async reinitializeConnection(ipAddress) {
                     // bulbState mode: circadian or normal. Only for LB130/120 and KL130/120
                     if ((TPlinkModel == "LB130") || (TPlinkModel == "LB120") || (TPlinkModel == "KL130") || (TPlinkModel == "KL120")) {
                         if (bulbState.mode == "normal") {
-                            this.log('Bulb state: normal');
+                            recovery.logChanged('bulbMode', bulbState.mode, 'Bulb state: normal');
                         } else
                             if (bulbState.mode == "circadian") {
-                                this.log('Bulb state: circadian');
+                                recovery.logChanged('bulbMode', bulbState.mode, 'Bulb state: circadian');
                             }
 
                         if (bulbState.color_temp == 0) {
@@ -526,6 +525,7 @@ async reinitializeConnection(ipAddress) {
                     }
 
                     if (typeof bulbState.brightness === 'number') {
+                        recovery.loggedValues.delete('brightnessAvailable');
                         let newBrightness = bulbState.brightness / 100;
                         if (this.oldBrightness !== newBrightness) {
                             this.log('Brightness changed: ' + newBrightness);
@@ -533,7 +533,7 @@ async reinitializeConnection(ipAddress) {
                                 .catch(this.error);
                         }
                     } else {
-                        this.log('Brightness data not available or not changed.');
+                        recovery.logChanged('brightnessAvailable', false, 'Brightness data not available.');
                     }
 
                     if (this.oldMode != this.getCapabilityValue('light_mode')) {
@@ -572,7 +572,7 @@ async reinitializeConnection(ipAddress) {
 
     discover() {
         return getRecovery(this).discover({
-            createClient: () => new Client(),
+            createClient: () => new Client({ logLevel: 'silent' }),
             type: 'bulb',
         });
     }

@@ -4,7 +4,7 @@ const Homey = require('homey');
 const { getRecovery } = require('../../lib/tplink-recovery');
 const { Client } = require('tplink-smarthome-api');
 
-const client = new Client();
+const client = new Client({ logLevel: 'silent' });
 
 const DEFAULT_POLLING_INTERVAL = 10;
 const DEFAULT_MOTION_RANGE_INDEX = 1;
@@ -219,7 +219,6 @@ class TPlinkKs200mDevice extends Homey.Device {
 
     const settings = this.getSettings();
     const device = settings.settingIPAddress;
-    this.log('getStatus device: ' + device + ', name: ' + this.getName());
 
     try {
       const { sysInfo, plug } = await this.getPlug(device);
@@ -474,7 +473,7 @@ class TPlinkKs200mDevice extends Homey.Device {
 
   discover() {
         return getRecovery(this).discover({
-            createClient: () => new Client(),
+            createClient: () => new Client({ logLevel: 'silent' }),
             type: 'plug',
         });
     }

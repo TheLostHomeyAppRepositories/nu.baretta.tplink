@@ -1,4 +1,6 @@
 {
+  "flowErrors": { "invalidBrightness": "Brightness must be a number between 0 and 100." },
+  "ks240": { "fanSpeed": "Fan level" },
         "pair": {
                 "start": {
                         "intro": "Enter your device's IP address, or try automatic discovery.",
@@ -24,9 +26,14 @@
                         "credentialsRequired": "Enter complete TP-Link account credentials to pair this authenticated device.",
                         "credentialsComplete": "Enter both the TP-Link account username and password, or clear both fields to use the global account.",
                         "credentialsOverrideHint": "Leave both fields empty to use the configured global account. Enter a different complete account to create a device-only override.",
-                        "globalCredentials": "Using the configured TP-Link account ({{username}}).",
+                        "globalCredentials": "Using the configured TP-Link account (__username__).",
+                        "devicesFound": "Device channels found. Continue to add them.",
                         "ep10CredentialsOptional": "TP-Link credentials are optional for TCP EP10 firmware, but required when the selected EP10 uses authenticated KLAP or AES firmware.",
-                        "ep10CredentialsRequired": "This EP10 uses authenticated firmware. Enter complete TP-Link account credentials and try again."
+                        "ep10CredentialsRequired": "This EP10 uses authenticated firmware. Enter complete TP-Link account credentials and try again.",
+                        "hs220CredentialsOptional": "TP-Link credentials are optional for TCP HS220 firmware, but required when the selected HS220 uses authenticated KLAP or AES firmware.",
+                        "hs210CredentialsOptional": "TP-Link credentials are optional for TCP HS210 firmware, but required when the selected HS210 uses authenticated KLAP or AES firmware.",
+                        "hs220CredentialsRequired": "This HS220 uses authenticated firmware. Enter complete TP-Link account credentials and try again.",
+                        "hs210CredentialsRequired": "This HS210 uses authenticated firmware. Enter complete TP-Link account credentials and try again."
                 }
         },
         "settings": {
@@ -38,17 +45,25 @@
                         "password": "TP-Link account password",
                         "replaceHint": "For security, the saved password is never shown. Enter both fields to replace it.",
                         "save": "Validate and save default account",
+                        "test": "Test saved credentials",
+                        "testIp": "Device IPv4 address (optional)",
+                        "testHint": "Enter an authenticated SMART device IP to test before pairing, or leave it empty to test eligible paired devices. This reads device information locally; it does not test TP-Link cloud login.",
+                        "saveBeforeTest": "Save the entered account first, or clear both fields to test the saved account.",
+                        "validated": "Local connection succeeded using the saved account settings.",
+                        "unverified": "Account saved; local authentication has not been confirmed.",
+                        "rejected": "The device rejected local authentication.",
+                        "checkedAt": "Last tested: __time__.",
                         "clear": "Clear default account",
                         "clearConfirm": "Clear the default TP-Link account? Devices using the global source will no longer have credentials until you save a new default or configure an override.",
-                        "configured": "A default TP-Link account is configured for {{username}}.",
+                        "configured": "A default TP-Link account is configured for __username__.",
                         "notConfigured": "No default TP-Link account is configured.",
-                        "deviceSummary": "Devices: {{global}} global, {{override}} override, {{legacy}} legacy, {{unavailable}} without usable credentials.",
+                        "deviceSummary": "Devices: __global__ global, __override__ override, __legacy__ legacy, __unavailable__ without usable credentials.",
                         "saved": "Default TP-Link account saved.",
                         "cleared": "Default TP-Link account cleared.",
                         "legacyLegend": "Legacy device credentials",
                         "legacyHint": "Adopt only legacy devices whose complete local credentials exactly match the current default. Different local accounts remain untouched.",
                         "adopt": "Adopt matching legacy devices",
-                        "adopted": "Adopted {{count}} matching legacy device(s).",
+                        "adopted": "Adopted __count__ matching legacy device(s).",
                         "error": "Unable to update TP-Link credentials."
                 }
         }

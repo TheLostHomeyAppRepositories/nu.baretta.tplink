@@ -133,6 +133,10 @@
     "net": "*"
   },
   "api": {
+    "testCredentials": {
+      "method": "POST",
+      "path": "/credentials/test"
+    },
     "getCredentialStatus": {
       "method": "GET",
       "path": "/credentials/status"
@@ -2528,6 +2532,32 @@
                 "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
                 "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
               }
+            },
+            {
+              "id": "deviceUsername",
+              "type": "text",
+              "value": "",
+              "label": {
+                "en": "TP-Link account email",
+                "nl": "E-mailadres van TP-Link-account"
+              },
+              "hint": {
+                "en": "Leave both account fields blank to use the app-wide account for authenticated firmware. A confirmed TCP HS210 can remain blank; enter both fields for a local override.",
+                "nl": "Laat beide accountvelden leeg om het app-brede account voor geauthenticeerde firmware te gebruiken. Een bevestigde TCP HS210 mag leeg blijven; vul beide velden in voor een lokale overschrijving."
+              }
+            },
+            {
+              "id": "devicePassword",
+              "type": "password",
+              "value": "",
+              "label": {
+                "en": "TP-Link account password",
+                "nl": "Wachtwoord van TP-Link-account"
+              },
+              "hint": {
+                "en": "Leave both account fields blank to use the app-wide account for authenticated firmware. A confirmed TCP HS210 can remain blank; enter both fields for a local override.",
+                "nl": "Laat beide accountvelden leeg om het app-brede account voor geauthenticeerde firmware te gebruiken. Een bevestigde TCP HS210 mag leeg blijven; vul beide velden in voor een lokale overschrijving."
+              }
             }
           ]
         }
@@ -2885,6 +2915,32 @@
               "hint": {
                 "en": "Enable this option if your TP-Link uses a dynamic IP address. The app will then attempt to re-discover the device when it becomes unreachable.",
                 "nl": "Zet deze optie aan als de TP-Link een dynamisch toegewezen IP adres gebruikt. De app zal dan pogen het apparaat opnieuw te vinden zodra het onbereikbaar wordt."
+              }
+            },
+            {
+              "id": "deviceUsername",
+              "type": "text",
+              "value": "",
+              "label": {
+                "en": "TP-Link account email",
+                "nl": "E-mailadres van TP-Link-account"
+              },
+              "hint": {
+                "en": "Leave both account fields blank to use the app-wide account for authenticated firmware. A confirmed TCP HS220 can remain blank; enter both fields for a local override.",
+                "nl": "Laat beide accountvelden leeg om het app-brede account voor geauthenticeerde firmware te gebruiken. Een bevestigde TCP HS220 mag leeg blijven; vul beide velden in voor een lokale overschrijving."
+              }
+            },
+            {
+              "id": "devicePassword",
+              "type": "password",
+              "value": "",
+              "label": {
+                "en": "TP-Link account password",
+                "nl": "Wachtwoord van TP-Link-account"
+              },
+              "hint": {
+                "en": "Leave both account fields blank to use the app-wide account for authenticated firmware. A confirmed TCP HS220 can remain blank; enter both fields for a local override.",
+                "nl": "Laat beide accountvelden leeg om het app-brede account voor geauthenticeerde firmware te gebruiken. Een bevestigde TCP HS220 mag leeg blijven; vul beide velden in voor een lokale overschrijving."
               }
             }
           ]

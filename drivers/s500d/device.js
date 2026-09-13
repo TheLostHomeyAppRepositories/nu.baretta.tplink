@@ -23,7 +23,7 @@ function getGlobalCredentials(device) {
 function createClientFromSettings(device, settings, { timeout } = {}) {
     const options = getTpLinkClientOptions('S500D', settings, getGlobalCredentials(device));
     if (timeout) options.defaultSendOptions.timeout = timeout;
-    return new Client(options);
+    return new Client({ ...options, logLevel: 'silent' });
 }
 
 // get driver name based on dirname
@@ -144,9 +144,6 @@ class TPlinkPlugDevice extends Homey.Device {
             return args.device.undo_meter_reset(args.device.getSettings().settingIPAddress);
         });
 
-        this.homey.flow.getActionCard('set_brightness').registerRunListener(async (args, state) => {
-            return args.device.setBrightness(args.device.getSettings().settingIPAddress, args.brightness);
-        });
 
     } // end onInit    
 
@@ -463,7 +460,6 @@ class TPlinkPlugDevice extends Homey.Device {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let TPlinkModel = getDriverName().toUpperCase();
-        this.log("getStatus device: " + device + ", name: " + this.getName());
 
         try {
             const sysInfo = await this.client.getSysInfo(device);

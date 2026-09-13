@@ -124,6 +124,7 @@ for (const spec of STRICT_MODELS) {
 
       assert.equal(instances.length, 1);
       assert.deepEqual(instances[0].options, {
+        logLevel: 'silent',
         defaultSendOptions: { transport: spec.transport, timeout: 4000 },
         credentials: {
           username: 'new@example.com',
@@ -271,6 +272,7 @@ test('a confirmed TCP EP10 may clear local credentials without a global pair', {
   });
 
   assert.deepEqual(instances[0].options, {
+    logLevel: 'silent',
     defaultSendOptions: { transport: 'tcp', timeout: 4000 },
   });
   assert.deepEqual(writes, [

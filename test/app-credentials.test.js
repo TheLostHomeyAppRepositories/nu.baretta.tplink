@@ -49,11 +49,107 @@ function createSettings(initial = {}) {
   };
 }
 
-async function createApp({ settings = {}, drivers = {}, Client } = {}) {
+test('brightness Flow survives mixed device initialization and preserves percentage units', async () => {
+  const { fixture } = require('./helpers/tplink-device-fixture');
+  const listeners = new Map();
+  let registrations = 0;
+  const flow = {
+    getActionCard(id) {
+      return { registerRunListener(listener) {
+        if (id === 'set_brightness') registrations++;
+        listeners.set(id, listener);
+      } };
+    },
+  };
+  const app = await createApp({ flow });
+  await app.onInit();
+  const devices = [];
+  for (const id of ['ks240', 'hs220', 'es20m', 'kp405', 'ks225', 'ks230', 's500d', 'ks240']) {
+    const { device } = fixture(id);
+    device.homey.flow = flow;
+    device.getStatus = async () => {};
+    device.pollDevice = () => {};
+    await device.onInit();
+    devices.push(device);
+  }
+  assert.equal(registrations, 1);
+  const run = listeners.get('set_brightness');
+  for (const device of devices) {
+    const calls = [];
+    if (typeof device.setLevel === 'function') {
+      device.setLevel = async level => { calls.push(level); };
+      for (const brightness of [0, 1, 50, 100]) {
+        assert.equal(await run({ device, brightness }), true);
+      }
+      assert.deepEqual(calls, [0, 0.01, 0.5, 1]);
+    } else {
+      device.setBrightness = async (host, brightness) => { calls.push({ host, brightness }); };
+      assert.equal(await run({ device, brightness: 50 }), true);
+      assert.deepEqual(calls, [{ host: device.getSettings().settingIPAddress, brightness: 50 }]);
+    }
+  }
+  const device = devices[1];
+  device.setBrightness = async () => false;
+  assert.equal(await run({ device, brightness: 50 }), false);
+  const failure = new Error('device unreachable');
+  device.setBrightness = async () => { throw failure; };
+  await assert.rejects(run({ device, brightness: 50 }), error => error === failure);
+  for (const brightness of [NaN, Infinity, -1, 101, '50']) {
+    await assert.rejects(run({ device, brightness }), /Brightness must be/);
+  }
+});
+
+test('authenticated HS220 participates in saved-account validation and refresh using its persisted transport', async () => {
+  const options = [];
+  const refreshes = [];
+  class Client {
+    constructor(value) { options.push(value); }
+    async getSysInfo(host) { assert.equal(host, '192.0.2.101'); return { model: 'HS220(US)' }; }
+  }
+  const device = {
+    getData: () => ({ id: 'hs220', transport: 'klap' }),
+    getSettings: () => ({ settingIPAddress: '192.0.2.101', credentialSource: 'global' }),
+    async refreshGlobalCredentials(value) { refreshes.push(value); return true; },
+  };
+  const app = await createApp({ Client, drivers: {
+    hs220: { id: 'hs220', getDevices: () => [device] },
+  } });
+  const account = { username: 'owner@example.com', password: 'secret' };
+  const result = await app.saveGlobalCredentials(account);
+  assert.equal(result.status.validation.status, 'validated');
+  assert.equal(options[0].defaultSendOptions.transport, 'klap');
+  assert.deepEqual(options[0].credentials, account);
+  assert.equal(refreshes.length, 1);
+  await app.clearGlobalCredentials();
+  assert.equal(refreshes.length, 2);
+});
+
+test('HS210 credential validation uses the recovered protocol even when pairing data says TCP', async () => {
+  const calls = [];
+  class Client {
+    constructor(options) { calls.push(options); }
+    async getSysInfo() { return { model: 'HS210' }; }
+  }
+  const account = { username: 'owner@example.com', password: 'secret' };
+  const device = {
+    getData: () => ({ id: 'existing', transport: 'tcp' }),
+    getSettings: () => ({ settingIPAddress: '192.0.2.75' }),
+    getStoreValue: () => ({ host: '192.0.2.75', transport: 'klap', protocol: 'iot' }),
+    async refreshGlobalCredentials() { return true; },
+  };
+  const app = await createApp({ Client, drivers: { hs210: { getDevices: () => [device] } } });
+  assert.equal((await app.saveGlobalCredentials(account)).status.validation.status, 'validated');
+  assert.equal(calls[0].defaultSendOptions.transport, 'klap');
+  assert.equal(calls[0].defaultSendOptions.protocol, 'iot');
+});
+
+async function createApp({ settings = {}, drivers = {}, Client, flow = { getActionCard: () => ({ registerRunListener() {} }) } } = {}) {
   const App = createAppClass(Client);
   const app = new App();
   app.homey = {
+    __: key => key === 'flowErrors.invalidBrightness' ? 'Brightness must be a number between 0 and 100.' : key,
     settings: createSettings(settings),
+    flow,
     drivers: {
       getDrivers() {
         return drivers;
@@ -65,6 +161,63 @@ async function createApp({ settings = {}, drivers = {}, Client } = {}) {
   await app.onInit();
   return app;
 }
+
+test('saved credentials can be tested before pairing, with honest status after failures, replacement and restart', async () => {
+  const calls = [];
+  let fail = false;
+  class Client {
+    constructor(options) { this.options = options; }
+    async getSysInfo(host, port, options) {
+      calls.push({ host, options, credentials: this.options.credentials });
+      if (!options) throw new Error(`AesConnection(AES ${host}:80): handshake failed with error_code 1003`);
+      if (fail) throw new Error('KlapConnection: authentication failed (challenge mismatch) secret-password');
+      return { model: 'KS240(US)', deviceId: 'ks240-parent' };
+    }
+  }
+  const app = await createApp({ Client });
+  const account = { username: 'owner@example.com', password: 'secret-password' };
+  assert.equal((await app.saveGlobalCredentials(account)).status.validation.status, 'unverified');
+  const api = require('../api');
+  let result = await api.testCredentials({ homey: { app }, body: { ip: '192.168.10.103' } });
+  assert.equal(result.status.validation.status, 'validated');
+  assert.ok(result.status.validation.checkedAt);
+  assert.equal((await app.getCredentialStatus()).validation.status, 'validated');
+  assert.deepEqual(calls[1].credentials, account);
+  assert.equal(calls[1].options.transport, 'klap');
+  assert.equal(JSON.stringify(result).includes(account.password), false);
+  fail = true;
+  result = await app.testGlobalCredentials({ ip: '192.168.10.103' });
+  assert.equal(result.status.validation.status, 'rejected');
+  assert.match(result.validation.error, /challenge mismatch/);
+  assert.equal(JSON.stringify(result).includes(account.password), false);
+  assert.deepEqual(app.getGlobalCredentials(), account);
+  fail = false;
+  await app.testGlobalCredentials({ ip: '192.168.10.103' });
+  await app.saveGlobalCredentials({ username: 'new@example.com', password: 'new-password' });
+  assert.equal((await app.getCredentialStatus()).validation.status, 'unverified');
+  await app.testGlobalCredentials({ ip: '192.168.10.103' });
+  await app.onInit();
+  assert.equal((await app.getCredentialStatus()).validation.status, 'unverified');
+  await app.clearGlobalCredentials();
+  assert.equal((await app.getCredentialStatus()).configured, false);
+  await assert.rejects(app.testGlobalCredentials({ ip: '192.168.10.103' }), /Save the TP-Link account/);
+});
+
+test('credential testing rejects malformed targets before sending credentials and preserves offline as unverified', async () => {
+  let calls = 0;
+  class Client {
+    async getSysInfo() { calls++; throw new Error('connect ECONNREFUSED 192.0.2.1:80'); }
+  }
+  const app = await createApp({ Client, settings: {
+    tplinkCredentials: { username: 'owner@example.com', password: 'secret' },
+  } });
+  for (const ip of ['http://example.com', '192.0.2.1:80', '::1', {}, 123, 0, false, null]) {
+    await assert.rejects(app.testGlobalCredentials({ ip }), /valid device IPv4/);
+  }
+  assert.equal(calls, 0);
+  assert.equal((await app.testGlobalCredentials({ ip: '192.0.2.1' })).validation.status, 'unverified');
+  assert.equal(calls, 1);
+});
 
 test('credential status and private API results never expose the password', async () => {
   const app = await createApp({
@@ -393,7 +546,8 @@ test('a fulfilled false global refresh is reported as failed', async () => {
   );
 });
 
-test('an unmarked pre-transport EP10 is not selected for global auth validation or refresh', async () => {
+for (const driverId of ['ep10', 'hs210', 'hs220']) {
+test(`an unmarked pre-transport ${driverId} is not selected for global auth validation or refresh`, async () => {
   let refreshCalls = 0;
   const device = {
     getData() {
@@ -415,8 +569,8 @@ test('an unmarked pre-transport EP10 is not selected for global auth validation 
       },
     },
     drivers: {
-      ep10: {
-        id: 'ep10',
+      [driverId]: {
+        id: driverId,
         getDevices() {
           return [device];
         },
@@ -438,6 +592,7 @@ test('an unmarked pre-transport EP10 is not selected for global auth validation 
   );
   assert.equal(refreshCalls, 0);
 });
+}
 
 test('an explicitly global pre-transport EP10 refreshes when the global pair is cleared', async () => {
   let refreshCalls = 0;

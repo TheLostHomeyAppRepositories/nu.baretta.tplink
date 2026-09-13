@@ -5,7 +5,7 @@ const {
     Client
 } = require('tplink-smarthome-api');
 
-const client = new Client();
+const client = new Client({ logLevel: 'silent' });
 
 // get driver name based on dirname
 function getDriverName() {
@@ -318,7 +318,6 @@ class TPlinkPlugDevice extends Homey.Device {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let TPlinkModel = getDriverName().toUpperCase();
-        this.log("getStatus device: " + device + ", name: " + this.getName());
 
         try {
             const sysInfo = await client.getSysInfo(device);
@@ -415,7 +414,7 @@ class TPlinkPlugDevice extends Homey.Device {
 
     async discover() {
         return getRecovery(this).discover({
-            createClient: () => new Client(),
+            createClient: () => new Client({ logLevel: 'silent' }),
             type: 'plug',
         });
     }

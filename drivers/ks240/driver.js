@@ -1,15 +1,21 @@
 'use strict';
 
 const Homey = require('homey');
+const { createHash } = require('node:crypto');
 const { Client } = require('tplink-smarthome-api');
-const { getTpLinkClientOptions } = require('../../lib/tplink-auth');
+const { getKs240SysInfo, getTpLinkClientOptions } = require('../../lib/tplink-auth');
 const {
   getPairedCredentialSettings,
   getSafeErrorMessage,
+  isAuthenticationError,
   resolvePairingCredentials,
 } = require('../../lib/tplink-credentials');
 
 const TPLINK_MODEL = 'KS240';
+
+function identityTag(value) {
+  return value ? createHash('sha256').update(String(value)).digest('hex').slice(0, 10) : 'none';
+}
 
 function guid() {
   function s4() {
@@ -69,6 +75,7 @@ function getPairingClient(credentials) {
     devicePassword: credentials.password,
   });
   options.defaultSendOptions.timeout = 4000;
+  options.logLevel = 'silent';
   return new Client(options);
 }
 
@@ -132,15 +139,17 @@ function makeChannels(input, parent) {
     });
 }
 
-async function validateTarget(input, credentials) {
+async function validateTarget(input, credentials, log = () => {}) {
   if (!input.ip) {
     throw new Error('An IP address is required to pair a KS240.');
   }
 
   const client = getPairingClient(credentials);
-  const sysInfo = await client.getSysInfo(input.ip);
+  log(`KS240 pairing: validating ${input.ip}, selected parent=${identityTag(input.parentId)}, child=${identityTag(input.childId)}`);
+  const sysInfo = await getKs240SysInfo(client, input.ip);
   const model = String(sysInfo.model || '').toUpperCase();
   const deviceId = sysInfo.deviceId || sysInfo.device_id;
+  log(`KS240 pairing: authenticated ${input.ip}, model=${model}, parent=${identityTag(deviceId)}, transport=${sysInfo.mgt_encrypt_schm && sysInfo.mgt_encrypt_schm.encrypt_type || 'unknown'}`);
   if (!model.startsWith(TPLINK_MODEL) || !deviceId) {
     throw new Error('The supplied address is not an accessible KS240.');
   }
@@ -154,6 +163,7 @@ async function validateTarget(input, credentials) {
   const responses = await plug.sendSmartRequests([
     { method: 'get_child_device_list' },
   ]);
+  log(`KS240 pairing: validated ${getChildrenFromResponse(responses).length} child channels at ${input.ip}`);
   return {
     ip: input.ip,
     deviceId,
@@ -199,19 +209,22 @@ class TPlinkKs240Driver extends Homey.Driver {
     const discover = async input => {
       stopActiveDiscovery();
       const credentials = resolveCredentialsForPairing(this, input);
+      this.log(`KS240 pairing: discovery started, credential source=${credentials.source}, target=${input.ip || 'LAN broadcast'}`);
       const client = getPairingClient(credentials.credentials);
       const discoveredDevices = [];
-      const pendingParents = new Set();
+      const attemptedParents = new Set();
       const validations = new Set();
+      let authenticationError;
       const discoveryOptions = {
         deviceTypes: ['plug'],
         discoveryInterval: 1500,
         discoveryTimeout: 5000,
         breakoutChildren: false,
+        filterCallback: sysInfo => String(sysInfo.model || '').toUpperCase().startsWith(TPLINK_MODEL),
         ...(input.ip ? { devices: [{ host: input.ip }] } : {}),
       };
 
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         let acceptingCandidates = true;
         let timer = null;
         let finished = false;
@@ -226,14 +239,23 @@ class TPlinkKs240Driver extends Homey.Driver {
           if (activeDiscovery && activeDiscovery.client === client) {
             activeDiscovery = null;
           }
-          Promise.allSettled([...validations]).then(() => resolve(discoveredDevices));
+          Promise.allSettled([...validations]).then(() => {
+            this.log(`KS240 pairing: discovery finished, channels=${discoveredDevices.length}, authentication failure=${Boolean(authenticationError)}`);
+            if (discoveredDevices.length === 0 && authenticationError) {
+              reject(new Error(authenticationError));
+            } else {
+              resolve(discoveredDevices);
+            }
+          });
         };
 
-        const validateParent = async (plug, key) => {
+        const validateParent = async plug => {
           try {
+            const discoveryId = plug.deviceId;
             const sysInfo = await plug.getSysInfo();
             const model = String(sysInfo.model || plug.model || '').toUpperCase();
             const parentId = sysInfo.deviceId || sysInfo.device_id || plug.deviceId;
+            this.log(`KS240 pairing: discovered ${plug.host}, model=${model}, discovery parent=${identityTag(discoveryId)}, authenticated parent=${identityTag(parentId)}, transport=${plug.defaultSendOptions && plug.defaultSendOptions.transport || 'unknown'}`);
             if (!model.startsWith(TPLINK_MODEL) || !parentId) return;
 
             const responses = await plug.sendSmartRequests([
@@ -245,6 +267,7 @@ class TPlinkKs240Driver extends Homey.Driver {
               name: getDiscoveryParentName(plug, sysInfo),
               children: getChildrenFromResponse(responses),
             };
+            this.log(`KS240 pairing: ${parent.children.length} child channels returned by ${plug.host}`);
             makeChannels({}, parent).forEach(channel => {
               if (
                 !knownChildIds.has(channel.id) &&
@@ -271,23 +294,25 @@ class TPlinkKs240Driver extends Homey.Driver {
               }
             });
           } catch (error) {
+            if (isAuthenticationError(error)) {
+              authenticationError = getSafeErrorMessage(error, credentials.credentials);
+            }
             this.log(
               `Unable to validate a discovered ${TPLINK_MODEL}: ${getSafeErrorMessage(
                 error,
                 credentials.credentials,
               )}`,
             );
-          } finally {
-            pendingParents.delete(key);
           }
         };
 
         const collectParent = plug => {
           if (!acceptingCandidates) return;
+          if (!String(plug.model || '').toUpperCase().startsWith(TPLINK_MODEL)) return;
           const key = plug.deviceId || plug.host;
-          if (!key || pendingParents.has(key)) return;
-          pendingParents.add(key);
-          const validation = validateParent(plug, key);
+          if (!key || attemptedParents.has(key)) return;
+          attemptedParents.add(key);
+          const validation = validateParent(plug);
           validations.add(validation);
           void validation.finally(() => validations.delete(validation));
         };
@@ -324,7 +349,13 @@ class TPlinkKs240Driver extends Homey.Driver {
     session.setHandler('discover', async data => {
       const version = ++requestVersion;
       const input = getPairingInput(Array.isArray(data) ? data[0] : data);
-      const discoveredDevices = await discover(input);
+      let discoveredDevices;
+      try {
+        discoveredDevices = await discover(input);
+      } catch (error) {
+        if (!pairingOpen || version !== requestVersion) return [];
+        throw error;
+      }
       if (!pairingOpen || version !== requestVersion) return [];
 
       if (discoveredDevices.length > 0) {
@@ -344,8 +375,9 @@ class TPlinkKs240Driver extends Homey.Driver {
         const pairingResolution = resolveCredentialsForPairing(this, input);
         let parent;
         try {
-          parent = await validateTarget(input, pairingResolution.credentials);
+          parent = await validateTarget(input, pairingResolution.credentials, message => this.log(message));
         } catch (error) {
+          this.log(`KS240 pairing: validation failed for ${input.ip}: ${getSafeErrorMessage(error, pairingResolution.credentials)}`);
           throw new Error(
             `Unable to validate the selected ${TPLINK_MODEL}: ${getSafeErrorMessage(
               error,
@@ -387,6 +419,7 @@ class TPlinkKs240Driver extends Homey.Driver {
         throw new Error('All selected KS240 channels are already paired.');
       }
       session.setHandler('list_devices', async () => devices);
+      this.log(`KS240 pairing: ${devices.length} validated channels ready to add`);
       await session.emit('continue', null);
       return devices;
     });

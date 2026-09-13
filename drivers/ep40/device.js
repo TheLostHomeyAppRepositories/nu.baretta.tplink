@@ -9,6 +9,7 @@ const {
 } = require('tplink-smarthome-api');
 
 const client = new Client({
+    logLevel: 'silent',
     //debug for API
     //    logLevel: 'debug' // Set the log level to 'debug' for detailed logs
 });
@@ -229,7 +230,6 @@ async reinitializeConnection(ipAddress) {
         let device = settings.settingIPAddress;
         let childId = this.getData().childId; // Retrieve the childId
         //const sysInfo = client.getSysInfo(device);
-        this.log("getStatus for device: " + device + ", Child ID: " + childId);
 
         try {
             const sysInfo = await client.getSysInfo(device);
@@ -277,7 +277,7 @@ async reinitializeConnection(ipAddress) {
 
     async discover() {
         return getRecovery(this).discover({
-            createClient: () => new Client(),
+            createClient: () => new Client({ logLevel: 'silent' }),
             type: 'plug',
         });
     }

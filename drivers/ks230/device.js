@@ -2,7 +2,7 @@
 const Homey = require('homey');
 const { getRecovery } = require('../../lib/tplink-recovery');
 const { Client } = require('tplink-smarthome-api');
-const client = new Client();
+const client = new Client({ logLevel: 'silent' });
 
 // get driver name based on dirname
 function getDriverName() {
@@ -85,17 +85,6 @@ class TPlinkPlugDevice extends Homey.Device {
             return args.device.ledOff(args.device.getSettings().settingIPAddress);
         });
 
-        let setBrightnessAction = this.homey.flow.getActionCard('set_brightness');
-        setBrightnessAction.registerRunListener(async (args, state) => {
-            const { device, brightness } = args;
-            try {
-                await device.setBrightness(device.getSettings().settingIPAddress, brightness);
-                return true; // Action was successful
-            } catch (err) {
-                this.log(err);
-                return false; // Action failed
-            }
-        });
 
 
     } // end onInit
@@ -293,7 +282,6 @@ async getLed(device) {
         let settings = this.getSettings();
         let device = settings.settingIPAddress;
         let TPlinkModel = getDriverName().toUpperCase();
-        this.log("getStatus device: " + device + ", name: " + this.getName());
 
         try {
             const sysInfo = await client.getSysInfo(device);
@@ -363,7 +351,7 @@ async getLed(device) {
                 if (TPlinkModel === "HS220" || TPlinkModel === "ES20M" || TPlinkModel === "KS230") {
                     try {
                         const brightness = this.plug.dimmer.brightness;
-                        this.log('State - brightness level: ' + brightness);
+                        recovery.logChanged('brightness', brightness, 'State - brightness level: ' + brightness);
                         // Update Homey device state for brightness
                     } catch (err) {
                         this.log('Error getting brightness: ', err.message);
@@ -393,7 +381,7 @@ pollDevice(interval) {
 
     async discover() {
         return getRecovery(this).discover({
-            createClient: () => new Client(),
+            createClient: () => new Client({ logLevel: 'silent' }),
             type: 'plug',
         });
     }
