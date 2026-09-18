@@ -80,16 +80,6 @@ class TPlinkPlugDevice extends Homey.Device {
         this.registerCapabilityListener('onoff', value => this.onCapabilityOnoff(value, childId));
         this.registerCapabilityListener('ledonoff', value => this.onCapabilityLedOnoff(value, childId));
 
-        // Register flow card action listeners
-        this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
-            let childId = args.device.getData().childId; // Retrieve the childId
-            return args.device.ledOn(args.device.getSettings().settingIPAddress, childId);
-        });
-
-        this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
-            let childId = args.device.getData().childId; // Retrieve the childId
-            return args.device.ledOff(args.device.getSettings().settingIPAddress, childId);
-        });
 
         this.homey.flow.getActionCard('meter_reset').registerRunListener(async (args, state) => {
             let childId = args.device.getData().childId; // Retrieve the childId

@@ -34,6 +34,18 @@ function guid() {
 
 class TPlinkPlugDriver extends Homey.Driver {
 
+    onInit() {
+        this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
+            const childId = args.device.getData().childId;
+            return args.device.setLedState(args.device.getSettings().settingIPAddress, childId, true);
+        });
+
+        this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
+            const childId = args.device.getData().childId;
+            return args.device.setLedState(args.device.getSettings().settingIPAddress, childId, false);
+        });
+    }
+
     async onPair(session) {
         // socket is a direct channel to the front-end
         var devIds = {};

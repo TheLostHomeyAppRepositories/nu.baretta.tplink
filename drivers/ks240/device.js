@@ -86,6 +86,7 @@ class TPlinkKs240Device extends Homey.Device {
         getRecovery(this).destroy();
     this.log('Device deleted: ' + this.getData().id + ', Child ID: ' + this.childId);
     clearInterval(this.pollingInterval);
+    clearTimeout(this.pollStartTimer);
     this.stopActiveDiscovery();
   }
 
@@ -446,19 +447,24 @@ class TPlinkKs240Device extends Homey.Device {
         }
     }
 
-  pollDevice(interval) {
-    clearInterval(this.pollingInterval);
+pollDevice(interval) {
+  clearInterval(this.pollingInterval);
+  clearTimeout(this.pollStartTimer);
+  // Stagger the first poll within the interval so devices initialized
+  // together do not all open connections in the same tick.
+  this.pollStartTimer = setTimeout(() => {
     this.pollingInterval = setInterval(async () => {
       try {
-        await this.getStatus();
+          await this.getStatus();
       } catch (error) {
-        this.log(
-          'Error during polling: ' +
-            getSafeErrorMessage(error, this.getSettings(), getGlobalCredentials(this))
-        );
+          this.log(
+            'Error during polling: ' +
+              getSafeErrorMessage(error, this.getSettings(), getGlobalCredentials(this))
+          );
       }
     }, 1000 * interval);
-  }
+  }, Math.floor(Math.random() * 1000 * interval));
+}
 
   stopActiveDiscovery() {
         getRecovery(this).cancel();

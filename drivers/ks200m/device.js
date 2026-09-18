@@ -43,17 +43,7 @@ class TPlinkKs200mDevice extends Homey.Device {
       this.onCapabilityLedOnoff.bind(this)
     );
 
-    this.homey.flow
-      .getActionCard('ledOn')
-      .registerRunListener(async args =>
-        args.device.ledOn(args.device.getSettings().settingIPAddress)
-      );
 
-    this.homey.flow
-      .getActionCard('ledOff')
-      .registerRunListener(async args =>
-        args.device.ledOff(args.device.getSettings().settingIPAddress)
-      );
 
     await this.getStatus();
     this.pollDevice(normalizedSettings.pollingInterval);
@@ -67,6 +57,7 @@ class TPlinkKs200mDevice extends Homey.Device {
         getRecovery(this).destroy();
     this.log('Device deleted: ' + this.getData().id);
     clearInterval(this.pollingInterval);
+    clearTimeout(this.pollStartTimer);
   }
 
   async onCapabilityOnoff(value) {
@@ -299,16 +290,21 @@ class TPlinkKs200mDevice extends Homey.Device {
         }
     }
 
-  pollDevice(interval) {
-    clearInterval(this.pollingInterval);
+pollDevice(interval) {
+  clearInterval(this.pollingInterval);
+  clearTimeout(this.pollStartTimer);
+  // Stagger the first poll within the interval so devices initialized
+  // together do not all open connections in the same tick.
+  this.pollStartTimer = setTimeout(() => {
     this.pollingInterval = setInterval(async () => {
       try {
-        await this.getStatus();
+          await this.getStatus();
       } catch (error) {
-        this.log('Error during polling: ' + error.message);
+          this.log('Error during polling: ' + error.message);
       }
     }, 1000 * interval);
-  }
+  }, Math.floor(Math.random() * 1000 * interval));
+}
 
   async setCapabilityIfChanged(capabilityId, value) {
     if (!this.hasCapability(capabilityId)) {

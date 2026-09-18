@@ -80,16 +80,7 @@ class TPlinkPlugDevice extends Homey.Device {
             return this.setLedState(device, childId, value);
         });      
 
-        // Register flow card action listeners
-        this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
-            let childId = args.device.getData().childId; // Retrieve the childId
-            return args.device.setLedState(args.device.getSettings().settingIPAddress, childId, true);
-        });
-        
-        this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
-            let childId = args.device.getData().childId; // Retrieve the childId
-            return args.device.setLedState(args.device.getSettings().settingIPAddress, childId, false);
-        });       
+
 
         // Call pollDevice with childId to start polling this specific socket
         this.pollDevice(interval, childId);

@@ -85,14 +85,7 @@ class TPlinkPlugDevice extends Homey.Device {
         this.registerCapabilityListener('ledonoff', this.onCapabilityLedOnoff.bind(this));
         this.registerCapabilityListener('dim', this.onCapabilityDim.bind(this));
 
-        // Register flow card action listeners
-        this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
-            return args.device.ledOn(args.device.getSettings().settingIPAddress);
-        });
 
-        this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
-            return args.device.ledOff(args.device.getSettings().settingIPAddress);
-        });
 
         this.homey.flow.getActionCard('meter_reset').registerRunListener(async (args, state) => {
             return args.device.meter_reset(args.device.getSettings().settingIPAddress);
@@ -117,6 +110,7 @@ class TPlinkPlugDevice extends Homey.Device {
         let id = this.getData().id;
         this.log("Device deleted: " + id);
         clearInterval(this.pollingInterval);
+        clearTimeout(this.pollStartTimer);
     }
 
     // this method is called when the Device has requested a state change (turned on or off)
@@ -170,6 +164,7 @@ class TPlinkPlugDevice extends Homey.Device {
                         const interval = parseInt(newSettings.pollingInterval, 10) || 10; // Ensure there's a fallback interval
                         this.log('Polling interval changed to ' + interval + ' seconds');
                         clearInterval(this.pollingInterval);
+                        clearTimeout(this.pollStartTimer);
                         this.pollDevice(interval); // Start polling with the defined interval
                         break;
                     case 'dynamicIp':
@@ -363,9 +358,11 @@ class TPlinkPlugDevice extends Homey.Device {
         let TPlinkModel = getDriverName().toUpperCase();
 
         try {
-            const sysInfo = await client.getSysInfo(device);
-            if (!recovery.isCurrent(poll)) return;
-            this.plug = client.getPlug({ host: device, sysInfo });
+            if (!this.plug || this.plug.client !== client || this.plug.host !== device) {
+                const sysInfo = await client.getSysInfo(device);
+                if (!recovery.isCurrent(poll)) return;
+                this.plug = client.getPlug({ host: device, sysInfo });
+            }
 
             const data = await this.plug.getInfo();
             if (!recovery.responded(poll)) return;
@@ -458,14 +455,19 @@ class TPlinkPlugDevice extends Homey.Device {
 
     pollDevice(interval) {
         clearInterval(this.pollingInterval);
-        this.pollingInterval = setInterval(async () => {
-            try {
-                await this.getStatus();
-            } catch (err) {
-                this.log("Error during polling: " + err.message);
-                // Optionally, handle reconnection or retry logic here
-            }
-        }, 1000 * interval);
+        clearTimeout(this.pollStartTimer);
+        // Stagger the first poll within the interval so devices initialized
+        // together do not all open connections in the same tick.
+        this.pollStartTimer = setTimeout(() => {
+            this.pollingInterval = setInterval(async () => {
+                try {
+                    await this.getStatus();
+                } catch (err) {
+                    this.log("Error during polling: " + err.message);
+                    // Optionally, handle reconnection or retry logic here
+                }
+            }, 1000 * interval);
+        }, Math.floor(Math.random() * 1000 * interval));
     }
 
 

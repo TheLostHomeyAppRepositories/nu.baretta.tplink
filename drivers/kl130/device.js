@@ -134,6 +134,7 @@ class TPlinkBulbDevice extends Homey.Device {
         let id = this.getData().id;
         this.log('device deleted: ', id);
         clearInterval(this.pollingInterval);
+        clearTimeout(this.pollStartTimer);
     }
 
     // this method is called when the Device has requested a state change (turned on or off)
@@ -270,6 +271,7 @@ async onSettings({ oldSettings, newSettings, changedKeys }) {
                         const interval = parseInt(newSettings.pollingInterval, 10) || 10; // Ensure there's a fallback interval
                         this.log('Polling interval changed to ' + interval + ' seconds');
                         clearInterval(this.pollingInterval);
+                        clearTimeout(this.pollStartTimer);
                         this.pollDevice(interval); // Start polling with the defined interval
                         break;
                     case 'dynamicIp':
@@ -555,14 +557,19 @@ async reinitializeConnection(ipAddress) {
 
 pollDevice(interval) {
     clearInterval(this.pollingInterval);
-    this.pollingInterval = setInterval(async () => {
-        try {
-            await this.getStatus();
-        } catch (err) {
-            this.log("Error during polling: " + err.message);
-            // Optionally, handle reconnection or retry logic here
-        }
-    }, 1000 * interval);
+    clearTimeout(this.pollStartTimer);
+    // Stagger the first poll within the interval so devices initialized
+    // together do not all open connections in the same tick.
+    this.pollStartTimer = setTimeout(() => {
+        this.pollingInterval = setInterval(async () => {
+            try {
+                await this.getStatus();
+            } catch (err) {
+                this.log("Error during polling: " + err.message);
+                // Optionally, handle reconnection or retry logic here
+            }
+        }, 1000 * interval);
+    }, Math.floor(Math.random() * 1000 * interval));
 }
 
 
