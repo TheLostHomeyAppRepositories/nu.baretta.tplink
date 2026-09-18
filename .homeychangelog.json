@@ -202,5 +202,8 @@
   },
   "0.3.5": {
     "en": "Fixed KS240 support, logging improvements, HS220 support for new transport method"
+  },
+  "0.3.6": {
+    "en": "Optimized polling to use half the network connections and stagger device startup to prevent connection bursts"
   }
 }
