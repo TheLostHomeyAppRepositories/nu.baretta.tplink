@@ -99,6 +99,75 @@ test('brightness Flow survives mixed device initialization and preserves percent
   }
 });
 
+test('LED Flows keep one app listener across every driver and device initialization order', async () => {
+  const { fixture } = require('./helpers/tplink-device-fixture');
+  const ids = require('../app.json').drivers.map(driver => driver.id);
+  for (const order of [ids, [...ids].reverse()]) {
+    const listeners = new Map();
+    const registrations = new Map();
+    const flow = { getActionCard: id => ({ registerRunListener(listener) {
+      listeners.set(id, listener);
+      registrations.set(id, (registrations.get(id) || 0) + 1);
+    } }) };
+    const app = await createApp({ flow });
+    await app.onInit();
+    const devices = [];
+    for (const id of order) {
+      const Driver = loadFreshModule(`../drivers/${id}/driver.js`, {
+        homey: { Driver: class Driver {} },
+        'tplink-smarthome-api': { Client: class Client {} },
+      });
+      const driver = new Driver();
+      driver.homey = { flow };
+      driver.log = () => {};
+      if (driver.onInit) await driver.onInit();
+      const { device } = fixture(id);
+      device.homey.flow = flow;
+      device.getStatus = async () => {};
+      device.pollDevice = () => {};
+      device.startPolling = () => {};
+      await device.onInit();
+      devices.push(device);
+    }
+    assert.equal(registrations.get('ledOn'), 1);
+    assert.equal(registrations.get('ledOff'), 1);
+    for (const device of devices) {
+      const calls = [];
+      const host = device.getSettings().settingIPAddress;
+      const childId = device.getData().childId;
+      if (typeof device.setLedState === 'function') {
+        device.setLedState = async (...args) => { calls.push(args); };
+        assert.equal(await listeners.get('ledOn')({ device }), true);
+        assert.equal(await listeners.get('ledOff')({ device }), true);
+        assert.deepEqual(calls, [[host, childId, true], [host, childId, false]]);
+      } else if (typeof device.ledOn === 'function') {
+        device.ledOn = async (...args) => { calls.push(['on', ...args]); };
+        device.ledOff = async (...args) => { calls.push(['off', ...args]); };
+        assert.equal(await listeners.get('ledOn')({ device }), true);
+        assert.equal(await listeners.get('ledOff')({ device }), true);
+        assert.deepEqual(calls, [['on', host, childId], ['off', host, childId]]);
+      }
+    }
+  }
+});
+
+test('LED Flow dispatch preserves device failures for both LED interfaces', async () => {
+  const listeners = new Map();
+  await createApp({ flow: { getActionCard: id => ({ registerRunListener: listener => listeners.set(id, listener) }) } });
+  for (const method of ['setLedState', 'ledOn', 'ledOff']) {
+    const device = {
+      getSettings: () => ({ settingIPAddress: '192.0.2.10' }),
+      getData: () => ({ childId: 'child-1' }),
+      [method]: async () => false,
+    };
+    const run = listeners.get(method === 'ledOff' ? 'ledOff' : 'ledOn');
+    assert.equal(await run({ device }), false);
+    const failure = new Error('LED request failed');
+    device[method] = async () => { throw failure; };
+    await assert.rejects(run({ device }), error => error === failure);
+  }
+});
+
 test('authenticated HS220 participates in saved-account validation and refresh using its persisted transport', async () => {
   const options = [];
   const refreshes = [];

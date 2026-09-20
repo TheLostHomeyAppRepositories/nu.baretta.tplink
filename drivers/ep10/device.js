@@ -488,15 +488,18 @@ class TPlinkPlugDevice extends Homey.Device {
         clearTimeout(this.pollStartTimer);
         // Stagger the first poll within the interval so devices initialized
         // together do not all open connections in the same tick.
+        const pollStatus = async () => {
+            try {
+                await this.getStatus();
+            } catch (err) {
+                this.log("Error during polling: " + getSafeErrorMessage(err, this.getSettings(), getGlobalCredentials(this)));
+                // Optionally, handle reconnection or retry logic here
+            }
+        };
         this.pollStartTimer = setTimeout(() => {
-            this.pollingInterval = setInterval(async () => {
-                try {
-                    await this.getStatus();
-                } catch (err) {
-                    this.log("Error during polling: " + getSafeErrorMessage(err, this.getSettings(), getGlobalCredentials(this)));
-                    // Optionally, handle reconnection or retry logic here
-                }
-            }, 1000 * interval);
+            this.pollStartTimer = null;
+            this.pollingInterval = setInterval(pollStatus, 1000 * interval);
+            void pollStatus();
         }, Math.floor(Math.random() * 1000 * interval));
     }
 

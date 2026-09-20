@@ -8,7 +8,7 @@ const vm = require('node:vm');
 
 const AUTHENTICATED = new Set(['ep10', 'hs210', 'hs220', 'ks225', 'ks240', 's500d']);
 
-function fixture(id = 'hs110', { Client: ClientOverride } = {}) {
+function fixture(id = 'hs110', { Client: ClientOverride, random = Math.random } = {}) {
   const filename = path.resolve(__dirname, '../../drivers', id, 'device.js');
   const recoveryFile = path.resolve(__dirname, '../../lib/tplink-recovery.js');
   const state = { now: 0, clients: [], timers: new Set(), requests: [], writes: [], logs: [], commands: [] };
@@ -97,6 +97,7 @@ function fixture(id = 'hs110', { Client: ClientOverride } = {}) {
         return localRequire(name);
       },
       Date: class extends Date { static now() { return state.now; } },
+      Math: Object.assign(Object.create(Math), { random }),
       setTimeout: setTimer, clearTimeout: timer => state.timers.delete(timer),
       setInterval: setTimer, clearInterval: timer => state.timers.delete(timer),
     }, { filename: file });

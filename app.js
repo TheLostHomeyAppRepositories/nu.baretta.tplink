@@ -65,6 +65,19 @@ class TpLinkApp extends Homey.App {
     this._credentialMutation = Promise.resolve();
     this._globalCredentialRefreshVersion = 0;
     this._credentialValidation = { status: 'unverified' };
+    if (!this._ledActionsRegistered) {
+      for (const [cardId, value] of [['ledOn', true], ['ledOff', false]]) {
+        this.homey.flow.getActionCard(cardId).registerRunListener(async ({ device }) => {
+          const host = device.getSettings().settingIPAddress;
+          const childId = device.getData().childId;
+          const result = typeof device.setLedState === 'function'
+            ? await device.setLedState(host, childId, value)
+            : await device[value ? 'ledOn' : 'ledOff'](host, childId);
+          return result !== false;
+        });
+      }
+      this._ledActionsRegistered = true;
+    }
     if (!this._brightnessActionRegistered) {
       this.homey.flow.getActionCard('set_brightness').registerRunListener(async ({ device, brightness }) => {
         if (typeof brightness !== 'number' || !Number.isFinite(brightness) || brightness < 0 || brightness > 100) {

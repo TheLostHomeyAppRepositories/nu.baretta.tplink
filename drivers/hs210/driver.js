@@ -106,15 +106,6 @@ async function finalizeCredentialsForPairing(driver, resolution) {
 
 class TPlinkPlugDriver extends Homey.Driver {
 
-    onInit() {
-        this.homey.flow.getActionCard('ledOn').registerRunListener(async (args, state) => {
-            return args.device.ledOn(args.device.getSettings().settingIPAddress);
-        });
-
-        this.homey.flow.getActionCard('ledOff').registerRunListener(async (args, state) => {
-            return args.device.ledOff(args.device.getSettings().settingIPAddress);
-        });
-    }
   async onPair(session) {
     const knownDeviceIds = new Set();
     let activeDiscovery = null;

@@ -70,27 +70,7 @@ class HS107Device extends Homey.Device {
 
     this.registerCapabilityListener('onoff', value => this.onCapabilityOnoff(value));
     this.registerCapabilityListener('ledonoff', value => this.onCapabilityLedOnoff(value));
-    this.registerFlowActions();
     this.startPolling();
-  }
-
-  registerFlowActions() {
-    const flow = this.homey && this.homey.flow;
-    if (!flow || typeof flow.getActionCard !== 'function') return;
-
-    const register = (cardId, value) => {
-      const card = flow.getActionCard(cardId);
-      if (!card || typeof card.registerRunListener !== 'function') return;
-      card.registerRunListener(async args => {
-        const device = args && args.device ? args.device : this;
-        const settings = device.getSettings();
-        const data = device.getData();
-        return device.setLedState(settings.settingIPAddress, data.childId, value);
-      });
-    };
-
-    register('ledOn', true);
-    register('ledOff', false);
   }
 
   startPolling() {

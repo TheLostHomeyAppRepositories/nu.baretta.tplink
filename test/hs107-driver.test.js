@@ -355,6 +355,14 @@ test('HS107 device uses child power methods, parent LED methods, one interval, a
   };
 
   try {
+    const App = loadFreshModule('../app.js', {
+      homey: { ...Homey, App: class App {} },
+      'tplink-smarthome-api': { Client: DeviceClient },
+    });
+    const app = new App();
+    app.homey = { flow: device.homey.flow };
+    app.log = () => {};
+    await app.onInit();
     await device.onInit();
     assert.equal(intervals.length, 1);
     assert.equal(intervals[0].delay, 10000);
@@ -370,6 +378,9 @@ test('HS107 device uses child power methods, parent LED methods, one interval, a
     await listeners.ledonoff(true);
     assert.deepEqual(childPowerCalls, [false]);
     assert.deepEqual(parentLedCalls, [true]);
+    await flowListeners.ledOn({ device });
+    await flowListeners.ledOff({ device });
+    assert.deepEqual(parentLedCalls, [true, true, false]);
 
     const rediscovery = device.discover();
     const client = clientInstances[0];
