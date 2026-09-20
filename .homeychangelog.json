@@ -205,5 +205,8 @@
   },
   "0.3.6": {
     "en": "Optimized polling to use half the network connections and stagger device startup to prevent connection bursts"
+  },
+  "0.3.7": {
+    "en": "Fixed shared LED Flow actions and removed the extra startup polling delay while preserving connection caching and recovery."
   }
 }
