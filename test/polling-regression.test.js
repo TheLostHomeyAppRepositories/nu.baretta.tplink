@@ -108,7 +108,7 @@ for (const id of CACHED) {
     assert.equal(f.requests.length, 1);
     assert.equal(f.statusRequests, 3);
     assert.equal(f.device.values.onoff, false);
-    if (id === 'hs220') assert.equal(f.device.values.dim, 0.25);
+    if (id === 'hs220') assert.equal(f.device.values.dim, 0);
     f.device.settings.settingIPAddress = '192.0.2.20';
     await f.poll();
     assert.notEqual(f.device.plug, first);

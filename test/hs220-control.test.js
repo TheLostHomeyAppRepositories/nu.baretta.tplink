@@ -14,6 +14,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
     const sent = [];
     const clients = [];
     let reject = false;
+    let rejectPowerOn = false;
     const sysInfo = () => ({ err_code: 0, deviceId: 'hs220-parent', model: id.toUpperCase() + '(US)',
       type: smart ? 'SMART.KASASWITCH' : 'IOT.SMARTPLUGSWITCH',
       alias: 'Dimmer', mac: '00:11:22:33:44:55', hw_ver: '3.26', sw_ver: '1.1.1',
@@ -40,6 +41,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
                 case 'get_device_info': result = { device_id: 'hs220-parent',
                   device_on: state.on, brightness: state.brightness }; break;
                 case 'set_device_info':
+                  if (rejectPowerOn && request.params.device_on === true) throw new Error('Test power-on rejected');
                   if ('brightness' in request.params) assert.ok(request.params.brightness >= 1 && request.params.brightness <= 100);
                   if ('device_on' in request.params) state.on = request.params.device_on;
                   if ('brightness' in request.params) state.brightness = request.params.brightness;
@@ -85,11 +87,33 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
         await d.onCapabilityDim(0);
         assert.equal(state.on, false);
         assert.equal(state.brightness, 70);
+        assert.equal(d.values.onoff, false);
+        assert.equal(d.values.dim, 0);
         await d.getStatus();
         assert.equal(d.values.onoff, false);
+        assert.equal(d.values.dim, 0);
+        // Firmware can report a saved nonzero brightness even with the relay off.
+        state.brightness = 100;
+        await d.getStatus();
+        await d.getStatus();
+        assert.equal(d.values.dim, 0);
         await d.onCapabilityOnoff(true);
         assert.equal(state.on, true);
-        assert.equal(state.brightness, 70);
+        assert.equal(state.brightness, 100);
+        await d.getStatus();
+        assert.equal(d.values.dim, 1);
+        await d.onCapabilityDim(0);
+        rejectPowerOn = true;
+        await assert.rejects(d.onCapabilityDim(0.3), /Test power-on rejected/);
+        assert.equal(state.on, false);
+        assert.equal(d.values.onoff, false);
+        assert.equal(d.values.dim, 0);
+        rejectPowerOn = false;
+        await d.onCapabilityDim(0.25);
+        assert.equal(state.on, true);
+        assert.equal(state.brightness, 25);
+        assert.equal(d.values.onoff, true);
+        assert.equal(d.values.dim, 0.25);
       }
     }
     await d.onCapabilityLedOnoff(false);
@@ -99,8 +123,10 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
     state.brightness = 22;
     await d.getStatus();
     assert.equal(d.values.onoff, false);
-    if (id === 'hs220') assert.equal(d.values.dim, 0.22, f.logs.join('\n'));
+    if (id === 'hs220') assert.equal(d.values.dim, 0, f.logs.join('\n'));
     await d.onInit();
+    await d.getStatus();
+    if (id === 'hs220') assert.equal(d.values.dim, 0);
     assert.equal(d.activeTransport, transport);
     assert.equal(f.timers.size, 1);
     assert.ok(sent.length > 0);

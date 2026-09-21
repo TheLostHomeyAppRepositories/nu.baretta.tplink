@@ -293,6 +293,14 @@ async powerOff(device) {
             const sysInfo = await this.client.getSysInfo(device);
             this.plug = this.client.getPlug({ host: device, sysInfo: sysInfo });
             await this.plug.dimmer.setBrightness(brightness);
+            if (this.plug.shouldUseSmartMethods()) {
+                // SMART brightness changes do not switch an off relay back on.
+                if (brightness > 0 && this.plug.sysInfo.relay_state !== 1) {
+                    await this.plug.setPowerState(true);
+                }
+                await this.setCapabilityValue('onoff', brightness > 0);
+                await this.setCapabilityValue('dim', brightness / 100);
+            }
         } catch (err) {
             this.log('Error setting brightness: ' + ' ' + getSafeErrorMessage(err, this.getSettings(), getGlobalCredentials(this)));
             throw err;
@@ -445,7 +453,8 @@ async getLed(device) {
                 // check if model support dimming
                 if (TPlinkModel === "HS220" || TPlinkModel === "ES20M" || TPlinkModel === "KS230") {
                     try {
-                        const brightness = this.plug.dimmer.brightness;
+                        // The device retains its last brightness while off; Homey shows the output level.
+                        const brightness = powerState ? this.plug.dimmer.brightness : 0;
                         recovery.logChanged('brightness', brightness, 'State - brightness level: ' + brightness);
                         // Update Homey device state for brightness
                         if (Number.isFinite(brightness) && this.getCapabilityValue('dim') !== brightness / 100) {
