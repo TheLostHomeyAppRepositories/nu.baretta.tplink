@@ -4,6 +4,7 @@
 
 ### SMART dimmer zero brightness
 
+- Updated the bundled API to 5.0.2 to fix legacy IOT/TCP HS220 error `-3` at 0%, and apply off/zero display and slider-to-on behavior across HS220 transports. KLAP errors now explicitly report exhausted v2/v1 checks; authentication of affected unreset units remains unconfirmed.
 - Fixed HS220's slider returning to the remembered brightness while the light is off: polling now displays 0%, and raising the slider from zero turns a SMART HS220 back on at the selected brightness.
 - Updated the bundled API to `tplink-smarthome-api` 5.0.1: setting a SMART dimmer such as HS220 to 0% now sends a power-off command instead of invalid brightness zero (error `-1008`), while preserving its saved brightness and legacy device behavior.
 

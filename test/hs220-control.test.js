@@ -60,8 +60,14 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
           for (const [module, commands] of Object.entries(payload)) {
             response[module] = {};
             for (const [command, params] of Object.entries(commands)) {
-              if (command === 'set_relay_state') state.on = params.state === 1;
-              if (command === 'set_brightness') state.brightness = params.brightness;
+              if (command === 'set_relay_state' || command === 'set_switch_state') {
+                if (rejectPowerOn && params.state === 1) throw new Error('Test power-on rejected');
+                state.on = params.state === 1;
+              }
+              if (command === 'set_brightness') {
+                assert.ok(params.brightness >= 1 && params.brightness <= 100, 'Legacy firmware rejects brightness zero');
+                state.brightness = params.brightness;
+              }
               if (command === 'set_led_off') state.led = params.off === 0;
               response[module][command] = command === 'get_sysinfo' ? sysInfo() : { err_code: 0 };
             }
@@ -83,7 +89,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
     if (id === 'hs220') {
       await d.onCapabilityDim(0.7);
       assert.equal(state.brightness, 70);
-      if (smart) {
+      {
         await d.onCapabilityDim(0);
         assert.equal(state.on, false);
         assert.equal(state.brightness, 70);
