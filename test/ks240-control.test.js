@@ -116,6 +116,21 @@ test('KS240 rejects missing child identity before making a parent or child reque
   assert.equal(c.sent.length, 0);
 });
 
+test('KS240 reuses the selected KLAP connection instead of retrying AES during polling and control', async () => {
+  const c = controlFixture();
+  await c.fan.onInit();
+  const plug = c.fan.plug;
+  const parentReads = c.parentReads;
+  for (let i = 0; i < 30; i++) await c.fan.getStatus();
+  await c.fan.onCapabilityDim(0.75);
+  await c.fan.onCapabilityOnoff(false);
+  assert.equal(c.fan.plug, plug);
+  assert.equal(c.parentReads, parentReads);
+  assert.equal(c.states[c.fanId].fan_speed_level, 3);
+  assert.equal(c.states[c.fanId].device_on, false);
+  c.fan.onDeleted();
+});
+
 test('KS240 labels only the fan slider and preserves its options idempotently', async () => {
   const c = controlFixture();
   c.fan.capabilityOptions.dim = { preventInsights: true };

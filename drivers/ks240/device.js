@@ -322,14 +322,19 @@ class TPlinkKs240Device extends Homey.Device {
     if (typeof this.childId !== 'string' || !this.childId.trim()) {
       throw new Error('The KS240 channel is missing its child ID.');
     }
-    const sysInfo = await getKs240SysInfo(this.client, device);
+    const client = this.client;
+    if (this.plug && this.plug.client === client && this.plug.host === device) {
+      return { sysInfo: this.plug.sysInfo, plug: this.plug };
+    }
+    const sysInfo = await getKs240SysInfo(client, device);
     // Parent SMART info has no child list. Route channel commands explicitly
     // instead of constructing a child Plug from incomplete parent metadata.
-    this.plug = this.client.getPlug({
+    const plug = client.getPlug({
       host: device,
       sysInfo,
     });
-    return { sysInfo, plug: this.plug };
+    if (client === this.client) this.plug = plug;
+    return { sysInfo, plug };
   }
 
   async setPowerState(powerState) {

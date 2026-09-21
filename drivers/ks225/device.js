@@ -457,9 +457,11 @@ class TPlinkPlugDevice extends Homey.Device {
         let TPlinkModel = getDriverName().toUpperCase();
 
         try {
-            const sysInfo = await this.client.getSysInfo(device);
-            if (!recovery.isCurrent(poll)) return;
-            this.plug = this.client.getPlug({ host: device, sysInfo });
+            if (!this.plug || this.plug.client !== this.client || this.plug.host !== device) {
+                const sysInfo = await this.client.getSysInfo(device);
+                if (!recovery.isCurrent(poll)) return;
+                this.plug = this.client.getPlug({ host: device, sysInfo });
+            }
 
             const data = await this.plug.getInfo();
             if (!recovery.responded(poll)) return;

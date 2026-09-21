@@ -9,7 +9,7 @@ const STAGGERED = ['ep10', 'ep25', 'es20m', 'hs100', 'hs103', 'hs110', 'hs200',
   'kp105', 'kp115', 'kp405', 'ks200m', 'ks225', 'ks230', 'ks240',
   'lb100', 'lb110', 'lb120', 'lb130', 's500d'];
 const CACHED = ['ep10', 'ep25', 'es20m', 'hs100', 'hs103', 'hs110', 'hs200',
-  'hs210', 'hs220', 'kp105', 'kp115', 'kp405', 'ks230'];
+  'hs210', 'hs220', 'kp105', 'kp115', 'kp405', 'ks225', 'ks230', 's500d'];
 
 function expireStart(f) {
   const timer = f.device.pollStartTimer;
@@ -144,7 +144,7 @@ for (const id of CACHED) {
   });
 }
 
-for (const id of ['ep10', 'hs210', 'hs220']) {
+for (const id of ['ep10', 'hs210', 'hs220', 'ks225', 's500d']) {
   test(`${id}: replacing the authenticated client invalidates its cached plug`, async () => {
     const f = cachedFixture(id);
     await f.poll();
