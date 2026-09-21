@@ -208,5 +208,8 @@
   },
   "0.3.7": {
     "en": "Fixed shared LED Flow actions and removed the extra startup polling delay while preserving connection caching and recovery."
+  },
+  "0.3.8": {
+    "en": "Fixed HS220 0% dimming and off-state brightness reporting, updated the bundled API to 5.0.3, and added Homey-based authentication and brightness diagnostics."
   }
 }
