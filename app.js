@@ -3,6 +3,7 @@
 const Homey = require('homey');
 const { isIP } = require('node:net');
 const { Client } = require('tplink-smarthome-api');
+const hs220Diagnostics = require('./lib/hs220-diagnostics');
 const {
   getEp10ClientOptions,
   getDeviceConnectionData,
@@ -97,6 +98,18 @@ class TpLinkApp extends Homey.App {
   getGlobalCredentials() {
     const stored = this.homey.settings.get(GLOBAL_CREDENTIALS_KEY);
     return hasCompleteCredentials(stored) ? normalizeCredentialPair(stored) : null;
+  }
+
+  collectHs220Diagnostics() {
+    if (!this._hs220DiagnosticScan) {
+      this._hs220DiagnosticScan = hs220Diagnostics.collect(this.getManagedDevices(), this.getGlobalCredentials())
+        .then(report => {
+          this.log(`HS220 diagnostics: API=${report.apiVersion}, app=${report.appVersion}, scan=${report.scan}`);
+          for (const row of report.devices) this.log('HS220 diagnostic device: ' + JSON.stringify(row));
+          return report;
+        }).finally(() => { this._hs220DiagnosticScan = null; });
+    }
+    return this._hs220DiagnosticScan;
   }
 
   resolveDeviceCredentials(settings = {}) {

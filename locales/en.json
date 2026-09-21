@@ -37,6 +37,14 @@
                 }
         },
         "settings": {
+                "diagnostics": {
+                        "title": "HS220 diagnostics",
+                        "hint": "Collect a read-only report from paired HS220 switches through Homey. Takes about six seconds. Includes local IP addresses, firmware, transport metadata and cached status; excludes credentials and device identifiers. Share the report below with support.",
+                        "collect": "Collect HS220 diagnostics",
+                        "running": "Collecting diagnostics through Homey…",
+                        "finished": "Report ready below and written to the app log. Null discovery means no matching response; null metadata fields were not provided. This scan does not test authentication.",
+                        "error": "Unable to collect diagnostics. Please check the app log."
+                },
                 "credentials": {
                         "title": "TP-Link account credentials",
                         "subtitle": "Use one default account for authenticated TP-Link SMART devices. A device can keep a separate account override when needed.",

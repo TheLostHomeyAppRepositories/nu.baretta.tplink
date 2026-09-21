@@ -51,6 +51,14 @@
       <button class="homey-button-secondary-full" id="adopt" type="button" data-i18n="settings.credentials.adopt"></button>
     </fieldset>
 
+    <fieldset class="homey-form-fieldset">
+      <legend class="homey-form-legend" data-i18n="settings.diagnostics.title"></legend>
+      <p data-i18n="settings.diagnostics.hint"></p>
+      <button class="homey-button-secondary-full" id="diagnostics" type="button" data-i18n="settings.diagnostics.collect"></button>
+      <p id="diagnostics-status" aria-live="polite"></p>
+      <textarea class="homey-form-input" id="diagnostics-report" rows="12" readonly hidden aria-label="HS220 diagnostics"></textarea>
+    </fieldset>
+
     <script type="text/javascript">
       function credentialInputError(username, password) {
         if (!username || !password) {
@@ -99,6 +107,26 @@
         var saveElement = document.getElementById('save');
         var clearElement = document.getElementById('clear');
         var adoptElement = document.getElementById('adopt');
+        var diagnosticsElement = document.getElementById('diagnostics');
+        var diagnosticsStatus = document.getElementById('diagnostics-status');
+        var diagnosticsReport = document.getElementById('diagnostics-report');
+
+        diagnosticsElement.addEventListener('click', async function() {
+          diagnosticsElement.disabled = true;
+          diagnosticsReport.hidden = true;
+          diagnosticsReport.value = '';
+          diagnosticsStatus.textContent = Homey.__('settings.diagnostics.running');
+          try {
+            var report = await callApi(Homey, 'POST', '/diagnostics/hs220', {});
+            diagnosticsReport.value = JSON.stringify(report, null, 2);
+            diagnosticsReport.hidden = false;
+            diagnosticsStatus.textContent = Homey.__('settings.diagnostics.finished');
+          } catch (error) {
+            diagnosticsStatus.textContent = Homey.__('settings.diagnostics.error');
+          } finally {
+            diagnosticsElement.disabled = false;
+          }
+        });
 
         function setLoading(isLoading) {
           [saveElement, clearElement, adoptElement, testElement].forEach(function(element) {

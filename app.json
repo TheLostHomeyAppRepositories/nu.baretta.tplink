@@ -133,6 +133,10 @@
     "net": "*"
   },
   "api": {
+    "collectHs220Diagnostics": {
+      "method": "POST",
+      "path": "/diagnostics/hs220"
+    },
     "testCredentials": {
       "method": "POST",
       "path": "/credentials/test"

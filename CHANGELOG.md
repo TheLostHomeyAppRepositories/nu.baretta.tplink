@@ -2,6 +2,8 @@
 
 **Unreleased**
 
+- Added a read-only HS220 diagnostic report in app settings, with safe discovery metadata collected through Homey, and change-only polling plus staged brightness command diagnostics. No credentials, owner hashes or handshake material are included.
+
 ### SMART dimmer zero brightness
 
 - Updated the bundled API to 5.0.2 to fix legacy IOT/TCP HS220 error `-3` at 0%, and apply off/zero display and slider-to-on behavior across HS220 transports. KLAP errors now explicitly report exhausted v2/v1 checks; authentication of affected unreset units remains unconfirmed.

@@ -2,6 +2,7 @@
 const Homey = require('homey');
 const { getRecovery } = require('../../lib/tplink-recovery');
 const { Client } = require('tplink-smarthome-api');
+const { metadata, brightnessState } = require('../../lib/hs220-diagnostics');
 
 const {
     getEp10ClientOptions,
@@ -288,18 +289,27 @@ async powerOff(device) {
 }
 
     async setBrightness(device, brightness) {
+        const request = this.brightnessRequestSequence = (this.brightnessRequestSequence || 0) + 1;
+        let stage = 'read-status';
         try {
             this.log('Setting brightness for device ' + device + ' to ' + brightness);
+            this.log(`HS220 brightness request=${request}, level=${brightness}, transport=${this.activeTransport}`);
             const sysInfo = await this.client.getSysInfo(device);
             this.plug = this.client.getPlug({ host: device, sysInfo: sysInfo });
+            this.log(`HS220 brightness request=${request}, protocol=${this.plug.shouldUseSmartMethods() ? 'smart' : 'iot'}, before=${JSON.stringify(brightnessState(sysInfo))}`);
+            stage = 'set-brightness';
             await this.plug.dimmer.setBrightness(brightness);
             // Setting a brightness need not switch an off relay back on.
             if (brightness > 0 && this.plug.sysInfo.relay_state !== 1) {
+                stage = 'power-on';
                 await this.plug.setPowerState(true);
             }
+            stage = 'update-homey';
             await this.setCapabilityValue('onoff', brightness > 0);
             await this.setCapabilityValue('dim', brightness / 100);
+            this.log(`HS220 brightness request=${request}, acknowledged, Homey onoff=${brightness > 0}, dim=${brightness / 100}; awaiting poll`);
         } catch (err) {
+            this.log(`HS220 brightness request=${request}, failed stage=${stage}`);
             this.log('Error setting brightness: ' + ' ' + getSafeErrorMessage(err, this.getSettings(), getGlobalCredentials(this)));
             throw err;
         }
@@ -394,6 +404,9 @@ async getLed(device) {
                 ? { sysInfo: await this.plug.getSysInfo() }
                 : await this.plug.getInfo();
             if (!recovery.responded(poll)) return;
+            this.hs220LastSuccessfulPoll = new Date().toISOString();
+            const statusMetadata = JSON.stringify(metadata(data.sysInfo));
+            recovery.logChanged('hs220Metadata', statusMetadata, 'HS220 status metadata: ' + statusMetadata);
                 //this.log("DeviceID: " + settings["deviceId"]);
                 //this.log("GetStatus data.sysInfo.deviceId: " + data.sysInfo.deviceId);
 
@@ -453,6 +466,8 @@ async getLed(device) {
                     try {
                         // The device retains its last brightness while off; Homey shows the output level.
                         const brightness = powerState ? this.plug.dimmer.brightness : 0;
+                        const stateDiagnostic = JSON.stringify({ ...brightnessState(data.sysInfo), output: brightness });
+                        recovery.logChanged('hs220BrightnessState', stateDiagnostic, 'HS220 polled brightness: ' + stateDiagnostic);
                         recovery.logChanged('brightness', brightness, 'State - brightness level: ' + brightness);
                         // Update Homey device state for brightness
                         if (Number.isFinite(brightness) && this.getCapabilityValue('dim') !== brightness / 100) {
@@ -604,6 +619,8 @@ pollDevice(interval) {
                 const loginVersion = Number.isInteger(advertisedVersion) ? advertisedVersion : 'unknown';
                 const diagnostic = `transport=${transport}, login version=${loginVersion}, account=${account}`;
                 getRecovery(this).logChanged('transportCandidate', diagnostic, 'Transport candidate: ' + diagnostic);
+                const advertised = JSON.stringify(metadata(plug.sysInfo));
+                getRecovery(this).logChanged('hs220DiscoveryMetadata', advertised, 'HS220 discovery metadata: ' + advertised);
                 if (transport !== 'tcp' && !options.credentials) {
                     throw new Error('Authenticated firmware found; save the TP-Link owner account in app settings.');
                 }

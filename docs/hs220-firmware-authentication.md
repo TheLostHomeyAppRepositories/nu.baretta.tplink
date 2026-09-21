@@ -52,3 +52,30 @@ After installing the updated integration, test each affected transport:
 
 Physical validation of the 5.0.2 correction and authentication of an affected,
 unreset HS220 remain pending.
+
+## Collecting diagnostics through Homey
+
+Open the app settings and press **Collect HS220 diagnostics**. After about six
+seconds, copy the report from the text box or share the app log. No access to the
+switches from a separate computer is needed. The scan targets only IPv4 addresses
+of paired HS220 devices and does not authenticate, change settings, or send controls.
+Concurrent button requests share a single scan; sockets and listeners are stopped
+when the scan finishes or fails.
+
+The report contains the API/app versions, credential source and whether it matches
+the global account (booleans only), cached status, time of the last successful poll,
+and discovery model/type, hardware/firmware, encryption, HTTP port, login version,
+`new_klap`, and `ANS`. API 5.0.3 preserves the last two flags when advertised.
+It excludes usernames, passwords, owner hashes, MAC/device IDs, cookies, and
+handshake material. Local IP addresses are included to correlate log entries.
+Null fields mean unavailable metadata, not a negative authentication result.
+Cached status is not a fresh read; discovery can omit firmware/hardware details.
+The flags are diagnostic evidence, not proof of a specific authentication cause.
+
+Also capture the normal log while setting a responding HS220 to **70%, 0%, then
+25%**, waiting at least two polling intervals after each command. Each brightness
+request records its protocol, previous relay/brightness, acknowledgment or failing
+stage. Acknowledgment is not physical verification. Changed polling state shows
+the device's remembered brightness separately from the output displayed in Homey.
+Repeated unchanged polls do not add new diagnostic lines. Existing recovery logs
+now include safe discovery metadata when it changes.

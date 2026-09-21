@@ -9,11 +9,12 @@ const test = require('node:test');
 test('settings calls ready first, shows green only for a successful local test, and clears stale feedback', async () => {
   const html = fs.readFileSync(path.join(__dirname, '../settings/index.html'), 'utf8');
   const script = html.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/)[1];
-  const translations = require('../locales/en.json').settings.credentials;
+  const translations = require('../locales/en.json').settings;
   const elements = new Map();
   const calls = [];
   const alerts = [];
   let current = { configured: true, validation: { status: 'unverified' } };
+  let diagnosticFailure = false;
   const element = id => {
     if (!elements.has(id)) elements.set(id, {
       value: '', textContent: '', hidden: false, disabled: false, attributes: {}, handlers: {},
@@ -31,13 +32,17 @@ test('settings calls ready first, shows green only for a successful local test, 
   const Homey = {
     ready() { calls.push('ready'); },
     __(key, values = {}) {
-      let text = translations[key.replace('settings.credentials.', '')];
+      let text = key.replace('settings.', '').split('.').reduce((value, part) => value[part], translations);
       assert.equal(typeof text, 'string', key);
       for (const [name, value] of Object.entries(values)) text = text.replace('__' + name + '__', value);
       return text;
     },
     api(method, url, body, callback) {
       calls.push({ method, url, body });
+      if (url === '/diagnostics/hs220') {
+        assert.equal(element('diagnostics').disabled, true);
+        return callback(diagnosticFailure ? new Error('test failure') : null, { scan: 'finished', devices: [] });
+      }
       if (method === 'GET') body(null, current);
       else callback(null, { status: current, validation: current.validation });
     },
@@ -81,4 +86,17 @@ test('settings calls ready first, shows green only for a successful local test, 
   context.window.confirm = () => true;
   await element('clear').handlers.click();
   assert.equal(status.hidden, true);
+
+  await element('diagnostics').handlers.click();
+  assert.equal(element('diagnostics').disabled, false);
+  assert.equal(element('diagnostics-report').hidden, false);
+  assert.equal(JSON.parse(element('diagnostics-report').value).scan, 'finished');
+  assert.match(element('diagnostics-status').textContent, /Report ready/);
+  assert.deepEqual(Object.keys(calls.at(-1).body), []);
+  diagnosticFailure = true;
+  await element('diagnostics').handlers.click();
+  assert.equal(element('diagnostics').disabled, false);
+  assert.equal(element('diagnostics-report').hidden, true);
+  assert.equal(element('diagnostics-report').value, '');
+  assert.match(element('diagnostics-status').textContent, /Unable to collect/);
 });

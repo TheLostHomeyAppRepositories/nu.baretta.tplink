@@ -49,6 +49,26 @@ function createSettings(initial = {}) {
   };
 }
 
+test('HS220 diagnostics API shares an in-flight scan and releases it after failure', async () => {
+  const diagnostics = require('../lib/hs220-diagnostics');
+  const original = diagnostics.collect;
+  let scans = 0;
+  let reject;
+  diagnostics.collect = () => { scans++; return new Promise((resolve, fail) => { reject = fail; }); };
+  try {
+    const app = await createApp();
+    const first = app.collectHs220Diagnostics();
+    assert.equal(app.collectHs220Diagnostics(), first);
+    assert.equal(scans, 1);
+    reject(new Error('test scan failure'));
+    await assert.rejects(first, /test scan failure/);
+    diagnostics.collect = async () => ({ apiVersion: 'test', appVersion: 'test', scan: 'no-targets', devices: [] });
+    const report = await require('../api').collectHs220Diagnostics({ homey: { app } });
+    assert.equal(report.scan, 'no-targets');
+    assert.equal(app._hs220DiagnosticScan, null);
+  } finally { diagnostics.collect = original; }
+});
+
 test('brightness Flow survives mixed device initialization and preserves percentage units', async () => {
   const { fixture } = require('./helpers/tplink-device-fixture');
   const listeners = new Map();

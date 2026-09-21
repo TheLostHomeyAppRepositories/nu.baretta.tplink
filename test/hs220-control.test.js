@@ -91,6 +91,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
       assert.equal(state.brightness, 70);
       {
         await d.onCapabilityDim(0);
+        assert.ok(f.logs.some(line => line.includes('acknowledged, Homey onoff=false, dim=0; awaiting poll')));
         assert.equal(state.on, false);
         assert.equal(state.brightness, 70);
         assert.equal(d.values.onoff, false);
@@ -111,6 +112,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
         await d.onCapabilityDim(0);
         rejectPowerOn = true;
         await assert.rejects(d.onCapabilityDim(0.3), /Test power-on rejected/);
+        assert.ok(f.logs.some(line => line.includes('failed stage=power-on')));
         assert.equal(state.on, false);
         assert.equal(d.values.onoff, false);
         assert.equal(d.values.dim, 0);

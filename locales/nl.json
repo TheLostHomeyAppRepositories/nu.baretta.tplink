@@ -36,7 +36,15 @@
                   "hs210CredentialsRequired": "Deze HS210 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw."
             }
       },
-      "settings": {
+        "settings": {
+                "diagnostics": {
+                        "title": "HS220-diagnose",
+                        "hint": "Verzamel via Homey een alleen-lezen rapport van gekoppelde HS220-schakelaars. Dit duurt ongeveer zes seconden. Bevat lokale IP-adressen, firmware, transportgegevens en opgeslagen status; geen inloggegevens of apparaat-ID's. Deel het onderstaande rapport met ondersteuning.",
+                        "collect": "HS220-diagnose verzamelen",
+                        "running": "Diagnose verzamelen via Homey…",
+                        "finished": "Het rapport staat hieronder en in het app-logboek. Null bij discovery betekent geen passend antwoord; null bij andere velden betekent dat de gegevens niet zijn verstrekt. Deze scan test de authenticatie niet.",
+                        "error": "Kan geen diagnose verzamelen. Controleer het app-logboek."
+                },
             "credentials": {
                   "title": "TP-Link-accountgegevens",
                   "subtitle": "Gebruik één standaardaccount voor geauthenticeerde TP-Link SMART-apparaten. Indien nodig kan een apparaat een eigen accountoverschrijving behouden.",

@@ -1,6 +1,10 @@
 'use strict';
 
 module.exports = {
+  async collectHs220Diagnostics({ homey }) {
+    return homey.app.collectHs220Diagnostics();
+  },
+
   async testCredentials({ homey, body }) {
     return homey.app.testGlobalCredentials(body || {});
   },
