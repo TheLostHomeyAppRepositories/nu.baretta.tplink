@@ -2,6 +2,10 @@
 
 **Unreleased**
 
+### SMART dimmer zero brightness
+
+- Updated the bundled API to `tplink-smarthome-api` 5.0.1: setting a SMART dimmer such as HS220 to 0% now sends a power-off command instead of invalid brightness zero (error `-1008`), while preserving its saved brightness and legacy device behavior.
+
 ### HS107 legacy LAN support
 
 - Added credential-free local LAN support for HS107, with both physical outlets paired separately and each outlet providing on/off control plus the shared parent-level LED.

@@ -40,6 +40,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
                 case 'get_device_info': result = { device_id: 'hs220-parent',
                   device_on: state.on, brightness: state.brightness }; break;
                 case 'set_device_info':
+                  if ('brightness' in request.params) assert.ok(request.params.brightness >= 1 && request.params.brightness <= 100);
                   if ('device_on' in request.params) state.on = request.params.device_on;
                   if ('brightness' in request.params) state.brightness = request.params.brightness;
                   break;
@@ -80,6 +81,16 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
     if (id === 'hs220') {
       await d.onCapabilityDim(0.7);
       assert.equal(state.brightness, 70);
+      if (smart) {
+        await d.onCapabilityDim(0);
+        assert.equal(state.on, false);
+        assert.equal(state.brightness, 70);
+        await d.getStatus();
+        assert.equal(d.values.onoff, false);
+        await d.onCapabilityOnoff(true);
+        assert.equal(state.on, true);
+        assert.equal(state.brightness, 70);
+      }
     }
     await d.onCapabilityLedOnoff(false);
     assert.equal(state.led, false);
