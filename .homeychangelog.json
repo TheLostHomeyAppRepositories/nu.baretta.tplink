@@ -211,5 +211,8 @@
   },
   "0.3.8": {
     "en": "Fixed HS220 0% dimming and off-state brightness reporting, updated the bundled API to 5.0.3, and added Homey-based authentication and brightness diagnostics."
+  },
+  "0.3.9": {
+    "en": "Fixed - round HS220 slider levels"
   }
 }
