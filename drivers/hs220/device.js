@@ -292,6 +292,11 @@ async powerOff(device) {
         const request = this.brightnessRequestSequence = (this.brightnessRequestSequence || 0) + 1;
         let stage = 'read-status';
         try {
+            if (!Number.isFinite(brightness) || brightness < 0 || brightness > 100) {
+                throw new RangeError('Brightness must be a finite number between 0 and 100');
+            }
+            // Keep the capability value consistent with the API's integer percentage.
+            brightness = brightness === 0 ? 0 : Math.max(1, Math.round(brightness));
             this.log('Setting brightness for device ' + device + ' to ' + brightness);
             this.log(`HS220 brightness request=${request}, level=${brightness}, transport=${this.activeTransport}`);
             const sysInfo = await this.client.getSysInfo(device);

@@ -2,6 +2,8 @@
 
 **Unreleased**
 
+- Fixed HS220 slider error `-1008` at levels such as 28% by rounding brightness commands and Homey feedback to whole percentages; bundled API 5.0.4 applies this to SMART and IOT dimmers while preserving 0% as off.
+
 - Added a read-only HS220 diagnostic report in app settings, with safe discovery metadata collected through Homey, and change-only polling plus staged brightness command diagnostics. No credentials, owner hashes or handshake material are included.
 
 ### SMART dimmer zero brightness

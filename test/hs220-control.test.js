@@ -42,7 +42,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
                   device_on: state.on, brightness: state.brightness }; break;
                 case 'set_device_info':
                   if (rejectPowerOn && request.params.device_on === true) throw new Error('Test power-on rejected');
-                  if ('brightness' in request.params) assert.ok(request.params.brightness >= 1 && request.params.brightness <= 100);
+                  if ('brightness' in request.params) assert.ok(Number.isInteger(request.params.brightness) && request.params.brightness >= 1 && request.params.brightness <= 100);
                   if ('device_on' in request.params) state.on = request.params.device_on;
                   if ('brightness' in request.params) state.brightness = request.params.brightness;
                   break;
@@ -65,7 +65,7 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
                 state.on = params.state === 1;
               }
               if (command === 'set_brightness') {
-                assert.ok(params.brightness >= 1 && params.brightness <= 100, 'Legacy firmware rejects brightness zero');
+                assert.ok(Number.isInteger(params.brightness) && params.brightness >= 1 && params.brightness <= 100, 'Legacy firmware requires an integer brightness from 1 to 100');
                 state.brightness = params.brightness;
               }
               if (command === 'set_led_off') state.led = params.off === 0;
@@ -87,6 +87,13 @@ for (const [transport, protocol] of [['tcp', 'iot'], ['klap', 'smart'], ['aes', 
     await d.onCapabilityOnoff(true);
     assert.equal(state.on, true);
     if (id === 'hs220') {
+      for (const [level, expected] of [[0.28, 28], [0.29, 29], [0.286, 29], [0.001, 1]]) {
+        await d.onCapabilityDim(level);
+        assert.equal(state.brightness, expected);
+        assert.equal(d.values.dim, expected / 100);
+        await d.getStatus();
+        assert.equal(d.values.dim, expected / 100);
+      }
       await d.onCapabilityDim(0.7);
       assert.equal(state.brightness, 70);
       {
