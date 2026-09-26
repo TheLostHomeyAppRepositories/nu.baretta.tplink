@@ -6,7 +6,7 @@ const { createRequire } = require('node:module');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const AUTHENTICATED = new Set(['ep10', 'hs210', 'hs220', 'ks225', 'ks240', 's500d']);
+const AUTHENTICATED = new Set(['ep10', 'hs200', 'hs210', 'hs220', 'ks225', 'ks240', 's500d']);
 
 function fixture(id = 'hs110', { Client: ClientOverride, random = Math.random } = {}) {
   const filename = path.resolve(__dirname, '../../drivers', id, 'device.js');

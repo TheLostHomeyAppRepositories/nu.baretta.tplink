@@ -31,7 +31,7 @@ const {
 } = require('./lib/tplink-credentials');
 
 const AUTHENTICATED_DRIVER_IDS = new Set(['ks225', 's500d', 'ks240']);
-const DUAL_TRANSPORT_DRIVER_IDS = new Set(['ep10', 'hs210', 'hs220']);
+const DUAL_TRANSPORT_DRIVER_IDS = new Set(['ep10', 'hs200', 'hs210', 'hs220']);
 const MANAGED_DRIVER_IDS = new Set([...AUTHENTICATED_DRIVER_IDS, ...DUAL_TRANSPORT_DRIVER_IDS]);
 const CREDENTIAL_VALIDATION_TIMEOUT = 4000;
 

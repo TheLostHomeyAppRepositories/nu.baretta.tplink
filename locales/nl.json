@@ -31,8 +31,10 @@
                   "ep10CredentialsOptional": "TP-Link-accountgegevens zijn optioneel voor TCP EP10-firmware, maar vereist als de geselecteerde EP10 geauthenticeerde KLAP- of AES-firmware gebruikt.",
                   "ep10CredentialsRequired": "Deze EP10 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw.",
                   "hs220CredentialsOptional": "TP-Link-accountgegevens zijn optioneel voor TCP HS220-firmware, maar vereist als de geselecteerde HS220 geauthenticeerde KLAP- of AES-firmware gebruikt.",
+                  "hs200CredentialsOptional": "TP-Link-accountgegevens zijn optioneel voor TCP HS200-firmware, maar vereist als de geselecteerde HS200 geauthenticeerde KLAP- of AES-firmware gebruikt.",
                   "hs210CredentialsOptional": "TP-Link-accountgegevens zijn optioneel voor TCP HS210-firmware, maar vereist als de geselecteerde HS210 geauthenticeerde KLAP- of AES-firmware gebruikt.",
                   "hs220CredentialsRequired": "Deze HS220 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw.",
+                  "hs200CredentialsRequired": "Deze HS200 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw.",
                   "hs210CredentialsRequired": "Deze HS210 gebruikt geauthenticeerde firmware. Vul volledige TP-Link-accountgegevens in en probeer het opnieuw."
             }
       },

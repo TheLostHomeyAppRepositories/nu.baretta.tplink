@@ -144,7 +144,7 @@ for (const id of CACHED) {
   });
 }
 
-for (const id of ['ep10', 'hs210', 'hs220', 'ks225', 's500d']) {
+for (const id of ['ep10', 'hs200', 'hs210', 'hs220', 'ks225', 's500d']) {
   test(`${id}: replacing the authenticated client invalidates its cached plug`, async () => {
     const f = cachedFixture(id);
     await f.poll();

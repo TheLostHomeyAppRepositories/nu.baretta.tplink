@@ -12,7 +12,7 @@ function candidate(id, overrides = {}) {
     getSysInfo: async () => ({ deviceId: 'plug-1', model: id.toUpperCase() + '(US)', type: 'IOT.SMARTPLUGSWITCH' }),
     ...overrides };
 }
-for (const id of ['hs210', 'hs220']) {
+for (const id of ['hs200', 'hs210', 'hs220']) {
   test(`${id}: authentication diagnostics identify the source without exposing credentials`, async () => {
     const f = fixture(id);
     f.globalCredentials = { username: 'private-owner@example.com', password: 'private-password' };

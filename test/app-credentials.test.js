@@ -635,7 +635,7 @@ test('a fulfilled false global refresh is reported as failed', async () => {
   );
 });
 
-for (const driverId of ['ep10', 'hs210', 'hs220']) {
+for (const driverId of ['ep10', 'hs200', 'hs210', 'hs220']) {
 test(`an unmarked pre-transport ${driverId} is not selected for global auth validation or refresh`, async () => {
   let refreshCalls = 0;
   const device = {

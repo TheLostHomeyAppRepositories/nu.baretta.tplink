@@ -31,8 +31,10 @@
                         "ep10CredentialsOptional": "TP-Link credentials are optional for TCP EP10 firmware, but required when the selected EP10 uses authenticated KLAP or AES firmware.",
                         "ep10CredentialsRequired": "This EP10 uses authenticated firmware. Enter complete TP-Link account credentials and try again.",
                         "hs220CredentialsOptional": "TP-Link credentials are optional for TCP HS220 firmware, but required when the selected HS220 uses authenticated KLAP or AES firmware.",
+                        "hs200CredentialsOptional": "TP-Link credentials are optional for TCP HS200 firmware, but required when the selected HS200 uses authenticated KLAP or AES firmware.",
                         "hs210CredentialsOptional": "TP-Link credentials are optional for TCP HS210 firmware, but required when the selected HS210 uses authenticated KLAP or AES firmware.",
                         "hs220CredentialsRequired": "This HS220 uses authenticated firmware. Enter complete TP-Link account credentials and try again.",
+                        "hs200CredentialsRequired": "This HS200 uses authenticated firmware. Enter complete TP-Link account credentials and try again.",
                         "hs210CredentialsRequired": "This HS210 uses authenticated firmware. Enter complete TP-Link account credentials and try again."
                 }
         },
